@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubScore</title>
+
+    <!-- Security: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://esm.sh;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com data:;
+        img-src 'self' https: data: blob:;
+        media-src 'self' https: data: blob:;
+        connect-src 'self' https: wss:;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+    ">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <!-- Fonts: Fraunces (serif display) + Karla (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,400&family=Karla:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================================================================
+           DESIGN TOKENS
+           ================================================================ */
+        :root {
+            --bg: #09090b;
+            --bg-raised: #121215;
+            --bg-elevated: #19191d;
+            --bg-hover: #1f1f25;
+
+            --border: rgba(255, 255, 255, 0.06);
+            --border-strong: rgba(255, 255, 255, 0.1);
+
+            --text: #ededef;
+            --text-2: #a0a0a8;
+            --text-3: #606068;
+
+            --accent: #e8c46c;
+            --accent-dim: #c9a44e;
+            --accent-bg: rgba(232, 196, 108, 0.08);
+            --accent-border: rgba(232, 196, 108, 0.2);
+
+            --red: #d45454;
+            --red-bg: rgba(212, 84, 84, 0.08);
+            --red-border: rgba(212, 84, 84, 0.25);
+
+            --green: #4eca82;
+            --green-bg: rgba(78, 202, 130, 0.08);
+
+            --blue: #5b9cf5;
+            --blue-bg: rgba(91, 156, 245, 0.08);
+
+            --r: 10px;
+        }
+
+        /* ================================================================
+           RESET & BASE
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Karla', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ================================================================
+           TOP BAR — sticky header with brand, nav, auth
+           ================================================================ */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            font-family: 'Fraunces', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--accent);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Nav pill tabs */
+        .topbar-nav {
+            display: flex;
+            gap: 2px;
+            margin-right: 12px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .topbar-nav button {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .topbar-nav button:hover {
+            color: var(--text-2);
+        }
+
+        .topbar-nav button.active {
+            color: var(--text);
+            background: var(--bg-elevated);
+        }
+
+        /* Auth pill — shows "Sign in" or user avatar+name */
+        .auth-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 16px 5px 6px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+            font-family: inherit;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .auth-pill:hover {
+            border-color: var(--border-strong);
+        }
+
+        .auth-pill img {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .auth-pill-ph {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-pill-ph svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: var(--text-3);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ================================================================
+           MAIN CONTENT AREA
+           ================================================================ */
+        .main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 32px 120px;
+        }
+
+        /* ================================================================
+           SEARCH INPUT
+           ================================================================ */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 36px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 18px 140px 18px 22px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-wrap input::placeholder {
+            color: var(--text-3);
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--accent-border);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        .search-wrap button {
+            position: absolute;
+            right: 7px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 12px 24px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .search-wrap button:hover {
+            background: var(--accent-dim);
+        }
+
+        /* ================================================================
+           TOAST NOTIFICATIONS — floating pill at bottom center
+           ================================================================ */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.info {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-strong);
+            color: var(--text-2);
+        }
+
+        .toast.success {
+            background: #12291c;
+            border: 1px solid rgba(78, 202, 130, 0.3);
+            color: var(--green);
+        }
+
+        .toast.error {
+            background: #291212;
+            border: 1px solid var(--red-border);
+            color: var(--red);
+        }
+
+        /* ================================================================
+           PROFILE CARD
+           ================================================================ */
+        .profile-card {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 32px;
+            margin-bottom: 28px;
+        }
+
+        .pc-top {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .pc-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-strong);
+            flex-shrink: 0;
+        }
+
+        .pc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pc-name {
+            font-family: 'Fraunces', serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .pc-nip05 {
+            font-size: 0.88rem;
+            color: var(--green);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        .pc-npub {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-3);
+            margin-top: 5px;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .pc-bio {
+            color: var(--text-2);
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pc-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .pc-big-score {
+            font-family: 'Fraunces', serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .pc-score-detail {
+            font-size: 0.88rem;
+            color: var(--text-3);
+            line-height: 1.5;
+        }
+
+        .pc-score-detail strong {
+            color: var(--text-2);
+            font-weight: 600;
+        }
+
+        /* ================================================================
+           STARS
+           ================================================================ */
+        .stars {
+            display: inline-flex;
+            gap: 1px;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .star {
+            color: var(--border-strong);
+        }
+
+        .star.filled {
+            color: var(--accent);
+        }
+
+        /* ================================================================
+           REVIEW FORM
+           ================================================================ */
+        .review-form {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+
+        .rf-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
+        .rf-row {
+            margin-bottom: 16px;
+        }
+
+        .rf-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        /* Star rating input */
+        .star-input {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star-input button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 2rem;
+            color: var(--border-strong);
+            transition: color 0.1s, transform 0.1s;
+            padding: 0 3px;
+            line-height: 1;
+        }
+
+        .star-input button:hover {
+            transform: scale(1.12);
+        }
+
+        .star-input button.filled {
+            color: var(--accent);
+        }
+
+        /* Category tag buttons */
+        .cat-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .cat-tag {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            background: transparent;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .cat-tag:hover {
+            color: var(--text-2);
+            border-color: var(--border-strong);
+        }
+
+        .cat-tag.sel {
+            color: var(--accent);
+            border-color: var(--accent-border);
+            background: var(--accent-bg);
+        }
+
+        .cat-tag[data-cat="warning"].sel {
+            color: var(--red);
+            border-color: var(--red-border);
+            background: var(--red-bg);
+        }
+
+        /* Textarea */
+        .rf-textarea {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.55;
+            resize: vertical;
+            min-height: 110px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .rf-textarea::placeholder {
+            color: var(--text-3);
+        }
+
+        .rf-textarea:focus {
+            border-color: var(--accent-border);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        /* ================================================================
+           BUTTONS
+           ================================================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 22px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
+        .btn-red {
+            background: transparent;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.82rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .btn-red:hover {
+            color: var(--red);
+            background: var(--red-bg);
+        }
+
+        /* ================================================================
+           REVIEWS LIST — header + sort pills
+           ================================================================ */
+        .reviews-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .reviews-header h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .sort-pills {
+            display: flex;
+            gap: 2px;
+        }
+
+        .sort-pill {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .sort-pill:hover {
+            color: var(--text-2);
+        }
+
+        .sort-pill.on {
+            color: var(--accent);
+            background: var(--accent-bg);
+        }
+
+        /* ================================================================
+           REVIEW CARDS
+           ================================================================ */
+        .rc {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 22px 24px;
+            margin-bottom: 10px;
+            transition: border-color 0.15s;
+        }
+
+        .rc:hover {
+            border-color: var(--border-strong);
+        }
+
+        .rc-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .rc-avi {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .rc-who {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .rc-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .rc-npub {
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: var(--text-3);
+        }
+
+        .rc-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .rc-date {
+            font-size: 0.78rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .rc-body {
+            color: var(--text-2);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .rc-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .rc-tags {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Category tags on review cards */
+        .rtag {
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .rtag-trade { background: var(--accent-bg); color: var(--accent); }
+        .rtag-knowledge { background: var(--blue-bg); color: var(--blue); }
+        .rtag-helpful { background: var(--green-bg); color: var(--green); }
+        .rtag-warning { background: var(--red-bg); color: var(--red); }
+
+        /* ================================================================
+           LOGIN DRAWER — slides in from right
+           ================================================================ */
+        .drawer-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+        }
+
+        .drawer-bg.open {
+            display: block;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--bg-raised);
+            border-left: 1px solid var(--border);
+            z-index: 101;
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer-head {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .drawer-head h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            line-height: 1;
+            font-size: 1.2rem;
+        }
+
+        .drawer-close:hover {
+            color: var(--text);
+        }
+
+        .drawer-body {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .drawer-body p {
+            color: var(--text-3);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Login method buttons */
+        .login-opt {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 18px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .login-opt:hover {
+            border-color: var(--accent-border);
+            background: var(--bg-elevated);
+        }
+
+        .login-opt-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--accent-bg);
+            border: 1px solid var(--accent-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .login-opt-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .login-opt-text small {
+            display: block;
+            color: var(--text-3);
+            font-size: 0.78rem;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* nsec input panel (hidden by default) */
+        .nsec-panel {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .nsec-panel.show {
+            display: block;
+        }
+
+        .nsec-warn {
+            padding: 14px 16px;
+            background: var(--red-bg);
+            border: 1px solid var(--red-border);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: var(--red);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .nsec-panel input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: monospace;
+            font-size: 0.88rem;
+            outline: none;
+            margin-bottom: 14px;
+            transition: border-color 0.15s;
+        }
+
+        .nsec-panel input:focus {
+            border-color: var(--accent-border);
+        }
+
+        /* ================================================================
+           FEATURED / TOP RATED — grid on the front page
+           ================================================================ */
+        .featured-section {
+            margin-bottom: 32px;
+        }
+
+        .featured-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .featured-header h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .featured-header button {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .featured-header button:hover {
+            color: var(--accent);
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .featured-card {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+
+        .featured-card:hover {
+            border-color: var(--accent-border);
+            transform: translateY(-2px);
+        }
+
+        .fc-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .fc-avi {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .fc-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .fc-npub {
+            font-family: monospace;
+            font-size: 0.68rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .fc-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .fc-score {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .fc-meta {
+            font-size: 0.75rem;
+            color: var(--text-3);
+            text-align: right;
+        }
+
+        /* ================================================================
+           UTILITY
+           ================================================================ */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-3);
+            font-size: 0.95rem;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-3);
+            font-size: 0.9rem;
+        }
+
+        .spin {
+            width: 26px;
+            height: 26px;
+            border: 2px solid var(--border-strong);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: sp 0.7s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes sp {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anim {
+            animation: fadeUp 0.25s ease-out both;
+        }
+
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
+        /* ================================================================
+           RESPONSIVE — Tablet
+           ================================================================ */
+        @media (max-width: 768px) {
+            .main { padding: 28px 20px 100px; }
+            .topbar-inner { padding: 0 20px; }
+            .featured-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ================================================================
+           RESPONSIVE — Mobile
+           ================================================================ */
+        @media (max-width: 540px) {
+            .topbar-inner {
+                padding: 0 14px;
+                height: 54px;
+            }
+
+            .brand { font-size: 1.2rem; }
+
+            /* Stack nav and auth vertically not needed — shrink instead */
+            .topbar-nav {
+                margin-right: 8px;
+                padding: 2px;
+            }
+            .topbar-nav button {
+                font-size: 0.78rem;
+                padding: 6px 12px;
+            }
+
+            .auth-pill {
+                font-size: 0.78rem;
+                padding: 4px 10px 4px 4px;
+                gap: 6px;
+            }
+            .auth-pill img { width: 24px; height: 24px; }
+            .auth-pill-ph { width: 24px; height: 24px; }
+
+            .main { padding: 20px 14px 80px; }
+
+            /* Search — stack button below on very small screens */
+            .search-wrap input {
+                padding: 16px 16px;
+                font-size: 0.92rem;
+            }
+            .search-wrap button {
+                position: static;
+                transform: none;
+                width: 100%;
+                margin-top: 8px;
+                padding: 14px;
+                font-size: 0.92rem;
+                border-radius: var(--r);
+            }
+            .search-wrap {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Profile card */
+            .profile-card { padding: 20px; }
+            .pc-top {
+                flex-direction: column;
+                text-align: center;
+            }
+            .pc-avatar { width: 72px; height: 72px; }
+            .pc-name { font-size: 1.4rem; }
+            .pc-npub { font-size: 0.68rem; }
+            .pc-rating-row {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            .pc-big-score { font-size: 2.6rem; }
+
+            /* Review form */
+            .review-form { padding: 20px; }
+            .cat-tags { gap: 6px; }
+            .cat-tag { padding: 6px 12px; font-size: 0.78rem; }
+
+            /* Review cards */
+            .rc { padding: 16px; }
+            .rc-avi { width: 36px; height: 36px; }
+            .rc-name { font-size: 0.88rem; }
+            .rc-body { font-size: 0.88rem; }
+
+            /* Featured grid — single column */
+            .featured-grid { grid-template-columns: 1fr; }
+            .featured-card { padding: 16px; }
+
+            /* Sort pills — scrollable */
+            .reviews-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .sort-pills { width: 100%; }
+            .sort-pill { font-size: 0.75rem; padding: 5px 10px; }
+
+            /* Login drawer */
+            .drawer { width: 100%; max-width: 100vw; }
+            .drawer-body { padding: 20px; }
+            .login-opt { padding: 14px; font-size: 0.85rem; }
+            .login-opt-icon { width: 36px; height: 36px; }
+
+            /* Toast */
+            .toast {
+                left: 14px;
+                right: 14px;
+                transform: translateY(80px);
+                text-align: center;
+                border-radius: var(--r);
+            }
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================================================================
+         TOP BAR
+         ================================================================ -->
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">Pub<em>Score</em></div>
+            <div class="topbar-right">
+                <div class="topbar-nav">
+                    <button class="active" data-tab="lookup" onclick="switchTab('lookup')">Lookup</button>
+                    <button data-tab="history" onclick="switchTab('history')">My Reviews</button>
+                </div>
+                <button class="auth-pill" id="authPill" onclick="window._authAction()">
+                    <div class="auth-pill-ph">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+                    </div>
+                    <span>Sign in</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ================================================================
+         MAIN CONTENT
+         ================================================================ -->
+    <div class="main">
+
+        <!-- Lookup tab -->
+        <div class="section active" id="section-lookup">
+            <div class="search-wrap">
+                <input type="text" id="npubInput" placeholder="Paste an npub or hex pubkey" autocomplete="off" spellcheck="false">
+                <button onclick="lookupProfile()">Look up</button>
+            </div>
+            <div id="featuredArea"></div>
+            <div id="profileArea"></div>
+            <div id="reviewFormArea"></div>
+            <div id="reviewsArea"></div>
+        </div>
+
+        <!-- My Reviews tab -->
+        <div class="section" id="section-history">
+            <div id="historyArea">
+                <div class="empty">Sign in to see your review history</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         LOGIN DRAWER
+         ================================================================ -->
+    <div class="drawer-bg" id="drawerBg"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-head">
+            <h2>Sign in</h2>
+            <button class="drawer-close" onclick="window._closeDrawer()">&#x2715;</button>
+        </div>
+        <div class="drawer-body">
+            <p>Connect your Nostr identity to leave reviews.</p>
+
+            <!-- Extension login -->
+            <button class="login-opt" onclick="loginExtension()">
+                <div class="login-opt-icon">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                </div>
+                <div class="login-opt-text">
+                    Browser Extension
+                    <small>nos2x, Alby, or NIP-07 extension</small>
+                </div>
+            </button>
+
+            <!-- nsec login -->
+            <button class="login-opt" onclick="window._toggleNsec()">
+                <div class="login-opt-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                </div>
+                <div class="login-opt-text">
+                    Private Key (nsec)
+                    <small>Held in memory, never saved</small>
+                </div>
+            </button>
+
+            <!-- nsec input (toggles open) -->
+            <div class="nsec-panel" id="nsecPanel">
+                <div class="nsec-warn">
+                    Your nsec is held in a secure closure and wiped on logout, tab close, or 15 min inactivity. For max safety, use a browser extension instead.
+                </div>
+                <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
+                <button class="btn btn-accent" style="width:100%;" onclick="loginNsec()">Sign in with nsec</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script type="module">
+
+    // =====================================================================
+    // SECURITY KIT — Sanitization utilities
+    // =====================================================================
+
+    /**
+     * Escapes HTML special characters to prevent XSS.
+     * Use on ALL user-supplied strings before innerHTML.
+     */
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /**
+     * Blocks dangerous URL protocols (javascript:, data:, vbscript:, file:).
+     * Use on any URL from relay data before setting as src/href.
+     */
+    function sanitizeUrl(url) {
+        if (!url || typeof url !== 'string') return '';
+        const trimmed = url.trim().toLowerCase();
+        if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:') ||
+            trimmed.startsWith('vbscript:') || trimmed.startsWith('file:')) {
+            return '';
+        }
+        return url.trim();
+    }
+
+    /**
+     * Caps string length to prevent DOM bloat from malicious data.
+     */
+    function capLength(text, maxLen, ellipsis = true) {
+        if (!text || typeof text !== 'string') return '';
+        if (text.length <= maxLen) return text;
+        return text.substring(0, maxLen) + (ellipsis ? '...' : '');
+    }
+
+    /** Sanitize display name: cap at 100 chars + HTML escape */
+    function sanitizeDisplayName(name) {
+        return escapeHtml(capLength(name, 100, false));
+    }
+
+    /** Sanitize bio: cap + HTML escape, returns { preview, full } */
+    function sanitizeBio(about, previewLen = 150) {
+        const safe = capLength(about, 500, false);
+        return {
+            preview: escapeHtml(capLength(safe, previewLen)),
+            full: escapeHtml(safe)
+        };
+    }
+
+    /** Sanitize NIP-05: truncate long usernames */
+    function sanitizeNip05(nip05) {
+        if (!nip05) return '';
+        let display = escapeHtml(nip05);
+        if (display.length > 30) {
+            const atIndex = display.indexOf('@');
+            if (atIndex > 0) {
+                const username = display.substring(0, atIndex);
+                const domain = display.substring(atIndex);
+                if (username.length > 10) {
+                    display = username.substring(0, 10) + '...' + domain;
+                }
+            } else {
+                display = display.substring(0, 28) + '...';
+            }
+        }
+        return display;
+    }
+
+    // =====================================================================
+    // SECURITY KIT — Secure Key Store (closure-based, no .get())
+    // =====================================================================
+
+    /**
+     * Private key held inside closure. XSS cannot read it —
+     * can only trigger signEvent() which returns a signed event.
+     * Key bytes zeroed on clear().
+     */
+    function createSecureKeyStore(NostrTools) {
+        let _secretKey = null;
+
+        return Object.freeze({
+            set(key) {
+                _secretKey = key;
+            },
+            has() {
+                return _secretKey !== null;
+            },
+            clear() {
+                if (_secretKey) {
+                    for (let i = 0; i < _secretKey.length; i++) _secretKey[i] = 0;
+                    _secretKey = null;
+                }
+            },
+            signEvent(event) {
+                if (!_secretKey) throw new Error('No key available');
+                return NostrTools.finalizeEvent(event, _secretKey);
+            }
+        });
+    }
+
+    // =====================================================================
+    // SECURITY KIT — Inactivity Auto-Logout (for nsec sessions)
+    // =====================================================================
+
+    /**
+     * Monitors mouse, keyboard, scroll, touch events.
+     * If no activity for timeoutMs, calls onLogout.
+     */
+    function createInactivityMonitor({ timeoutMs = 15 * 60 * 1000, onLogout, isNsecSession }) {
+        let timer = null;
+        let lastActivity = Date.now();
+
+        function reset() {
+            lastActivity = Date.now();
+            if (!isNsecSession()) return;
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(onLogout, timeoutMs);
+        }
+
+        const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+        const handler = () => { if (isNsecSession()) reset(); };
+        events.forEach(evt => document.addEventListener(evt, handler, { passive: true }));
+
+        const visHandler = () => {
+            if (!isNsecSession()) return;
+            if (!document.hidden) {
+                if (Date.now() - lastActivity > timeoutMs) onLogout();
+                else reset();
+            }
+        };
+        document.addEventListener('visibilitychange', visHandler);
+
+        return {
+            reset,
+            destroy() {
+                if (timer) { clearTimeout(timer); timer = null; }
+                events.forEach(evt => document.removeEventListener(evt, handler));
+                document.removeEventListener('visibilitychange', visHandler);
+            }
+        };
+    }
+
+    // =====================================================================
+    // APP STATE & CONFIG
+    // =====================================================================
+
+    import * as NostrTools from "https://esm.sh/nostr-tools@2.7.2";
+
+    const RELAYS = [
+        'wss://relay.damus.io',
+        'wss://relay.nostr.band',
+        'wss://nos.lol',
+        'wss://relay.snort.social',
+        'wss://relay.primal.net'
+    ];
+
+    // Review event kind — parameterized replaceable in app-specific range
+    const REVIEW_KIND = 38383;
+
+    let pool = null;
+    let currentUser = null;
+    let SecureKeyStore = null;
+    let inactivityMonitor = null;
+    let currentLookupPubkey = null;
+    let currentReviews = [];
+    let currentSort = 'newest';
+
+    // Default avatar SVG (data URI)
+    const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">' +
+        '<rect fill="%23121215" width="80" height="80" rx="40"/>' +
+        '<circle cx="40" cy="30" r="12" fill="%23252530"/>' +
+        '<ellipse cx="40" cy="66" rx="22" ry="16" fill="%23252530"/>' +
+        '</svg>'
+    );
+
+    /** Initialize the relay connection pool */
+    async function initPool() {
+        if (pool) return pool;
+        const { SimplePool } = await import("https://esm.sh/nostr-tools@2.7.2/pool");
+        pool = new SimplePool();
+        return pool;
+    }
+
+    // Initialize secure key store
+    SecureKeyStore = createSecureKeyStore(NostrTools);
+
+    // Wipe keys on page unload
+    window.addEventListener('beforeunload', () => {
+        SecureKeyStore.clear();
+        if (inactivityMonitor) {
+            inactivityMonitor.destroy();
+            inactivityMonitor = null;
+        }
+    });
+
+    // =====================================================================
+    // AUTH — Login / Logout
+    // =====================================================================
+
+    /** Login via NIP-07 browser extension (Alby, nos2x, etc.) */
+    async function loginWithExtension() {
+        if (typeof window.nostr === 'undefined') {
+            throw new Error('No Nostr browser extension found.');
+        }
+        const pubkey = await window.nostr.getPublicKey();
+        const npub = NostrTools.nip19.npubEncode(pubkey);
+        const profile = await fetchProfile(pubkey);
+        currentUser = { pubkey, npub, profile, loginMethod: 'extension' };
+        return currentUser;
+    }
+
+    /** Login via nsec private key (stored in SecureKeyStore closure) */
+    async function loginWithNsec(nsecString) {
+        if (!nsecString) throw new Error('Enter your nsec');
+        if (!nsecString.startsWith('nsec1')) throw new Error('Invalid nsec format');
+
+        const { data: secretKey } = NostrTools.nip19.decode(nsecString);
+        if (secretKey.length !== 32) throw new Error('Invalid key length');
+
+        const pubkey = NostrTools.getPublicKey(secretKey);
+        const npub = NostrTools.nip19.npubEncode(pubkey);
+
+        SecureKeyStore.set(secretKey);
+        const profile = await fetchProfile(pubkey);
+        currentUser = { pubkey, npub, profile, loginMethod: 'nsec' };
+
+        // Start inactivity auto-logout timer
+        inactivityMonitor = createInactivityMonitor({
+            timeoutMs: 15 * 60 * 1000,
+            onLogout: () => {
+                doLogout();
+                toast('Auto-logged out after inactivity', 'info');
+            },
+            isNsecSession: () => currentUser?.loginMethod === 'nsec'
+        });
+        inactivityMonitor.reset();
+
+        return currentUser;
+    }
+
+    /** Sign a Nostr event using the current auth method */
+    async function signEvent(event) {
+        if (!currentUser) throw new Error('Not logged in');
+        if (currentUser.loginMethod === 'extension') {
+            return await window.nostr.signEvent(event);
+        }
+        if (currentUser.loginMethod === 'nsec' && SecureKeyStore.has()) {
+            return SecureKeyStore.signEvent(event);
+        }
+        throw new Error('No signing method available');
+    }
+
+    /** Logout — wipe keys, destroy monitors, reset UI */
+    function doLogout() {
+        currentUser = null;
+        SecureKeyStore.clear();
+        if (inactivityMonitor) {
+            inactivityMonitor.destroy();
+            inactivityMonitor = null;
+        }
+        updateAuthPill();
+        toast('Signed out', 'info');
+    }
+
+    // =====================================================================
+    // RELAY QUERIES
+    // =====================================================================
+
+    /** Fetch a profile (kind 0) from relays */
+    async function fetchProfile(pubkey) {
+        const p = await initPool();
+        try {
+            const event = await p.get(RELAYS, { kinds: [0], authors: [pubkey], limit: 1 });
+            if (event) return JSON.parse(event.content);
+        } catch (e) {
+            console.warn('fetchProfile error:', e);
+        }
+        return {};
+    }
+
+    /** Fetch follows list (kind 3) from relays */
+    async function fetchFollows(pubkey) {
+        const p = await initPool();
+        try {
+            const event = await p.get(RELAYS, { kinds: [3], authors: [pubkey], limit: 1 });
+            if (event) return event.tags.filter(t => t[0] === 'p').map(t => t[1]);
+        } catch (e) {}
+        return [];
+    }
+
+    /**
+     * Deduplicate replaceable events.
+     * Keeps only the newest event per author + d-tag combination.
+     * Fixes issue where relays return both old and new versions.
+     */
+    function deduplicateReviews(events) {
+        const map = new Map();
+        for (const event of events) {
+            const dTag = event.tags.find(t => t[0] === 'd')?.[1] || '';
+            const key = `${event.pubkey}:${dTag}`;
+            const existing = map.get(key);
+            if (!existing || event.created_at > existing.created_at) {
+                map.set(key, event);
+            }
+        }
+        return Array.from(map.values());
+    }
+
+    /** Fetch all reviews for a given subject pubkey */
+    async function fetchReviews(subjectPubkey) {
+        const p = await initPool();
+        try {
+            const events = await p.querySync(RELAYS, {
+                kinds: [REVIEW_KIND],
+                '#p': [subjectPubkey]
+            });
+            return deduplicateReviews(events);
+        } catch (e) {
+            console.warn('fetchReviews error:', e);
+            return [];
+        }
+    }
+
+    /** Fetch all reviews written by a given pubkey */
+    async function fetchMyReviews(myPubkey) {
+        const p = await initPool();
+        try {
+            const events = await p.querySync(RELAYS, {
+                kinds: [REVIEW_KIND],
+                authors: [myPubkey]
+            });
+            return deduplicateReviews(events);
+        } catch (e) {
+            console.warn('fetchMyReviews error:', e);
+            return [];
+        }
+    }
+
+    /** Delete a review by publishing a kind 5 deletion event */
+    async function deleteReview(eventId) {
+        const event = {
+            kind: 5,
+            pubkey: currentUser.pubkey,
+            created_at: Math.floor(Date.now() / 1000),
+            tags: [['e', eventId], ['k', String(REVIEW_KIND)]],
+            content: ''
+        };
+        const signed = await signEvent(event);
+        const p = await initPool();
+        await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+    }
+
+    /** Publish (or update) a review for a subject pubkey */
+    async function publishReview(subjectPubkey, rating, content, categories) {
+        const tags = [
+            ['p', subjectPubkey],
+            ['d', subjectPubkey],  // Makes it replaceable per reviewer per subject
+            ['rating', String(rating)]
+        ];
+        for (const cat of categories) {
+            tags.push(['t', cat]);
+        }
+
+        const event = {
+            kind: REVIEW_KIND,
+            pubkey: currentUser.pubkey,
+            created_at: Math.floor(Date.now() / 1000),
+            tags,
+            content
+        };
+
+        const signed = await signEvent(event);
+        const p = await initPool();
+        await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+    }
+
+    // =====================================================================
+    // UI HELPERS
+    // =====================================================================
+
+    /** Show a floating toast notification */
+    function toast(msg, type = 'info') {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = `toast show ${type}`;
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    /** Generate star rating HTML */
+    function starsHtml(rating, size = '0.9rem') {
+        let html = `<span class="stars" style="font-size:${size}">`;
+        for (let i = 1; i <= 5; i++) {
+            html += `<span class="star ${i <= rating ? 'filled' : ''}">&#9733;</span>`;
+        }
+        return html + '</span>';
+    }
+
+    /** Format a unix timestamp to readable date */
+    function fmtDate(timestamp) {
+        return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    /** Shorten an npub for display */
+    function shortNpub(npub) {
+        if (!npub || npub.length < 20) return npub || '';
+        return npub.substring(0, 12) + '...' + npub.substring(npub.length - 6);
+    }
+
+    /** Generate a category tag badge */
+    function catTag(category) {
+        const labels = {
+            trade: 'Trustworthy',
+            knowledge: 'Knowledgeable',
+            helpful: 'Helpful',
+            warning: 'Warning'
+        };
+        const classes = {
+            trade: 'rtag-trade',
+            knowledge: 'rtag-knowledge',
+            helpful: 'rtag-helpful',
+            warning: 'rtag-warning'
+        };
+        return `<span class="rtag ${classes[category] || ''}">${escapeHtml(labels[category] || category)}</span>`;
+    }
+
+    /** Parse a review event into a usable object */
+    function parseReview(event) {
+        const ratingTag = event.tags.find(t => t[0] === 'rating');
+        const rating = ratingTag ? Math.min(5, Math.max(1, parseInt(ratingTag[1]) || 0)) : 0;
+        const categories = event.tags.filter(t => t[0] === 't').map(t => t[1]);
+        return { ...event, rating, categories };
+    }
+
+    /** Sort reviews by the given criteria */
+    function sortReviews(reviews, sortBy) {
+        const parsed = reviews.map(parseReview);
+        switch (sortBy) {
+            case 'oldest':  return parsed.sort((a, b) => a.created_at - b.created_at);
+            case 'highest': return parsed.sort((a, b) => b.rating - a.rating);
+            case 'lowest':  return parsed.sort((a, b) => a.rating - b.rating);
+            default:        return parsed.sort((a, b) => b.created_at - a.created_at); // newest
+        }
+    }
+
+    /** Profile cache to avoid re-fetching reviewer profiles */
+    const profileCache = {};
+
+    async function getProfile(pubkey) {
+        if (profileCache[pubkey]) return profileCache[pubkey];
+        const profile = await fetchProfile(pubkey);
+        profileCache[pubkey] = profile;
+        return profile;
+    }
+
+    // =====================================================================
+    // TAB SWITCHING
+    // =====================================================================
+
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.topbar-nav button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.toggle('active', section.id === `section-${tab}`);
+        });
+        if (tab === 'history') loadHistory();
+        // Show featured area if returning to lookup with nothing loaded
+        if (tab === 'lookup' && !currentLookupPubkey) {
+            document.getElementById('featuredArea').style.display = '';
+        }
+    };
+
+    // =====================================================================
+    // AUTH UI
+    // =====================================================================
+
+    /** Update the auth pill in the top bar */
+    function updateAuthPill() {
+        const pill = document.getElementById('authPill');
+
+        if (currentUser) {
+            const profile = currentUser.profile || {};
+            const avatar = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+            const name = sanitizeDisplayName(profile.display_name || profile.name || 'Anon');
+            pill.innerHTML = `
+                <img src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
+                <span>${capLength(name, 16)}</span>
+            `;
+        } else {
+            pill.innerHTML = `
+                <div class="auth-pill-ph">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+                </div>
+                <span>Sign in</span>
+            `;
+        }
+    }
+
+    /** Handle auth pill click — open drawer or confirm logout */
+    window._authAction = function() {
+        if (currentUser) {
+            if (confirm('Sign out?')) doLogout();
+        } else {
+            document.getElementById('drawerBg').classList.add('open');
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('nsecPanel').classList.remove('show');
+        }
+    };
+
+    /** Close the login drawer */
+    window._closeDrawer = function() {
+        document.getElementById('drawerBg').classList.remove('open');
+        document.getElementById('drawer').classList.remove('open');
+        document.getElementById('nsecInput').value = '';
+    };
+
+    // Close drawer on backdrop click
+    document.getElementById('drawerBg').addEventListener('click', () => window._closeDrawer());
+
+    /** Toggle the nsec input panel */
+    window._toggleNsec = function() {
+        document.getElementById('nsecPanel').classList.toggle('show');
+    };
+
+    /** Handle extension login button */
+    window.loginExtension = async function() {
+        try {
+            await loginWithExtension();
+            window._closeDrawer();
+            updateAuthPill();
+            toast('Signed in with extension', 'success');
+            if (currentLookupPubkey) await renderReviewForm();
+        } catch (e) {
+            toast(e.message, 'error');
+        }
+    };
+
+    /** Handle nsec login button */
+    window.loginNsec = async function() {
+        const input = document.getElementById('nsecInput');
+        try {
+            await loginWithNsec(input.value.trim());
+            input.value = '';
+            window._closeDrawer();
+            updateAuthPill();
+            toast('Signed in (auto-logout in 15 min idle)', 'success');
+            if (currentLookupPubkey) await renderReviewForm();
+        } catch (e) {
+            input.value = '';
+            toast(e.message, 'error');
+        }
+    };
+
+    // =====================================================================
+    // PROFILE LOOKUP
+    // =====================================================================
+
+    window.lookupProfile = async function() {
+        const raw = document.getElementById('npubInput').value.trim();
+        if (!raw) return toast('Paste an npub or hex pubkey', 'error');
+
+        // Parse input — accept npub1... or raw 64-char hex
+        let pubkey;
+        try {
+            if (raw.startsWith('npub1')) {
+                pubkey = NostrTools.nip19.decode(raw).data;
+            } else if (/^[0-9a-f]{64}$/i.test(raw)) {
+                pubkey = raw.toLowerCase();
+            } else {
+                return toast('Invalid npub or hex pubkey', 'error');
+            }
+        } catch (e) {
+            return toast('Invalid npub format', 'error');
+        }
+
+        currentLookupPubkey = pubkey;
+
+        // Hide featured section when looking up a profile
+        document.getElementById('featuredArea').style.display = 'none';
+
+        // Show loading state
+        document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Loading profile...</div>';
+        document.getElementById('reviewFormArea').innerHTML = '';
+        document.getElementById('reviewsArea').innerHTML = '';
+
+        try {
+            // Fetch everything in parallel
+            const [profile, follows, reviews] = await Promise.all([
+                fetchProfile(pubkey),
+                fetchFollows(pubkey),
+                fetchReviews(pubkey)
+            ]);
+
+            currentReviews = reviews;
+            const npub = NostrTools.nip19.npubEncode(pubkey);
+
+            renderProfileCard(pubkey, npub, profile, follows, reviews);
+            await renderReviewForm();
+            renderReviews(reviews);
+        } catch (e) {
+            console.error(e);
+            toast('Error: ' + e.message, 'error');
+            document.getElementById('profileArea').innerHTML = '';
+        }
+    };
+
+    // Enter key triggers lookup
+    document.getElementById('npubInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') lookupProfile();
+    });
+
+    // =====================================================================
+    // RENDER — Profile Card
+    // =====================================================================
+
+    function renderProfileCard(pubkey, npub, profile, follows, reviews) {
+        const avatar = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+        const name = sanitizeDisplayName(profile.display_name || profile.name || 'Unknown');
+        const { preview: bio } = sanitizeBio(profile.about || '', 200);
+        const nip05 = sanitizeNip05(profile.nip05);
+        const followCount = follows.length;
+
+        // Calculate average rating
+        let avgRating = 0;
+        let totalReviews = reviews.length;
+        if (totalReviews > 0) {
+            const sum = reviews.reduce((acc, r) => {
+                const tag = r.tags.find(t => t[0] === 'rating');
+                return acc + (tag ? parseInt(tag[1]) || 0 : 0);
+            }, 0);
+            avgRating = (sum / totalReviews).toFixed(1);
+        }
+
+        document.getElementById('profileArea').innerHTML = `
+            <div class="profile-card anim">
+                <div class="pc-top">
+                    <img class="pc-avatar" src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
+                    <div class="pc-info">
+                        <div class="pc-name">${name}</div>
+                        ${nip05 ? `<div class="pc-nip05">${nip05}</div>` : ''}
+                        <div class="pc-npub">${escapeHtml(npub)}</div>
+                    </div>
+                </div>
+                ${bio ? `<div class="pc-bio">${bio}</div>` : ''}
+                <div class="pc-rating-row">
+                    <div class="pc-big-score">${avgRating > 0 ? avgRating : '--'}</div>
+                    <div>
+                        ${avgRating > 0 ? starsHtml(Math.round(avgRating), '1.3rem') : ''}
+                        <div class="pc-score-detail">
+                            <strong>${totalReviews}</strong> review${totalReviews !== 1 ? 's' : ''}
+                            ${followCount > 0
+                                ? ` &middot; following <strong>${followCount > 999 ? (followCount / 1000).toFixed(1) + 'k' : followCount}</strong>`
+                                : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // =====================================================================
+    // RENDER — Review Form
+    // =====================================================================
+
+    let selectedRating = 0;
+    let selectedCategories = new Set();
+
+    async function renderReviewForm() {
+        const area = document.getElementById('reviewFormArea');
+
+        if (!currentUser || !currentLookupPubkey) {
+            area.innerHTML = '';
+            return;
+        }
+
+        // Can't review yourself
+        if (currentUser.pubkey === currentLookupPubkey) {
+            area.innerHTML = '<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">You can\'t review yourself</div>';
+            return;
+        }
+
+        // Check for existing review (to show "update" mode)
+        const existing = currentReviews.find(r => r.pubkey === currentUser.pubkey);
+        const existingContent = existing ? escapeHtml(existing.content) : '';
+        const existingRating = existing ? parseInt(existing.tags.find(t => t[0] === 'rating')?.[1] || '0') : 0;
+        const existingCats = existing ? existing.tags.filter(t => t[0] === 't').map(t => t[1]) : [];
+
+        selectedRating = existingRating;
+        selectedCategories = new Set(existingCats);
+
+        area.innerHTML = `
+            <div class="review-form anim">
+                <div class="rf-title">${existing ? 'Update your review' : 'Leave a review'}</div>
+
+                <div class="rf-row">
+                    <div class="rf-label">Rating</div>
+                    <div class="star-input" id="starInput">
+                        ${[1,2,3,4,5].map(i =>
+                            `<button class="${i <= selectedRating ? 'filled' : ''}" data-r="${i}" onclick="window._setRating(${i})">&#9733;</button>`
+                        ).join('')}
+                    </div>
+                </div>
+
+                <div class="rf-row">
+                    <div class="rf-label">Category (optional)</div>
+                    <div class="cat-tags">
+                        <button class="cat-tag ${selectedCategories.has('trade') ? 'sel' : ''}" data-cat="trade" onclick="window._toggleCat('trade',this)">Trustworthy</button>
+                        <button class="cat-tag ${selectedCategories.has('knowledge') ? 'sel' : ''}" data-cat="knowledge" onclick="window._toggleCat('knowledge',this)">Knowledgeable</button>
+                        <button class="cat-tag ${selectedCategories.has('helpful') ? 'sel' : ''}" data-cat="helpful" onclick="window._toggleCat('helpful',this)">Helpful</button>
+                        <button class="cat-tag ${selectedCategories.has('warning') ? 'sel' : ''}" data-cat="warning" onclick="window._toggleCat('warning',this)">Warning</button>
+                    </div>
+                </div>
+
+                <div class="rf-row">
+                    <div class="rf-label">Your review</div>
+                    <textarea class="rf-textarea" id="reviewContent" placeholder="Share your experience..." maxlength="2000">${existingContent}</textarea>
+                </div>
+
+                <button class="btn btn-accent" onclick="window._submitReview()" id="submitBtn">
+                    ${existing ? 'Update review' : 'Publish review'}
+                </button>
+            </div>
+        `;
+    }
+
+    /** Set star rating */
+    window._setRating = function(rating) {
+        selectedRating = rating;
+        document.querySelectorAll('#starInput button').forEach(btn => {
+            btn.classList.toggle('filled', parseInt(btn.dataset.r) <= rating);
+        });
+    };
+
+    /** Toggle a category tag */
+    window._toggleCat = function(category, element) {
+        if (selectedCategories.has(category)) {
+            selectedCategories.delete(category);
+            element.classList.remove('sel');
+        } else {
+            selectedCategories.add(category);
+            element.classList.add('sel');
+        }
+    };
+
+    /** Submit or update a review */
+    window._submitReview = async function() {
+        if (!currentUser) return toast('Sign in first', 'error');
+        if (!selectedRating) return toast('Select a rating', 'error');
+
+        const content = document.getElementById('reviewContent').value.trim();
+        if (!content) return toast('Write a review', 'error');
+        if (content.length > 2000) return toast('Too long (2000 max)', 'error');
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Publishing...';
+
+        try {
+            await publishReview(currentLookupPubkey, selectedRating, content, Array.from(selectedCategories));
+            toast('Review published', 'success');
+
+            // Refresh everything
+            const reviews = await fetchReviews(currentLookupPubkey);
+            currentReviews = reviews;
+            renderReviews(reviews);
+
+            const [profile, follows] = await Promise.all([
+                fetchProfile(currentLookupPubkey),
+                fetchFollows(currentLookupPubkey)
+            ]);
+            renderProfileCard(currentLookupPubkey, NostrTools.nip19.npubEncode(currentLookupPubkey), profile, follows, reviews);
+            await renderReviewForm();
+        } catch (e) {
+            toast('Failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Publish review';
+        }
+    };
+
+    // =====================================================================
+    // RENDER — Reviews List
+    // =====================================================================
+
+    function renderReviews(reviews) {
+        const area = document.getElementById('reviewsArea');
+
+        if (!reviews.length) {
+            area.innerHTML = '<div class="empty anim">No reviews yet. Be the first.</div>';
+            return;
+        }
+
+        const sorted = sortReviews(reviews, currentSort);
+
+        area.innerHTML = `
+            <div class="reviews-header anim">
+                <h3>${reviews.length} review${reviews.length !== 1 ? 's' : ''}</h3>
+                <div class="sort-pills">
+                    ${['newest', 'oldest', 'highest', 'lowest'].map(s =>
+                        `<button class="sort-pill ${currentSort === s ? 'on' : ''}" onclick="window._sort('${s}')">${s[0].toUpperCase() + s.slice(1)}</button>`
+                    ).join('')}
+                </div>
+            </div>
+            ${sorted.map((r, i) => renderCard(r, i)).join('')}
+        `;
+
+        // Lazy-load reviewer profile names and avatars
+        sorted.forEach(async (review) => {
+            const profile = await getProfile(review.pubkey);
+            const card = document.querySelector(`[data-rpk="${review.pubkey}"]`);
+            if (card && profile) {
+                const nameEl = card.querySelector('.rc-name');
+                const imgEl = card.querySelector('.rc-avi');
+                if (profile.name || profile.display_name) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 40);
+                }
+                if (profile.picture) {
+                    imgEl.src = sanitizeUrl(profile.picture);
+                }
+            }
+        });
+    }
+
+    /** Render a single review card */
+    function renderCard(review, index) {
+        const npub = NostrTools.nip19.npubEncode(review.pubkey);
+        const content = escapeHtml(capLength(review.content, 1000));
+        const categories = review.categories.map(catTag).join('');
+        const isOwn = currentUser && review.pubkey === currentUser.pubkey;
+
+        return `
+            <div class="rc anim" style="animation-delay:${index * 0.04}s" data-rpk="${review.pubkey}">
+                <div class="rc-top">
+                    <img class="rc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
+                    <div class="rc-who">
+                        <div class="rc-name">${shortNpub(npub)}</div>
+                        <div class="rc-npub">${shortNpub(npub)}</div>
+                    </div>
+                    <div class="rc-right">
+                        ${starsHtml(review.rating, '1rem')}
+                        <div class="rc-date">${fmtDate(review.created_at)}</div>
+                    </div>
+                </div>
+                <div class="rc-body">${content}</div>
+                <div class="rc-foot">
+                    <div class="rc-tags">${categories}</div>
+                    ${isOwn ? `<button class="btn-red" onclick="window._del('${review.id}','lookup')">Delete</button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    /** Change sort order */
+    window._sort = function(sortBy) {
+        currentSort = sortBy;
+        renderReviews(currentReviews);
+    };
+
+    /** Delete a review */
+    window._del = async function(eventId, context) {
+        if (!currentUser) return toast('Sign in first', 'error');
+        if (!confirm('Delete this review?')) return;
+
+        try {
+            await deleteReview(eventId);
+            toast('Deletion request sent', 'success');
+
+            if (context === 'lookup' && currentLookupPubkey) {
+                // Remove from local array and re-render
+                currentReviews = currentReviews.filter(r => r.id !== eventId);
+                renderReviews(currentReviews);
+
+                const [profile, follows] = await Promise.all([
+                    fetchProfile(currentLookupPubkey),
+                    fetchFollows(currentLookupPubkey)
+                ]);
+                renderProfileCard(
+                    currentLookupPubkey,
+                    NostrTools.nip19.npubEncode(currentLookupPubkey),
+                    profile, follows, currentReviews
+                );
+                await renderReviewForm();
+            } else if (context === 'history') {
+                loadHistory();
+            }
+        } catch (e) {
+            toast('Delete failed: ' + e.message, 'error');
+        }
+    };
+
+    // =====================================================================
+    // MY REVIEWS HISTORY
+    // =====================================================================
+
+    async function loadHistory() {
+        const area = document.getElementById('historyArea');
+
+        if (!currentUser) {
+            area.innerHTML = '<div class="empty">Sign in to see your review history</div>';
+            return;
+        }
+
+        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
+
+        try {
+            const reviews = await fetchMyReviews(currentUser.pubkey);
+
+            if (!reviews.length) {
+                area.innerHTML = '<div class="empty anim">No reviews written yet</div>';
+                return;
+            }
+
+            const parsed = reviews.map(parseReview).sort((a, b) => b.created_at - a.created_at);
+
+            let html = `
+                <div class="reviews-header anim">
+                    <h3>${parsed.length} review${parsed.length !== 1 ? 's' : ''} written</h3>
+                </div>
+            `;
+
+            for (const review of parsed) {
+                const pTag = review.tags.find(t => t[0] === 'p');
+                const subjectPubkey = pTag ? pTag[1] : null;
+                const subjectNpub = subjectPubkey ? NostrTools.nip19.npubEncode(subjectPubkey) : 'Unknown';
+                const content = escapeHtml(capLength(review.content, 500));
+                const categories = review.categories.map(catTag).join('');
+
+                html += `
+                    <div class="rc anim" data-hpk="${subjectPubkey || ''}">
+                        <div class="rc-top">
+                            <div class="rc-who" style="flex:1">
+                                <div class="rc-name hist-name" style="font-size:0.75rem;color:var(--text-3);">Review of</div>
+                                <div class="rc-npub" style="cursor:pointer;color:var(--accent);"
+                                    onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
+                                    ${shortNpub(subjectNpub)}
+                                </div>
+                            </div>
+                            <div class="rc-right">
+                                ${starsHtml(review.rating, '1rem')}
+                                <div class="rc-date">${fmtDate(review.created_at)}</div>
+                            </div>
+                        </div>
+                        <div class="rc-body">${content}</div>
+                        <div class="rc-foot">
+                            <div class="rc-tags">${categories}</div>
+                            <button class="btn-red" onclick="window._del('${review.id}','history')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            area.innerHTML = html;
+
+            // Lazy-load subject profile names
+            for (const review of parsed) {
+                const subjectPubkey = review.tags.find(t => t[0] === 'p')?.[1];
+                if (subjectPubkey) {
+                    getProfile(subjectPubkey).then(profile => {
+                        if (profile && (profile.display_name || profile.name)) {
+                            const card = area.querySelector(`[data-hpk="${subjectPubkey}"]`);
+                            if (card) {
+                                const nameEl = card.querySelector('.hist-name');
+                                if (nameEl) {
+                                    nameEl.textContent = 'Review of ' + capLength(profile.display_name || profile.name, 30);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            area.innerHTML = '<div class="empty">Error loading reviews</div>';
+        }
+    }
+
+    // =====================================================================
+    // FEATURED — Top Rated Profiles (front page)
+    // =====================================================================
+
+    /**
+     * Fetch recent review events from relays (not filtered by subject),
+     * aggregate by subject pubkey, calculate average rating,
+     * and return the top rated profiles.
+     */
+    async function fetchFeaturedProfiles() {
+        const p = await initPool();
+        try {
+            // Grab a broad batch of recent review events
+            const events = await p.querySync(RELAYS, {
+                kinds: [REVIEW_KIND],
+                limit: 200
+            });
+
+            if (!events.length) return [];
+
+            // Deduplicate (one review per author per subject)
+            const deduped = deduplicateReviews(events);
+
+            // Aggregate by subject pubkey
+            const subjects = new Map(); // pubkey -> { ratings: [], count: 0 }
+
+            for (const event of deduped) {
+                const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
+                if (!subjectPubkey) continue;
+
+                const ratingTag = event.tags.find(t => t[0] === 'rating');
+                const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
+                if (rating < 1 || rating > 5) continue;
+
+                if (!subjects.has(subjectPubkey)) {
+                    subjects.set(subjectPubkey, { ratings: [], total: 0 });
+                }
+                const entry = subjects.get(subjectPubkey);
+                entry.ratings.push(rating);
+                entry.total += rating;
+            }
+
+            // Convert to sorted array — sort by average rating, then by review count
+            const ranked = Array.from(subjects.entries())
+                .map(([pubkey, data]) => ({
+                    pubkey,
+                    avgRating: (data.total / data.ratings.length).toFixed(1),
+                    reviewCount: data.ratings.length
+                }))
+                // Only include profiles with 1+ reviews
+                .filter(p => p.reviewCount >= 1)
+                // Sort: highest avg first, break ties by more reviews
+                .sort((a, b) => {
+                    const ratingDiff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
+                    if (ratingDiff !== 0) return ratingDiff;
+                    return b.reviewCount - a.reviewCount;
+                });
+
+            return ranked;
+        } catch (e) {
+            console.warn('fetchFeaturedProfiles error:', e);
+            return [];
+        }
+    }
+
+    /**
+     * Pick a random selection from the top rated profiles.
+     * Takes the top N ranked, then shuffles and picks `count` from them.
+     */
+    function pickRandom(ranked, poolSize = 20, count = 6) {
+        const pool = ranked.slice(0, poolSize);
+        // Fisher-Yates shuffle
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        return pool.slice(0, Math.min(count, pool.length));
+    }
+
+    /** Render the featured profiles grid */
+    async function renderFeatured() {
+        const area = document.getElementById('featuredArea');
+        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading top rated...</div>';
+
+        const ranked = await fetchFeaturedProfiles();
+
+        if (!ranked.length) {
+            area.innerHTML = '<div class="empty anim">No reviews found on relays yet. Be the first to review someone.</div>';
+            return;
+        }
+
+        const selection = pickRandom(ranked, 20, 6);
+
+        let cardsHtml = '';
+        for (const entry of selection) {
+            const npub = NostrTools.nip19.npubEncode(entry.pubkey);
+            cardsHtml += `
+                <div class="featured-card anim" onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; lookupProfile();">
+                    <div class="fc-top">
+                        <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-fc-pk="${entry.pubkey}">
+                        <div>
+                            <div class="fc-name" data-fc-name="${entry.pubkey}">${shortNpub(npub)}</div>
+                            <div class="fc-npub">${shortNpub(npub)}</div>
+                        </div>
+                    </div>
+                    <div class="fc-bottom">
+                        <div class="fc-score">${entry.avgRating}</div>
+                        <div class="fc-meta">
+                            ${starsHtml(Math.round(entry.avgRating), '0.9rem')}<br>
+                            ${entry.reviewCount} review${entry.reviewCount !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        area.innerHTML = `
+            <div class="featured-section">
+                <div class="featured-header">
+                    <h3>Top rated</h3>
+                    <button onclick="renderFeatured()">Shuffle</button>
+                </div>
+                <div class="featured-grid">
+                    ${cardsHtml}
+                </div>
+            </div>
+        `;
+
+        // Lazy-load profile names and avatars
+        for (const entry of selection) {
+            getProfile(entry.pubkey).then(profile => {
+                if (!profile) return;
+
+                const nameEl = area.querySelector(`[data-fc-name="${entry.pubkey}"]`);
+                const imgEl = area.querySelector(`[data-fc-pk="${entry.pubkey}"]`);
+
+                if (nameEl && (profile.display_name || profile.name)) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
+                }
+                if (imgEl && profile.picture) {
+                    imgEl.src = sanitizeUrl(profile.picture);
+                }
+            });
+        }
+    }
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+
+    await initPool();
+    console.log('PubScore initialized');
+
+    // Load featured profiles on the front page
+    renderFeatured();
+
+    </script>
+</body>
+</html>
