@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>PubScore</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PubScore</title>
 
-  <!-- Primary SEO -->
-  <meta name="description" content="PubScore is a Nostr-native rating and review page for npubs. Public, signed reviews stored on relays." />
+    <!-- Primary SEO -->
+    <meta name="description" content="PubScore is a Nostr-native rating and review page for npubs. Public, signed reviews stored on relays.">
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="PubScore" />
-  <meta property="og:description" content="Rate and review Nostr npubs with signed, public events." />
-  <meta property="og:url" content="https://pubscore.space/" />
-  <meta property="og:image" content="https://pubscore.space/og-preview.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PubScore">
+    <meta property="og:description" content="Rate and review Nostr npubs with signed, public events.">
+    <meta property="og:url" content="https://pubscore.space/">
+    <meta property="og:image" content="https://pubscore.space/og-preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="PubScore" />
-  <meta name="twitter:description" content="Rate and review Nostr npubs with signed, public events." />
-  <meta name="twitter:image" content="https://pubscore.space/og-preview.png" />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PubScore">
+    <meta name="twitter:description" content="Rate and review Nostr npubs with signed, public events.">
+    <meta name="twitter:image" content="https://pubscore.space/og-preview.png">
 
-  <!-- Icons -->
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
     <!-- Security: Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="
@@ -920,6 +920,100 @@
         }
 
         /* ================================================================
+           PAGINATION — "Show more" button
+           ================================================================ */
+        .pagination {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .pagination button {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 12px 32px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pagination button:hover {
+            border-color: var(--accent-border);
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        .pagination-info {
+            font-size: 0.78rem;
+            color: var(--text-3);
+            margin-top: 8px;
+        }
+
+        /* ================================================================
+           SEARCH RESULTS — dropdown for username search
+           ================================================================ */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--r);
+            overflow: hidden;
+            z-index: 30;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-result {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .search-result:hover {
+            background: var(--bg-hover);
+        }
+
+        .search-result img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .search-result-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .search-result-npub {
+            font-family: monospace;
+            font-size: 0.66rem;
+            color: var(--text-3);
+        }
+
+        .search-result-nip05 {
+            font-size: 0.72rem;
+            color: var(--green);
+        }
+
+        .search-no-results {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 0.85rem;
+        }
+
+        /* ================================================================
            FEATURED / TOP RATED — grid on the front page
            ================================================================ */
         .featured-section {
@@ -1201,7 +1295,7 @@
          ================================================================ -->
     <div class="topbar">
         <div class="topbar-inner">
-            <div class="brand">Pub<em>Score</em></div>
+            <div class="brand" onclick="window._goHome && window._goHome()" style="cursor:pointer;">Pub<em>Score</em></div>
             <div class="topbar-right">
                 <div class="topbar-nav">
                     <button class="active" data-tab="lookup" onclick="switchTab('lookup')">Lookup</button>
@@ -1228,7 +1322,7 @@
         <!-- Lookup tab -->
         <div class="section active" id="section-lookup">
             <div class="search-wrap">
-                <input type="text" id="npubInput" placeholder="Paste an npub or hex pubkey" autocomplete="off" spellcheck="false">
+                <input type="text" id="npubInput" placeholder="Search by npub, hex pubkey, or username" autocomplete="off" spellcheck="false">
                 <button onclick="lookupProfile()">Look up</button>
             </div>
             <div id="featuredArea"></div>
@@ -1467,6 +1561,8 @@
     let currentLookupPubkey = null;
     let currentReviews = [];
     let currentSort = 'newest';
+    let currentPage = 0;
+    const REVIEWS_PER_PAGE = 5;
 
     // Default avatar SVG (data URI)
     const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(
@@ -1861,30 +1957,125 @@
     };
 
     // =====================================================================
-    // PROFILE LOOKUP
+    // PROFILE LOOKUP — supports npub, hex, username, and NIP-05
     // =====================================================================
 
-    window.lookupProfile = async function() {
-        const raw = document.getElementById('npubInput').value.trim();
-        if (!raw) return toast('Paste an npub or hex pubkey', 'error');
-
-        // Parse input — accept npub1... or raw 64-char hex
-        let pubkey;
+    /**
+     * Search for profiles by name/NIP-05 on relays.
+     * Queries kind 0 (profile metadata) events with a search filter.
+     */
+    async function searchProfiles(query) {
+        const p = await initPool();
         try {
-            if (raw.startsWith('npub1')) {
-                pubkey = NostrTools.nip19.decode(raw).data;
-            } else if (/^[0-9a-f]{64}$/i.test(raw)) {
-                pubkey = raw.toLowerCase();
-            } else {
-                return toast('Invalid npub or hex pubkey', 'error');
+            // Use NIP-50 search if supported, fall back to fetching recent profiles
+            const events = await p.querySync(RELAYS, {
+                kinds: [0],
+                search: query,
+                limit: 8
+            });
+
+            const results = [];
+            const seen = new Set();
+
+            for (const event of events) {
+                if (seen.has(event.pubkey)) continue;
+                seen.add(event.pubkey);
+
+                try {
+                    const profile = JSON.parse(event.content);
+                    const name = (profile.display_name || profile.name || '').toLowerCase();
+                    const nip05 = (profile.nip05 || '').toLowerCase();
+                    const q = query.toLowerCase();
+
+                    // Only include if name or nip05 actually matches
+                    if (name.includes(q) || nip05.includes(q)) {
+                        results.push({
+                            pubkey: event.pubkey,
+                            profile
+                        });
+                    }
+                } catch (e) {}
             }
+
+            return results.slice(0, 6);
         } catch (e) {
-            return toast('Invalid npub format', 'error');
+            console.warn('searchProfiles error:', e);
+            return [];
+        }
+    }
+
+    /** Clear the lookup and return to the start/featured page */
+    function goHome() {
+        currentLookupPubkey = null;
+        currentReviews = [];
+        currentPage = 0;
+        document.getElementById('npubInput').value = '';
+        document.getElementById('profileArea').innerHTML = '';
+        document.getElementById('reviewFormArea').innerHTML = '';
+        document.getElementById('reviewsArea').innerHTML = '';
+        document.getElementById('featuredArea').style.display = '';
+        closeSearchResults();
+        // Make sure we're on the lookup tab
+        switchTab('lookup');
+    }
+    window._goHome = goHome;
+
+    /** Close the search results dropdown */
+    function closeSearchResults() {
+        const existing = document.querySelector('.search-results');
+        if (existing) existing.remove();
+    }
+
+    /** Show search results dropdown */
+    function showSearchResults(results, query) {
+        closeSearchResults();
+        const wrap = document.querySelector('.search-wrap');
+
+        if (!results.length) {
+            const el = document.createElement('div');
+            el.className = 'search-results';
+            el.innerHTML = `<div class="search-no-results">No profiles found for "${escapeHtml(query)}"</div>`;
+            wrap.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+            return;
         }
 
-        currentLookupPubkey = pubkey;
+        const el = document.createElement('div');
+        el.className = 'search-results';
 
-        // Hide featured section when looking up a profile
+        for (const r of results) {
+            const npub = NostrTools.nip19.npubEncode(r.pubkey);
+            const name = sanitizeDisplayName(r.profile.display_name || r.profile.name || 'Unknown');
+            const avatar = sanitizeUrl(r.profile.picture) || DEFAULT_AVATAR;
+            const nip05 = r.profile.nip05 ? sanitizeNip05(r.profile.nip05) : '';
+
+            const div = document.createElement('div');
+            div.className = 'search-result';
+            div.innerHTML = `
+                <img src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
+                <div>
+                    <div class="search-result-name">${name}</div>
+                    ${nip05 ? `<div class="search-result-nip05">${nip05}</div>` : ''}
+                    <div class="search-result-npub">${shortNpub(npub)}</div>
+                </div>
+            `;
+            div.addEventListener('click', () => {
+                document.getElementById('npubInput').value = npub;
+                closeSearchResults();
+                lookupByPubkey(r.pubkey);
+            });
+            el.appendChild(div);
+        }
+
+        wrap.appendChild(el);
+    }
+
+    /** Lookup by already-resolved pubkey (skip parsing) */
+    async function lookupByPubkey(pubkey) {
+        currentLookupPubkey = pubkey;
+        currentPage = 0;
+
+        // Hide featured section
         document.getElementById('featuredArea').style.display = 'none';
 
         // Show loading state
@@ -1893,7 +2084,6 @@
         document.getElementById('reviewsArea').innerHTML = '';
 
         try {
-            // Fetch everything in parallel
             const [profile, follows, reviews] = await Promise.all([
                 fetchProfile(pubkey),
                 fetchFollows(pubkey),
@@ -1911,11 +2101,76 @@
             toast('Error: ' + e.message, 'error');
             document.getElementById('profileArea').innerHTML = '';
         }
+    }
+
+    window.lookupProfile = async function() {
+        const raw = document.getElementById('npubInput').value.trim();
+        if (!raw) return toast('Enter an npub, hex pubkey, or username', 'error');
+
+        closeSearchResults();
+
+        // 1. Try npub
+        if (raw.startsWith('npub1')) {
+            try {
+                const pubkey = NostrTools.nip19.decode(raw).data;
+                return await lookupByPubkey(pubkey);
+            } catch (e) {
+                return toast('Invalid npub format', 'error');
+            }
+        }
+
+        // 2. Try hex pubkey
+        if (/^[0-9a-f]{64}$/i.test(raw)) {
+            return await lookupByPubkey(raw.toLowerCase());
+        }
+
+        // 3. Username / NIP-05 search
+        document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Searching profiles...</div>';
+        document.getElementById('featuredArea').style.display = 'none';
+        document.getElementById('reviewFormArea').innerHTML = '';
+        document.getElementById('reviewsArea').innerHTML = '';
+
+        const results = await searchProfiles(raw);
+
+        if (results.length === 1) {
+            // Single result — go straight to it
+            const npub = NostrTools.nip19.npubEncode(results[0].pubkey);
+            document.getElementById('npubInput').value = npub;
+            document.getElementById('profileArea').innerHTML = '';
+            await lookupByPubkey(results[0].pubkey);
+        } else if (results.length > 1) {
+            // Multiple results — show dropdown
+            document.getElementById('profileArea').innerHTML = '';
+            document.getElementById('featuredArea').style.display = '';
+            showSearchResults(results, raw);
+        } else {
+            // No results
+            document.getElementById('profileArea').innerHTML = '';
+            document.getElementById('featuredArea').style.display = '';
+            toast('No profiles found for "' + raw + '"', 'error');
+        }
     };
 
     // Enter key triggers lookup
     document.getElementById('npubInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') lookupProfile();
+    });
+
+    // Back to start when input is cleared
+    document.getElementById('npubInput').addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (!val && currentLookupPubkey) {
+            goHome();
+        }
+        // Close search results when typing
+        if (val) closeSearchResults();
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-wrap')) {
+            closeSearchResults();
+        }
     });
 
     // =====================================================================
@@ -2100,6 +2355,10 @@
         }
 
         const sorted = sortReviews(reviews, currentSort);
+        const totalPages = Math.ceil(sorted.length / REVIEWS_PER_PAGE);
+        const showCount = Math.min((currentPage + 1) * REVIEWS_PER_PAGE, sorted.length);
+        const visible = sorted.slice(0, showCount);
+        const hasMore = showCount < sorted.length;
 
         area.innerHTML = `
             <div class="reviews-header anim">
@@ -2110,11 +2369,17 @@
                     ).join('')}
                 </div>
             </div>
-            ${sorted.map((r, i) => renderCard(r, i)).join('')}
+            ${visible.map((r, i) => renderCard(r, i)).join('')}
+            ${hasMore ? `
+                <div class="pagination anim">
+                    <button onclick="window._showMore()">Show more</button>
+                    <div class="pagination-info">Showing ${showCount} of ${sorted.length}</div>
+                </div>
+            ` : ''}
         `;
 
         // Lazy-load reviewer profile names and avatars
-        sorted.forEach(async (review) => {
+        visible.forEach(async (review) => {
             const profile = await getProfile(review.pubkey);
             const card = document.querySelector(`[data-rpk="${review.pubkey}"]`);
             if (card && profile) {
@@ -2129,6 +2394,18 @@
             }
         });
     }
+
+    /** Show more reviews (next page) */
+    window._showMore = function() {
+        currentPage++;
+        renderReviews(currentReviews);
+        // Scroll the new content into view smoothly
+        const cards = document.querySelectorAll('.rc');
+        if (cards.length > 0) {
+            const target = cards[cards.length - Math.min(REVIEWS_PER_PAGE, cards.length)];
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     /** Render a single review card */
     function renderCard(review, index) {
@@ -2162,6 +2439,7 @@
     /** Change sort order */
     window._sort = function(sortBy) {
         currentSort = sortBy;
+        currentPage = 0;
         renderReviews(currentReviews);
     };
 
