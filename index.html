@@ -1126,6 +1126,17 @@
             color: var(--text);
         }
 
+        .fc-rank {
+            font-family: 'Fraunces', serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-3);
+            margin-bottom: 8px;
+        }
+        .fc-rank.gold   { color: #e8c46c; }
+        .fc-rank.silver { color: #a8a8b8; }
+        .fc-rank.bronze { color: #b87040; }
+
         .lb-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1138,17 +1149,7 @@
             gap: 10px;
         }
 
-        .fc-rank {
-            font-family: 'Fraunces', serif;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-3);
-            margin-bottom: 10px;
-        }
 
-        .fc-rank.gold   { color: #e8c46c; }
-        .fc-rank.silver { color: #a0a0b0; }
-        .fc-rank.bronze { color: #b87040; }
 
         .featured-card {
             background: var(--bg-raised);
@@ -3012,21 +3013,35 @@
         }
     }
 
-    /** Render a single leaderboard grid into `container` */
+    /** Top 3 locked, shuffle 3 more from the rest of the pool */
+    function buildSelection(ranked, extraCount = 9) {
+        const top3 = ranked.slice(0, 3);
+        const rest = ranked.slice(3);
+        // Fisher-Yates shuffle the remainder
+        for (let i = rest.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rest[i], rest[j]] = [rest[j], rest[i]];
+        }
+        return [...top3, ...rest.slice(0, extraCount)];
+    }
+
+    /** Render a leaderboard grid into `container` */
     function renderLbGrid(container, ranked) {
         if (!ranked.length) {
             container.innerHTML = '<div class="empty anim">No reviews in this period yet.</div>';
             return;
         }
 
+        const selection = buildSelection(ranked);
+
         const rankLabel = (i) => {
             if (i === 0) return '<div class="fc-rank gold">#1</div>';
             if (i === 1) return '<div class="fc-rank silver">#2</div>';
             if (i === 2) return '<div class="fc-rank bronze">#3</div>';
-            return `<div class="fc-rank">#${i + 1}</div>`;
+            return '';
         };
 
-        container.innerHTML = ranked.map((entry, i) => {
+        container.innerHTML = selection.map((entry, i) => {
             const npub = NostrTools.nip19.npubEncode(entry.pubkey);
             return `
                 <div class="featured-card anim" style="animation-delay:${i * 0.05}s"
@@ -3051,7 +3066,7 @@
         }).join('');
 
         // Lazy-load names and avatars
-        for (const entry of ranked) {
+        for (const entry of selection) {
             getProfile(entry.pubkey).then(profile => {
                 if (!profile) return;
                 const nameEl = container.querySelector(`[data-fc-name="${entry.pubkey}"]`);
@@ -3081,9 +3096,8 @@
         area.innerHTML = `
             <div class="featured-section">
                 <div class="lb-header">
-                    <div>
-                        <div class="lb-title">Top rated</div>
-                    </div>
+                    <div class="lb-title">Top rated</div>
+                    <button class="featured-header button" onclick="window._lbShuffle()" style="background:none;border:none;color:var(--text-3);font-family:inherit;font-size:0.82rem;cursor:pointer;transition:color 0.15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'">Shuffle</button>
                 </div>
                 <div class="lb-tabs">${tabsHtml}</div>
                 <div class="lb-grid" id="lbGrid">
@@ -3122,6 +3136,13 @@
     window._lbSwitch = async function(key) {
         currentLbWindow = key;
         await loadLbWindow(key);
+    };
+
+    // Shuffle re-renders with a new random pick from cached ranked data
+    window._lbShuffle = function() {
+        const grid = document.getElementById('lbGrid');
+        if (!grid || !lbCache[currentLbWindow]) return;
+        renderLbGrid(grid, lbCache[currentLbWindow]);
     };
 
     // =====================================================================
