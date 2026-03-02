@@ -1702,8 +1702,17 @@
         }
         const pubkey = await window.nostr.getPublicKey();
         const npub = NostrTools.nip19.npubEncode(pubkey);
-        const profile = await fetchProfile(pubkey);
-        currentUser = { pubkey, npub, profile, loginMethod: 'extension' };
+        // Log in immediately with empty profile, fetch in background
+        currentUser = { pubkey, npub, profile: {}, loginMethod: 'extension' };
+        fetchProfile(pubkey).then(profile => {
+            if (currentUser && currentUser.pubkey === pubkey) {
+                currentUser.profile = profile;
+                updateAuthPill();
+                // Refresh history tab if it's open so profile card shows real data
+                const historyActive = document.getElementById('section-history')?.classList.contains('active');
+                if (historyActive) loadHistory();
+            }
+        });
         return currentUser;
     }
 
@@ -1719,8 +1728,17 @@
         const npub = NostrTools.nip19.npubEncode(pubkey);
 
         SecureKeyStore.set(secretKey);
-        const profile = await fetchProfile(pubkey);
-        currentUser = { pubkey, npub, profile, loginMethod: 'nsec' };
+        // Log in immediately with empty profile, fetch in background
+        currentUser = { pubkey, npub, profile: {}, loginMethod: 'nsec' };
+        fetchProfile(pubkey).then(profile => {
+            if (currentUser && currentUser.pubkey === pubkey) {
+                currentUser.profile = profile;
+                updateAuthPill();
+                // Refresh history tab if it's open so profile card shows real data
+                const historyActive = document.getElementById('section-history')?.classList.contains('active');
+                if (historyActive) loadHistory();
+            }
+        });
 
         // Start inactivity auto-logout timer
         inactivityMonitor = createInactivityMonitor({
