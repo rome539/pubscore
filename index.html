@@ -98,6 +98,7 @@
 
         html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         body {
@@ -105,7 +106,9 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         /* ================================================================
@@ -128,6 +131,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            min-width: 0;
         }
 
         .brand {
@@ -147,6 +151,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            min-width: 0;
+            flex-shrink: 1;
         }
 
         /* Nav pill tabs */
@@ -158,6 +164,8 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 3px;
+            flex-shrink: 1;
+            min-width: 0;
         }
 
         .topbar-nav button {
@@ -171,6 +179,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.15s;
+            white-space: nowrap;
         }
 
         .topbar-nav button:hover {
@@ -237,6 +246,7 @@
             max-width: 1000px;
             margin: 0 auto;
             padding: 40px 32px 120px;
+            min-width: 0;
         }
 
         /* ================================================================
@@ -245,6 +255,7 @@
         .search-wrap {
             position: relative;
             margin-bottom: 36px;
+            max-width: 100%;
         }
 
         .search-wrap input {
@@ -823,20 +834,25 @@
         .drawer {
             position: fixed;
             top: 0;
-            right: -420px;
+            right: 0;
             width: 400px;
             max-width: 90vw;
             height: 100vh;
+            height: 100dvh;
             background: var(--bg-raised);
             border-left: 1px solid var(--border);
             z-index: 101;
-            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(100%);
+            visibility: hidden;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .drawer.open {
-            right: 0;
+            transform: translateX(0);
+            visibility: visible;
         }
 
         .drawer-head {
@@ -1139,13 +1155,13 @@
 
         .lb-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
             gap: 10px;
         }
 
         .featured-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
             gap: 10px;
         }
 
@@ -1158,6 +1174,8 @@
             padding: 20px;
             cursor: pointer;
             transition: border-color 0.15s, transform 0.15s;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .featured-card:hover {
@@ -1170,6 +1188,7 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 14px;
+            min-width: 0;
         }
 
         .fc-avi {
@@ -1194,6 +1213,9 @@
             font-size: 0.68rem;
             color: var(--text-3);
             margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .fc-bottom {
@@ -1274,6 +1296,7 @@
             .main { padding: 28px 20px 100px; }
             .topbar-inner { padding: 0 20px; }
             .featured-grid { grid-template-columns: repeat(2, 1fr); }
+            .lb-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         /* ================================================================
@@ -1355,7 +1378,16 @@
 
             /* Featured grid — single column */
             .featured-grid { grid-template-columns: 1fr; }
+            .lb-grid { grid-template-columns: 1fr; }
             .featured-card { padding: 16px; }
+
+            /* Leaderboard tabs — scrollable on small screens */
+            .lb-tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .lb-tabs::-webkit-scrollbar { display: none; }
 
             /* Sort pills — scrollable */
             .reviews-header {
@@ -1383,6 +1415,27 @@
             .toast.show {
                 transform: translateY(0);
             }
+        }
+
+        /* ================================================================
+           RESPONSIVE — Extra-small (narrow Android devices)
+           ================================================================ */
+        @media (max-width: 360px) {
+            .topbar-inner { padding: 0 10px; height: 50px; }
+            .brand { font-size: 1.05rem; }
+            .topbar-nav { margin-right: 4px; padding: 2px; }
+            .topbar-nav button { font-size: 0.72rem; padding: 5px 8px; }
+            .auth-pill { font-size: 0.72rem; padding: 3px 8px 3px 3px; gap: 4px; }
+            .auth-pill img { width: 22px; height: 22px; }
+            .auth-pill-ph { width: 22px; height: 22px; }
+            .main { padding: 16px 10px 72px; }
+            .search-wrap input { padding: 14px 12px; font-size: 0.85rem; }
+            .lb-tab { font-size: 0.75rem; padding: 6px 10px; }
+            .featured-card { padding: 14px; }
+            .fc-avi { width: 40px; height: 40px; }
+            .fc-name { font-size: 0.88rem; }
+            .fc-score { font-size: 1.3rem; }
+            .fc-meta { font-size: 0.68rem; }
         }
     </style>
 </head>
