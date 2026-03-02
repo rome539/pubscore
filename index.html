@@ -658,6 +658,62 @@
         }
 
         /* ================================================================
+           HISTORY SUB-TABS
+           ================================================================ */
+        .hist-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .hist-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 10px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .hist-tab:hover {
+            color: var(--text-2);
+        }
+
+        .hist-tab.active {
+            background: var(--bg-elevated);
+            color: var(--text);
+        }
+
+        .hist-tab-count {
+            background: var(--bg-elevated);
+            color: var(--text-3);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 100px;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        .hist-tab.active .hist-tab-count {
+            background: var(--accent-bg);
+            color: var(--accent);
+        }
+
+        /* ================================================================
            REVIEW CARDS
            ================================================================ */
         .rc {
@@ -1017,34 +1073,63 @@
            FEATURED / TOP RATED — grid on the front page
            ================================================================ */
         .featured-section {
-            margin-bottom: 32px;
+            margin-bottom: 48px;
         }
 
-        .featured-header {
+        .lb-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
-        .featured-header h3 {
+        .lb-title {
             font-family: 'Fraunces', serif;
             font-size: 1.15rem;
             font-weight: 600;
         }
 
-        .featured-header button {
+        .lb-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .lb-tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 16px;
+        }
+
+        .lb-tab {
             background: none;
             border: none;
             color: var(--text-3);
             font-family: inherit;
             font-size: 0.82rem;
+            font-weight: 500;
+            padding: 7px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: color 0.15s;
+            transition: all 0.15s;
+            white-space: nowrap;
         }
 
-        .featured-header button:hover {
-            color: var(--accent);
+        .lb-tab:hover { color: var(--text-2); }
+
+        .lb-tab.active {
+            background: var(--bg-elevated);
+            color: var(--text);
+        }
+
+        .lb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
         }
 
         .featured-grid {
@@ -1052,6 +1137,18 @@
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 10px;
         }
+
+        .fc-rank {
+            font-family: 'Fraunces', serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-3);
+            margin-bottom: 10px;
+        }
+
+        .fc-rank.gold   { color: #e8c46c; }
+        .fc-rank.silver { color: #a0a0b0; }
+        .fc-rank.bronze { color: #b87040; }
 
         .featured-card {
             background: var(--bg-raised);
@@ -1688,6 +1785,38 @@
         return [];
     }
 
+    /** Fetch follower count — how many people follow this pubkey (kind 3 #p tag) */
+    async function fetchFollowerCount(pubkey) {
+        const p = await initPool();
+        try {
+            const events = await p.querySync(RELAYS, { kinds: [3], '#p': [pubkey], limit: 500 });
+            // Deduplicate by author (one follow-list per person)
+            const authors = new Set(events.map(e => e.pubkey));
+            return authors.size;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    /** Check if a profile meets minimum social graph thresholds.
+     *  Returns { ok: true } or { ok: false, reason: string }
+     */
+    async function checkProfileEligibility(pubkey, follows) {
+        const MIN_FOLLOWING = 20;
+        const MIN_FOLLOWERS = 10;
+
+        if (follows.length < MIN_FOLLOWING) {
+            return { ok: false, reason: `This profile follows fewer than ${MIN_FOLLOWING} people and can't be looked up.` };
+        }
+
+        const followerCount = await fetchFollowerCount(pubkey);
+        if (followerCount < MIN_FOLLOWERS) {
+            return { ok: false, reason: `This profile has fewer than ${MIN_FOLLOWERS} followers and can't be looked up.` };
+        }
+
+        return { ok: true };
+    }
+
     /**
      * Deduplicate replaceable events.
      * Keeps only the newest event per author + d-tag combination.
@@ -1957,51 +2086,144 @@
     };
 
     // =====================================================================
-    // PROFILE LOOKUP — supports npub, hex, username, and NIP-05
+    // PROFILE LOOKUP — supports npub, hex, and username search
     // =====================================================================
 
     /**
-     * Search for profiles by name/NIP-05 on relays.
-     * Queries kind 0 (profile metadata) events with a search filter.
+     * Search for profiles by username.
+     *
+     * Strategy (multi-layered):
+     * 1. Check the local profileCache first (instant)
+     * 2. Try NIP-50 search on relays that support it (relay.nostr.band)
+     * 3. Try NIP-05 lookup if the query looks like user@domain
+     * 4. Fall back to fetching a batch of recent kind 0s and filtering client-side
      */
     async function searchProfiles(query) {
+        const q = query.toLowerCase().trim();
+        if (!q) return [];
+
+        const results = new Map(); // pubkey -> { pubkey, profile, score }
+
+        /** Score a profile against the query — NIP-05 verified profiles rank higher */
+        function matchProfile(pk, profile) {
+            const displayName = (profile.display_name || '').toLowerCase();
+            const name = (profile.name || '').toLowerCase();
+            const nip05 = (profile.nip05 || '').toLowerCase();
+            const either = displayName || name;
+            const hasNip05 = !!nip05;
+
+            let score = 0;
+            if (displayName === q || name === q) score = 6;
+            else if (displayName.startsWith(q) || name.startsWith(q)) score = 4;
+            else if (either.includes(q) || nip05.includes(q)) score = 2;
+
+            // Boost verified (NIP-05) profiles at every tier
+            if (score > 0 && hasNip05) score += 1;
+
+            // Extra boost if NIP-05 local part matches query exactly (e.g. "jack" -> jack@cash.app)
+            const nip05Local = nip05.split('@')[0];
+            if (nip05Local === q) score += 2;
+
+            if (score > 0) {
+                const existing = results.get(pk);
+                if (!existing || score > existing.score) {
+                    results.set(pk, { pubkey: pk, profile, score });
+                }
+            }
+        }
+
+        // 1. Search the local profileCache first (instant)
+        for (const [pk, profile] of Object.entries(profileCache)) {
+            matchProfile(pk, profile);
+        }
+
+        // 2. NIP-50 search on relay.nostr.band (supports search filter)
+        const NIP50_RELAYS = ['wss://relay.nostr.band', 'wss://nostr.wine'];
         const p = await initPool();
         try {
-            // Use NIP-50 search if supported, fall back to fetching recent profiles
-            const events = await p.querySync(RELAYS, {
+            const nip50Events = await p.querySync(NIP50_RELAYS, {
                 kinds: [0],
-                search: query,
-                limit: 8
+                search: q,
+                limit: 10
             });
-
-            const results = [];
-            const seen = new Set();
-
-            for (const event of events) {
-                if (seen.has(event.pubkey)) continue;
-                seen.add(event.pubkey);
-
+            for (const event of nip50Events) {
                 try {
                     const profile = JSON.parse(event.content);
-                    const name = (profile.display_name || profile.name || '').toLowerCase();
-                    const nip05 = (profile.nip05 || '').toLowerCase();
-                    const q = query.toLowerCase();
-
-                    // Only include if name or nip05 actually matches
-                    if (name.includes(q) || nip05.includes(q)) {
-                        results.push({
-                            pubkey: event.pubkey,
-                            profile
-                        });
+                    profileCache[event.pubkey] = profile;
+                    // Always include NIP-50 results — relay already filtered by relevance
+                    // Try to score by name, but if no name match still include with score 1
+                    const existing = results.get(event.pubkey);
+                    matchProfile(event.pubkey, profile);
+                    if (!results.has(event.pubkey)) {
+                        // No name matched but relay said it's relevant — include it
+                        results.set(event.pubkey, { pubkey: event.pubkey, profile, score: 1 });
                     }
                 } catch (e) {}
             }
-
-            return results.slice(0, 6);
         } catch (e) {
-            console.warn('searchProfiles error:', e);
-            return [];
+            console.warn('NIP-50 search error:', e);
         }
+
+        // 3. NIP-05 lookup if query looks like user@domain or just a username
+        //    Try querying nostr.directory and nostr.band lookup endpoints
+        const nip05Candidates = [];
+        if (q.includes('@')) {
+            nip05Candidates.push(q);
+        } else {
+            // Try common domains for bare username
+            nip05Candidates.push(`${q}@nostr.com`, `${q}@iris.to`, `${q}@snort.social`, `${q}@primal.net`);
+        }
+
+        // Run NIP-05 lookups in parallel with a short timeout
+        await Promise.allSettled(nip05Candidates.map(async nip05addr => {
+            try {
+                const [user, domain] = nip05addr.split('@');
+                if (!user || !domain) return;
+                const resp = await fetch(
+                    `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(user)}`,
+                    { signal: AbortSignal.timeout(2000) }
+                );
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const pk = data.names?.[user] || data.names?.[user.toLowerCase()];
+                if (pk && /^[0-9a-f]{64}$/i.test(pk) && !results.has(pk)) {
+                    const profile = await fetchProfile(pk);
+                    profileCache[pk] = profile;
+                    results.set(pk, { pubkey: pk, profile, score: 4 });
+                }
+            } catch (e) {}
+        }));
+
+        // 4. Fallback: fetch recent kind-0 batch and filter client-side
+        //    Only do this if NIP-50 returned nothing
+        if (results.size === 0) {
+            try {
+                const events = await p.querySync(RELAYS, {
+                    kinds: [0],
+                    limit: 500
+                });
+                for (const event of events) {
+                    if (results.has(event.pubkey)) continue;
+                    try {
+                        const profile = JSON.parse(event.content);
+                        matchProfile(event.pubkey, profile);
+                        profileCache[event.pubkey] = profile;
+                    } catch (e) {}
+                }
+            } catch (e) {
+                console.warn('searchProfiles fallback relay fetch error:', e);
+            }
+        }
+
+        // Sort by score (NIP-05 verified profiles naturally rank higher due to scoring boost)
+        const sorted = Array.from(results.values()).sort((a, b) => b.score - a.score);
+
+        // Eligibility is enforced on actual lookup — don't slow search down with extra relay queries
+        // Prefer NIP-05 verified profiles — fill up to 8 slots with verified first,
+        // then pad with unverified only if fewer than 4 verified results exist
+        const verified = sorted.filter(r => r.profile && r.profile.nip05);
+        const unverified = sorted.filter(r => !r.profile || !r.profile.nip05);
+        return verified.length >= 4 ? verified.slice(0, 8) : [...verified, ...unverified].slice(0, 8);
     }
 
     /** Clear the lookup and return to the start/featured page */
@@ -2045,17 +2267,19 @@
 
         for (const r of results) {
             const npub = NostrTools.nip19.npubEncode(r.pubkey);
-            const name = sanitizeDisplayName(r.profile.display_name || r.profile.name || 'Unknown');
-            const avatar = sanitizeUrl(r.profile.picture) || DEFAULT_AVATAR;
-            const nip05 = r.profile.nip05 ? sanitizeNip05(r.profile.nip05) : '';
+            const profile = r.profile || {};
+            const name = sanitizeDisplayName(profile.display_name || profile.name || '');
+            const avatar = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+            const nip05 = profile.nip05 ? sanitizeNip05(profile.nip05) : '';
 
             const div = document.createElement('div');
             div.className = 'search-result';
+            div.dataset.pk = r.pubkey;
             div.innerHTML = `
-                <img src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
+                <img class="sr-img" src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
                 <div>
-                    <div class="search-result-name">${name}</div>
-                    ${nip05 ? `<div class="search-result-nip05">${nip05}</div>` : ''}
+                    <div class="search-result-name sr-name">${name ? escapeHtml(name) : '<span style="color:var(--text-3);font-style:italic">Loading...</span>'}${nip05 ? ' <span style="font-size:0.7rem;color:var(--green);font-weight:700" title="NIP-05 Verified">✓</span>' : ''}</div>
+                    ${nip05 ? `<div class="search-result-nip05 sr-nip05">${nip05}</div>` : '<div class="search-result-nip05 sr-nip05" style="display:none"></div>'}
                     <div class="search-result-npub">${shortNpub(npub)}</div>
                 </div>
             `;
@@ -2068,6 +2292,37 @@
         }
 
         wrap.appendChild(el);
+
+        // Lazy-load any missing profile metadata
+        for (const r of results) {
+            const hasName = r.profile?.display_name || r.profile?.name;
+            const hasAvatar = r.profile?.picture;
+            if (!hasName || !hasAvatar) {
+                getProfile(r.pubkey).then(profile => {
+                    if (!profile) return;
+                    const card = el.querySelector(`[data-pk="${r.pubkey}"]`);
+                    if (!card) return; // dropdown may have closed
+
+                    const nameEl = card.querySelector('.sr-name');
+                    const imgEl = card.querySelector('.sr-img');
+                    const nip05El = card.querySelector('.sr-nip05');
+
+                    if (nameEl && (profile.display_name || profile.name)) {
+                        nameEl.textContent = sanitizeDisplayName(profile.display_name || profile.name);
+                    }
+                    if (imgEl && profile.picture) {
+                        imgEl.src = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+                    }
+                    if (nip05El && profile.nip05) {
+                        const safe = sanitizeNip05(profile.nip05);
+                        if (safe) {
+                            nip05El.textContent = safe;
+                            nip05El.style.display = '';
+                        }
+                    }
+                }).catch(() => {});
+            }
+        }
     }
 
     /** Lookup by already-resolved pubkey (skip parsing) */
@@ -2089,6 +2344,19 @@
                 fetchFollows(pubkey),
                 fetchReviews(pubkey)
             ]);
+
+            // Eligibility gate: must follow 20+ and have 10+ followers
+            const eligibility = await checkProfileEligibility(pubkey, follows);
+            if (!eligibility.ok) {
+                currentLookupPubkey = null;
+                document.getElementById('profileArea').innerHTML = `
+                    <div class="empty anim" style="padding:40px;text-align:center;">
+                        <div style="font-size:2rem;margin-bottom:12px">🚫</div>
+                        <div style="color:var(--text-2);font-size:0.95rem;">${escapeHtml(eligibility.reason)}</div>
+                    </div>`;
+                document.getElementById('featuredArea').style.display = '';
+                return;
+            }
 
             currentReviews = reviews;
             const npub = NostrTools.nip19.npubEncode(pubkey);
@@ -2124,8 +2392,8 @@
             return await lookupByPubkey(raw.toLowerCase());
         }
 
-        // 3. Username / NIP-05 search
-        document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Searching profiles...</div>';
+        // 3. Username search
+        document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Searching Nostr for "<b>' + escapeHtml(raw) + '</b>"...</div>';
         document.getElementById('featuredArea').style.display = 'none';
         document.getElementById('reviewFormArea').innerHTML = '';
         document.getElementById('reviewsArea').innerHTML = '';
@@ -2476,48 +2744,146 @@
     };
 
     // =====================================================================
-    // MY REVIEWS HISTORY
+    // MY PROFILE & REVIEWS HISTORY
     // =====================================================================
+
+    let historyTab = 'received'; // 'received' | 'written'
 
     async function loadHistory() {
         const area = document.getElementById('historyArea');
 
         if (!currentUser) {
-            area.innerHTML = '<div class="empty">Sign in to see your review history</div>';
+            area.innerHTML = '<div class="empty">Sign in to see your profile</div>';
             return;
         }
 
-        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
+        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading your profile...</div>';
 
         try {
-            const reviews = await fetchMyReviews(currentUser.pubkey);
+            const [profile, follows, receivedReviews, writtenReviews] = await Promise.all([
+                fetchProfile(currentUser.pubkey),
+                fetchFollows(currentUser.pubkey),
+                fetchReviews(currentUser.pubkey),
+                fetchMyReviews(currentUser.pubkey)
+            ]);
 
-            if (!reviews.length) {
-                area.innerHTML = '<div class="empty anim">No reviews written yet</div>';
-                return;
-            }
+            const npub = currentUser.npub;
+            const avatar = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+            const name = sanitizeDisplayName(profile.display_name || profile.name || 'Unknown');
+            const { preview: bio } = sanitizeBio(profile.about || '', 200);
+            const nip05 = sanitizeNip05(profile.nip05);
 
-            const parsed = reviews.map(parseReview).sort((a, b) => b.created_at - a.created_at);
+            // Calculate score from received reviews
+            const parsed = receivedReviews.map(parseReview);
+            const avgRating = parsed.length
+                ? (parsed.reduce((s, r) => s + r.rating, 0) / parsed.length).toFixed(1)
+                : 0;
 
-            let html = `
-                <div class="reviews-header anim">
-                    <h3>${parsed.length} review${parsed.length !== 1 ? 's' : ''} written</h3>
+            area.innerHTML = `
+                <div class="profile-card anim">
+                    <div class="pc-top">
+                        <img class="pc-avatar" src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
+                        <div class="pc-info">
+                            <div class="pc-name">${escapeHtml(name)}</div>
+                            ${nip05 ? `<div class="pc-nip05">${escapeHtml(nip05)}</div>` : ''}
+                            <div class="pc-npub">${escapeHtml(npub)}</div>
+                        </div>
+                    </div>
+                    ${bio ? `<div class="pc-bio">${bio}</div>` : ''}
+                    <div class="pc-rating-row">
+                        <div class="pc-big-score">${avgRating > 0 ? avgRating : '--'}</div>
+                        <div>
+                            ${avgRating > 0 ? starsHtml(Math.round(avgRating), '1.3rem') : ''}
+                            <div class="pc-score-detail">
+                                <strong>${receivedReviews.length}</strong> review${receivedReviews.length !== 1 ? 's' : ''} received
+                                ${follows.length > 0 ? ` &middot; following <strong>${follows.length > 999 ? (follows.length/1000).toFixed(1)+'k' : follows.length}</strong>` : ''}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="hist-tabs anim">
+                    <button class="hist-tab ${historyTab === 'received' ? 'active' : ''}" onclick="window._histTab('received')">
+                        Reviews I received <span class="hist-tab-count">${receivedReviews.length}</span>
+                    </button>
+                    <button class="hist-tab ${historyTab === 'written' ? 'active' : ''}" onclick="window._histTab('written')">
+                        Reviews I wrote <span class="hist-tab-count">${writtenReviews.length}</span>
+                    </button>
+                </div>
+
+                <div id="histReviewsArea"></div>
             `;
 
-            for (const review of parsed) {
+            // Store for tab switching
+            window._histData = { receivedReviews, writtenReviews };
+            renderHistoryReviews();
+
+        } catch (e) {
+            area.innerHTML = '<div class="empty">Error loading profile</div>';
+            console.error(e);
+        }
+    }
+
+    window._histTab = function(tab) {
+        historyTab = tab;
+        document.querySelectorAll('.hist-tab').forEach(b => {
+            b.classList.toggle('active', b.textContent.trim().startsWith(tab === 'received' ? 'Reviews I received' : 'Reviews I wrote'));
+        });
+        renderHistoryReviews();
+    };
+
+    function renderHistoryReviews() {
+        const area = document.getElementById('histReviewsArea');
+        if (!area || !window._histData) return;
+
+        const { receivedReviews, writtenReviews } = window._histData;
+        const isReceived = historyTab === 'received';
+        const reviews = isReceived ? receivedReviews : writtenReviews;
+        const parsed = reviews.map(parseReview).sort((a, b) => b.created_at - a.created_at);
+
+        if (!parsed.length) {
+            area.innerHTML = `<div class="empty anim">${isReceived ? 'No reviews received yet' : 'No reviews written yet'}</div>`;
+            return;
+        }
+
+        let html = '';
+        for (const review of parsed) {
+            if (isReceived) {
+                // Show who wrote the review (reviewer = review.pubkey)
+                const reviewerNpub = NostrTools.nip19.npubEncode(review.pubkey);
+                const content = escapeHtml(capLength(review.content, 500));
+                const categories = review.categories.map(catTag).join('');
+                html += `
+                    <div class="rc anim" data-hrpk="${review.pubkey}" data-rid="${review.id}">
+                        <div class="rc-top">
+                            <img class="rc-avi hr-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
+                            <div class="rc-who">
+                                <div class="rc-name hr-name">${shortNpub(reviewerNpub)}</div>
+                                <div class="rc-npub">${shortNpub(reviewerNpub)}</div>
+                            </div>
+                            <div class="rc-right">
+                                ${starsHtml(review.rating, '1rem')}
+                                <div class="rc-date">${fmtDate(review.created_at)}</div>
+                            </div>
+                        </div>
+                        <div class="rc-body">${content}</div>
+                        ${categories ? `<div class="rc-foot"><div class="rc-tags">${categories}</div></div>` : ''}
+                    </div>
+                `;
+            } else {
+                // Show who was reviewed (subject = p tag)
                 const pTag = review.tags.find(t => t[0] === 'p');
                 const subjectPubkey = pTag ? pTag[1] : null;
                 const subjectNpub = subjectPubkey ? NostrTools.nip19.npubEncode(subjectPubkey) : 'Unknown';
                 const content = escapeHtml(capLength(review.content, 500));
                 const categories = review.categories.map(catTag).join('');
-
                 html += `
-                    <div class="rc anim" data-hpk="${subjectPubkey || ''}">
+                    <div class="rc anim" data-hspk="${subjectPubkey || ''}" data-rid="${review.id}">
                         <div class="rc-top">
+                            <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
                             <div class="rc-who" style="flex:1">
-                                <div class="rc-name hist-name" style="font-size:0.75rem;color:var(--text-3);">Review of</div>
-                                <div class="rc-npub" style="cursor:pointer;color:var(--accent);"
+                                <div class="rc-name" style="font-size:0.75rem;color:var(--text-3);">Review of</div>
+                                <div class="hs-name rc-npub" style="cursor:pointer;color:var(--accent);"
                                     onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
                                     ${shortNpub(subjectNpub)}
                                 </div>
@@ -2535,28 +2901,45 @@
                     </div>
                 `;
             }
+        }
 
-            area.innerHTML = html;
+        area.innerHTML = html;
 
-            // Lazy-load subject profile names
+        // Lazy-load profile data for all cards
+        if (isReceived) {
+            for (const review of parsed) {
+                getProfile(review.pubkey).then(profile => {
+                    if (!profile) return;
+                    const card = area.querySelector(`[data-hrpk="${review.pubkey}"]`);
+                    if (!card) return;
+                    if (profile.display_name || profile.name) {
+                        const el = card.querySelector('.hr-name');
+                        if (el) el.textContent = capLength(profile.display_name || profile.name, 30);
+                    }
+                    if (profile.picture) {
+                        const img = card.querySelector('.hr-avi');
+                        if (img) img.src = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+                    }
+                }).catch(() => {});
+            }
+        } else {
             for (const review of parsed) {
                 const subjectPubkey = review.tags.find(t => t[0] === 'p')?.[1];
-                if (subjectPubkey) {
-                    getProfile(subjectPubkey).then(profile => {
-                        if (profile && (profile.display_name || profile.name)) {
-                            const card = area.querySelector(`[data-hpk="${subjectPubkey}"]`);
-                            if (card) {
-                                const nameEl = card.querySelector('.hist-name');
-                                if (nameEl) {
-                                    nameEl.textContent = 'Review of ' + capLength(profile.display_name || profile.name, 30);
-                                }
-                            }
-                        }
-                    });
-                }
+                if (!subjectPubkey) continue;
+                getProfile(subjectPubkey).then(profile => {
+                    if (!profile) return;
+                    const card = area.querySelector(`[data-hspk="${subjectPubkey}"]`);
+                    if (!card) return;
+                    if (profile.display_name || profile.name) {
+                        const el = card.querySelector('.hs-name');
+                        if (el) el.textContent = capLength(profile.display_name || profile.name, 30);
+                    }
+                    if (profile.picture) {
+                        const img = card.querySelector('.hs-avi');
+                        if (img) img.src = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+                    }
+                }).catch(() => {});
             }
-        } catch (e) {
-            area.innerHTML = '<div class="empty">Error loading reviews</div>';
         }
     }
 
@@ -2569,99 +2952,90 @@
      * aggregate by subject pubkey, calculate average rating,
      * and return the top rated profiles.
      */
-    async function fetchFeaturedProfiles() {
-        const p = await initPool();
-        try {
-            // Grab a broad batch of recent review events
-            const events = await p.querySync(RELAYS, {
-                kinds: [REVIEW_KIND],
-                limit: 200
-            });
+    // =====================================================================
+    // LEADERBOARDS
+    // =====================================================================
 
+    const LB_WINDOWS = [
+        { key: '24h',    label: '24 hours',  seconds: 60 * 60 * 24 },
+        { key: '7d',     label: '7 days',    seconds: 60 * 60 * 24 * 7 },
+        { key: '30d',    label: '30 days',   seconds: 60 * 60 * 24 * 30 },
+        { key: 'alltime',label: 'All time',  seconds: null },
+    ];
+
+    let currentLbWindow = 'alltime';
+
+    /**
+     * Rank profiles by average rating within a time window.
+     * sinceTs: unix timestamp (null = all time)
+     */
+    async function fetchRanked(sinceTs) {
+        const p = await initPool();
+        const filter = { kinds: [REVIEW_KIND], limit: 500 };
+        if (sinceTs) filter.since = sinceTs;
+
+        try {
+            const events = await p.querySync(RELAYS, filter);
             if (!events.length) return [];
 
-            // Deduplicate (one review per author per subject)
             const deduped = deduplicateReviews(events);
-
-            // Aggregate by subject pubkey
-            const subjects = new Map(); // pubkey -> { ratings: [], count: 0 }
+            const subjects = new Map();
 
             for (const event of deduped) {
                 const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
                 if (!subjectPubkey) continue;
-
                 const ratingTag = event.tags.find(t => t[0] === 'rating');
                 const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
                 if (rating < 1 || rating > 5) continue;
 
-                if (!subjects.has(subjectPubkey)) {
-                    subjects.set(subjectPubkey, { ratings: [], total: 0 });
-                }
-                const entry = subjects.get(subjectPubkey);
-                entry.ratings.push(rating);
-                entry.total += rating;
+                if (!subjects.has(subjectPubkey)) subjects.set(subjectPubkey, { total: 0, count: 0 });
+                const e = subjects.get(subjectPubkey);
+                e.total += rating;
+                e.count++;
             }
 
-            // Convert to sorted array — sort by average rating, then by review count
-            const ranked = Array.from(subjects.entries())
-                .map(([pubkey, data]) => ({
+            return Array.from(subjects.entries())
+                .map(([pubkey, d]) => ({
                     pubkey,
-                    avgRating: (data.total / data.ratings.length).toFixed(1),
-                    reviewCount: data.ratings.length
+                    avgRating: (d.total / d.count).toFixed(1),
+                    reviewCount: d.count
                 }))
-                // Only include profiles with 1+ reviews
-                .filter(p => p.reviewCount >= 1)
-                // Sort: highest avg first, break ties by more reviews
+                .filter(e => e.reviewCount >= 1)
                 .sort((a, b) => {
-                    const ratingDiff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
-                    if (ratingDiff !== 0) return ratingDiff;
-                    return b.reviewCount - a.reviewCount;
-                });
-
-            return ranked;
+                    const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
+                    return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
+                })
+                .slice(0, 6);
         } catch (e) {
-            console.warn('fetchFeaturedProfiles error:', e);
+            console.warn('fetchRanked error:', e);
             return [];
         }
     }
 
-    /**
-     * Pick a random selection from the top rated profiles.
-     * Takes the top N ranked, then shuffles and picks `count` from them.
-     */
-    function pickRandom(ranked, poolSize = 20, count = 6) {
-        const pool = ranked.slice(0, poolSize);
-        // Fisher-Yates shuffle
-        for (let i = pool.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [pool[i], pool[j]] = [pool[j], pool[i]];
-        }
-        return pool.slice(0, Math.min(count, pool.length));
-    }
-
-    /** Render the featured profiles grid */
-    async function renderFeatured() {
-        const area = document.getElementById('featuredArea');
-        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading top rated...</div>';
-
-        const ranked = await fetchFeaturedProfiles();
-
+    /** Render a single leaderboard grid into `container` */
+    function renderLbGrid(container, ranked) {
         if (!ranked.length) {
-            area.innerHTML = '<div class="empty anim">No reviews found on relays yet. Be the first to review someone.</div>';
+            container.innerHTML = '<div class="empty anim">No reviews in this period yet.</div>';
             return;
         }
 
-        const selection = pickRandom(ranked, 20, 6);
+        const rankLabel = (i) => {
+            if (i === 0) return '<div class="fc-rank gold">#1</div>';
+            if (i === 1) return '<div class="fc-rank silver">#2</div>';
+            if (i === 2) return '<div class="fc-rank bronze">#3</div>';
+            return `<div class="fc-rank">#${i + 1}</div>`;
+        };
 
-        let cardsHtml = '';
-        for (const entry of selection) {
+        container.innerHTML = ranked.map((entry, i) => {
             const npub = NostrTools.nip19.npubEncode(entry.pubkey);
-            cardsHtml += `
-                <div class="featured-card anim" onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; lookupProfile();">
+            return `
+                <div class="featured-card anim" style="animation-delay:${i * 0.05}s"
+                    onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; switchTab('lookup'); lookupProfile();">
+                    ${rankLabel(i)}
                     <div class="fc-top">
                         <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-fc-pk="${entry.pubkey}">
-                        <div>
-                            <div class="fc-name" data-fc-name="${entry.pubkey}">${shortNpub(npub)}</div>
+                        <div style="min-width:0;flex:1">
+                            <div class="fc-name" data-fc-name="${entry.pubkey}" style="color:var(--text-3);font-weight:400;font-style:italic">Loading...</div>
                             <div class="fc-npub">${shortNpub(npub)}</div>
                         </div>
                     </div>
@@ -2674,37 +3048,81 @@
                     </div>
                 </div>
             `;
+        }).join('');
+
+        // Lazy-load names and avatars
+        for (const entry of ranked) {
+            getProfile(entry.pubkey).then(profile => {
+                if (!profile) return;
+                const nameEl = container.querySelector(`[data-fc-name="${entry.pubkey}"]`);
+                const imgEl  = container.querySelector(`[data-fc-pk="${entry.pubkey}"]`);
+                if (nameEl && (profile.display_name || profile.name)) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
+                    nameEl.style.color = '';
+                    nameEl.style.fontWeight = '';
+                    nameEl.style.fontStyle = '';
+                }
+                if (imgEl && profile.picture) imgEl.src = sanitizeUrl(profile.picture);
+            });
         }
+    }
+
+    // Cache ranked results per window so tab switching is instant
+    const lbCache = {};
+
+    async function renderFeatured() {
+        const area = document.getElementById('featuredArea');
+
+        const tabsHtml = LB_WINDOWS.map(w => `
+            <button class="lb-tab ${currentLbWindow === w.key ? 'active' : ''}"
+                onclick="window._lbSwitch('${w.key}')">${w.label}</button>
+        `).join('');
 
         area.innerHTML = `
             <div class="featured-section">
-                <div class="featured-header">
-                    <h3>Top rated</h3>
-                    <button onclick="renderFeatured()">Shuffle</button>
+                <div class="lb-header">
+                    <div>
+                        <div class="lb-title">Top rated</div>
+                    </div>
                 </div>
-                <div class="featured-grid">
-                    ${cardsHtml}
+                <div class="lb-tabs">${tabsHtml}</div>
+                <div class="lb-grid" id="lbGrid">
+                    <div class="loader anim"><div class="spin"></div>Loading...</div>
                 </div>
             </div>
         `;
 
-        // Lazy-load profile names and avatars
-        for (const entry of selection) {
-            getProfile(entry.pubkey).then(profile => {
-                if (!profile) return;
-
-                const nameEl = area.querySelector(`[data-fc-name="${entry.pubkey}"]`);
-                const imgEl = area.querySelector(`[data-fc-pk="${entry.pubkey}"]`);
-
-                if (nameEl && (profile.display_name || profile.name)) {
-                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
-                }
-                if (imgEl && profile.picture) {
-                    imgEl.src = sanitizeUrl(profile.picture);
-                }
-            });
-        }
+        await loadLbWindow(currentLbWindow);
     }
+
+    async function loadLbWindow(key) {
+        const grid = document.getElementById('lbGrid');
+        if (!grid) return;
+
+        // Update tab active state
+        document.querySelectorAll('.lb-tab').forEach(b => {
+            b.classList.toggle('active', b.textContent.trim() === LB_WINDOWS.find(w => w.key === key)?.label);
+        });
+
+        // Use cache if available
+        if (lbCache[key]) {
+            renderLbGrid(grid, lbCache[key]);
+            return;
+        }
+
+        grid.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
+
+        const win = LB_WINDOWS.find(w => w.key === key);
+        const sinceTs = win?.seconds ? Math.floor(Date.now() / 1000) - win.seconds : null;
+        const ranked = await fetchRanked(sinceTs);
+        lbCache[key] = ranked;
+        renderLbGrid(grid, ranked);
+    }
+
+    window._lbSwitch = async function(key) {
+        currentLbWindow = key;
+        await loadLbWindow(key);
+    };
 
     // =====================================================================
     // INIT
