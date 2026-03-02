@@ -813,7 +813,6 @@
         .rtag-trade { background: var(--accent-bg); color: var(--accent); }
         .rtag-knowledge { background: var(--blue-bg); color: var(--blue); }
         .rtag-helpful { background: var(--green-bg); color: var(--green); }
-        .rtag-funny { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
         .rtag-warning { background: var(--red-bg); color: var(--red); }
 
         /* ================================================================
@@ -2032,7 +2031,6 @@
             trade: 'rtag-trade',
             knowledge: 'rtag-knowledge',
             helpful: 'rtag-helpful',
-            funny:    'rtag-funny',
             warning: 'rtag-warning'
         };
         return `<span class="rtag ${classes[category] || ''}">${escapeHtml(labels[category] || category)}</span>`;
@@ -2082,10 +2080,6 @@
         // Show featured area if returning to lookup with nothing loaded
         if (tab === 'lookup' && !currentLookupPubkey) {
             document.getElementById('featuredArea').style.display = '';
-
-            document.getElementById('profileArea').innerHTML = '';
-            document.getElementById('reviewFormArea').innerHTML = '';
-            document.getElementById('reviewsArea').innerHTML = '';   
         }
     };
 
