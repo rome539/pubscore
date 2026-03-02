@@ -2899,13 +2899,10 @@
                 html += `
                     <div class="rc anim" data-hspk="${subjectPubkey || ''}" data-rid="${review.id}">
                         <div class="rc-top">
-                            <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
-                            <div class="rc-who" style="flex:1">
-                                <div class="rc-name" style="font-size:0.75rem;color:var(--text-3);">Review of</div>
-                                <div class="hs-name rc-npub" style="cursor:pointer;color:var(--accent);"
-                                    onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
-                                    ${shortNpub(subjectNpub)}
-                                </div>
+                            <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
+                            <div class="rc-who" style="cursor:pointer" onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
+                                <div class="rc-name hs-name" style="color:var(--accent)">${shortNpub(subjectNpub)}</div>
+                                <div class="rc-npub hs-npub">${shortNpub(subjectNpub)}</div>
                             </div>
                             <div class="rc-right">
                                 ${starsHtml(review.rating, '1rem')}
@@ -2949,9 +2946,15 @@
                     if (!profile) return;
                     const card = area.querySelector(`[data-hspk="${subjectPubkey}"]`);
                     if (!card) return;
-                    if (profile.display_name || profile.name) {
-                        const el = card.querySelector('.hs-name');
-                        if (el) el.textContent = capLength(profile.display_name || profile.name, 30);
+                    const displayName = profile.display_name || profile.name;
+                    if (displayName) {
+                        const nameEl = card.querySelector('.hs-name');
+                        const npubEl = card.querySelector('.hs-npub');
+                        if (nameEl) {
+                            nameEl.textContent = capLength(displayName, 30);
+                            nameEl.style.color = ''; // reset from accent to normal
+                        }
+                        if (npubEl) npubEl.textContent = shortNpub(subjectNpub);
                     }
                     if (profile.picture) {
                         const img = card.querySelector('.hs-avi');
