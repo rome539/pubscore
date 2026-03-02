@@ -2024,7 +2024,6 @@
             trade: 'Trustworthy',
             knowledge: 'Knowledgeable',
             helpful: 'Helpful',
-            funny: 'Funny',
             warning: 'Warning'
         };
         const classes = {
@@ -2653,7 +2652,6 @@
                         <button class="cat-tag ${selectedCategories.has('trade') ? 'sel' : ''}" data-cat="trade" onclick="window._toggleCat('trade',this)">Trustworthy</button>
                         <button class="cat-tag ${selectedCategories.has('knowledge') ? 'sel' : ''}" data-cat="knowledge" onclick="window._toggleCat('knowledge',this)">Knowledgeable</button>
                         <button class="cat-tag ${selectedCategories.has('helpful') ? 'sel' : ''}" data-cat="helpful" onclick="window._toggleCat('helpful',this)">Helpful</button>
-                        <button class="cat-tag ${selectedCategories.has('funny') ? 'sel' : ''}" data-cat="funny" onclick="window._toggleCat('funny',this)">Funny</button>
                         <button class="cat-tag ${selectedCategories.has('warning') ? 'sel' : ''}" data-cat="warning" onclick="window._toggleCat('warning',this)">Warning</button>
                     </div>
                 </div>
@@ -3087,6 +3085,7 @@
     // =====================================================================
 
     const LB_WINDOWS = [
+        { key: '24h',    label: '24 hours',  seconds: 60 * 60 * 24 },
         { key: '7d',     label: '7 days',    seconds: 60 * 60 * 24 * 7 },
         { key: '30d',    label: '30 days',   seconds: 60 * 60 * 24 * 30 },
         { key: 'alltime',label: 'All time',  seconds: null },
