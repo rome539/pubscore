@@ -1393,7 +1393,7 @@
          ================================================================ -->
     <div class="topbar">
         <div class="topbar-inner">
-            <div class="brand" onclick="window._goHome && window._goHome()" style="cursor:pointer;">Pub<em>Score</em></div>
+            <div class="brand">Pub<em>Score</em></div>
             <div class="topbar-right">
                 <div class="topbar-nav">
                     <button class="active" data-tab="lookup" onclick="switchTab('lookup')">Lookup</button>
@@ -1421,7 +1421,7 @@
         <div class="section active" id="section-lookup">
             <div class="search-wrap">
                 <input type="text" id="npubInput" placeholder="Search by npub, hex pubkey, or username" autocomplete="off" spellcheck="false">
-                <button onclick="lookupProfile()">Look up</button>
+                <button id="searchBtn" onclick="window._searchBtnClick()">Look up</button>
             </div>
             <div id="featuredArea"></div>
             <div id="profileArea"></div>
@@ -2444,12 +2444,38 @@
     });
 
     // Back to start when input is cleared
+    function updateSearchBtn() {
+        const val = document.getElementById('npubInput').value.trim();
+        const btn = document.getElementById('searchBtn');
+        if (!btn) return;
+        if (val) {
+            btn.textContent = 'Clear';
+            btn.style.background = 'var(--bg-elevated)';
+            btn.style.color = 'var(--text-2)';
+        } else {
+            btn.textContent = 'Look up';
+            btn.style.background = '';
+            btn.style.color = '';
+        }
+    }
+
+    window._searchBtnClick = function() {
+        const val = document.getElementById('npubInput').value.trim();
+        if (val) {
+            document.getElementById('npubInput').value = '';
+            updateSearchBtn();
+            goHome();
+        } else {
+            lookupProfile();
+        }
+    };
+
     document.getElementById('npubInput').addEventListener('input', (e) => {
         const val = e.target.value.trim();
+        updateSearchBtn();
         if (!val && currentLookupPubkey) {
             goHome();
         }
-        // Close search results when typing
         if (val) closeSearchResults();
     });
 
@@ -2779,8 +2805,13 @@
         area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading your profile...</div>';
 
         try {
+            // Use cached profile if already loaded, otherwise fetch
+            const profilePromise = (currentUser.profile && (currentUser.profile.name || currentUser.profile.display_name))
+                ? Promise.resolve(currentUser.profile)
+                : fetchProfile(currentUser.pubkey).then(p => { currentUser.profile = p; return p; });
+
             const [profile, follows, receivedReviews, writtenReviews] = await Promise.all([
-                fetchProfile(currentUser.pubkey),
+                profilePromise,
                 fetchFollows(currentUser.pubkey),
                 fetchReviews(currentUser.pubkey),
                 fetchMyReviews(currentUser.pubkey)
@@ -2901,7 +2932,7 @@
                         <div class="rc-top">
                             <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
                             <div class="rc-who" style="cursor:pointer" onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
-                                <div class="rc-name hs-name" style="color:var(--accent)">${shortNpub(subjectNpub)}</div>
+                                <div class="rc-name hs-name" style="color:var(--text-3);font-style:italic;font-weight:400">Loading...</div>
                                 <div class="rc-npub hs-npub">${shortNpub(subjectNpub)}</div>
                             </div>
                             <div class="rc-right">
@@ -2947,14 +2978,12 @@
                     const card = area.querySelector(`[data-hspk="${subjectPubkey}"]`);
                     if (!card) return;
                     const displayName = profile.display_name || profile.name;
-                    if (displayName) {
-                        const nameEl = card.querySelector('.hs-name');
-                        const npubEl = card.querySelector('.hs-npub');
-                        if (nameEl) {
-                            nameEl.textContent = capLength(displayName, 30);
-                            nameEl.style.color = ''; // reset from accent to normal
-                        }
-                        if (npubEl) npubEl.textContent = shortNpub(subjectNpub);
+                    const nameEl = card.querySelector('.hs-name');
+                    if (nameEl) {
+                        nameEl.textContent = displayName ? capLength(displayName, 30) : shortNpub(subjectNpub);
+                        nameEl.style.color = '';
+                        nameEl.style.fontStyle = '';
+                        nameEl.style.fontWeight = '';
                     }
                     if (profile.picture) {
                         const img = card.querySelector('.hs-avi');
