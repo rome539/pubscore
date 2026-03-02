@@ -1696,8 +1696,8 @@
 
     const RELAYS = [
         'wss://relay.damus.io',
-        'wss://relay.nostr.band',
-        'wss://nos.lol',
+        'wss://relay.mostr.pub',
+        'wss://relay.nostrplebs.com',
         'wss://relay.snort.social',
         'wss://relay.primal.net'
     ];
@@ -2172,7 +2172,7 @@
      *
      * Strategy (multi-layered):
      * 1. Check the local profileCache first (instant)
-     * 2. Try NIP-50 search on relays that support it (relay.nostr.band)
+     * 2. Try NIP-50 search on relays that support it (relay.mostr.pub)
      * 3. Try NIP-05 lookup if the query looks like user@domain
      * 4. Fall back to fetching a batch of recent kind 0s and filtering client-side
      */
@@ -2215,8 +2215,8 @@
             matchProfile(pk, profile);
         }
 
-        // 2. NIP-50 search on relay.nostr.band (supports search filter)
-        const NIP50_RELAYS = ['wss://relay.nostr.band', 'wss://nostr.wine'];
+        // 2. NIP-50 search on relay.mostr.pub (supports search filter)
+        const NIP50_RELAYS = ['wss://relay.mostr.pub', 'wss://nostr.wine'];
         const p = await initPool();
         try {
             const nip50Events = await p.querySync(NIP50_RELAYS, {
