@@ -771,6 +771,28 @@
             color: var(--text-3);
         }
 
+        .rc-reviewer-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 4px;
+            margin: -4px;
+            transition: background 0.15s;
+            -webkit-tap-highlight-color: transparent;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .rc-reviewer-link:hover .rc-name {
+            color: var(--accent);
+        }
+
+        .rc-reviewer-link:active {
+            background: var(--bg-hover);
+        }
+
         .rc-right {
             text-align: right;
             flex-shrink: 0;
@@ -1091,6 +1113,60 @@
            ================================================================ */
         .featured-section {
             margin-bottom: 48px;
+        }
+
+        /* Tag leaderboard section */
+        .tag-lb-section {
+            margin-bottom: 48px;
+        }
+
+        .tag-lb-pills {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+
+        .tag-lb-pills::-webkit-scrollbar { display: none; }
+
+        .tag-lb-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg-raised);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+            color: var(--text-3);
+            letter-spacing: 0.02em;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tag-lb-pill:hover { border-color: var(--border-strong); color: var(--text-2); }
+
+        .tag-lb-pill.active-trade  { background: var(--accent-bg);              border-color: var(--accent-border);          color: var(--accent); }
+        .tag-lb-pill.active-knowledge { background: var(--blue-bg);             border-color: rgba(91,156,245,0.25);         color: var(--blue); }
+        .tag-lb-pill.active-helpful   { background: var(--green-bg);            border-color: rgba(78,202,130,0.25);         color: var(--green); }
+        .tag-lb-pill.active-funny     { background: rgba(168,85,247,0.1);       border-color: rgba(168,85,247,0.25);         color: #a855f7; }
+        .tag-lb-pill.active-warning   { background: var(--red-bg);              border-color: var(--red-border);             color: var(--red); }
+
+        .tag-lb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .tag-lb-grid { grid-template-columns: 1fr; }
         }
 
         .lb-header {
@@ -1478,6 +1554,7 @@
                 <button id="searchBtn" onclick="window._searchBtnClick()">Look up</button>
             </div>
             <div id="featuredArea"></div>
+            <div id="tagLbArea"></div>
             <div id="profileArea"></div>
             <div id="reviewFormArea"></div>
             <div id="reviewsArea"></div>
@@ -1698,9 +1775,9 @@
     const RELAYS = [
         'wss://relay.damus.io',
         'wss://relay.mostr.pub',
-        'wss://nos.lol',
         'wss://relay.nostrplebs.com',
-        'wss://relay.primal.net'
+        'wss://relay.primal.net',
+        'wss://nos.lol',
     ];
 
     // Review event kind — parameterized replaceable in app-specific range
@@ -2081,7 +2158,11 @@
         if (tab === 'history') loadHistory();
         // Show featured area if returning to lookup with nothing loaded
         if (tab === 'lookup' && !currentLookupPubkey) {
-            document.getElementById('featuredArea').style.display = '';
+            document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
+        }
+        // Clear review form when leaving lookup so stale async renders don't bleed through
+        if (tab !== 'lookup') {
+            document.getElementById('reviewFormArea').innerHTML = '';
         }
     };
 
@@ -2316,7 +2397,7 @@
         document.getElementById('profileArea').innerHTML = '';
         document.getElementById('reviewFormArea').innerHTML = '';
         document.getElementById('reviewsArea').innerHTML = '';
-        document.getElementById('featuredArea').style.display = '';
+        document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
         closeSearchResults();
         // Make sure we're on the lookup tab
         switchTab('lookup');
@@ -2412,7 +2493,7 @@
         currentPage = 0;
 
         // Hide featured section
-        document.getElementById('featuredArea').style.display = 'none';
+        document.getElementById('featuredArea').style.display = 'none'; document.getElementById('tagLbArea').style.display = 'none';
 
         // Show loading state
         document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Loading profile...</div>';
@@ -2430,12 +2511,20 @@
             const eligibility = await checkProfileEligibility(pubkey, follows);
             if (!eligibility.ok) {
                 currentLookupPubkey = null;
-                document.getElementById('profileArea').innerHTML = `
-                    <div class="empty anim" style="padding:40px;text-align:center;">
+                const profileArea = document.getElementById('profileArea');
+                profileArea.innerHTML = `
+                    <div class="empty anim" id="eligibilityMsg" style="padding:40px;text-align:center;transition:opacity 0.4s;">
                         <div style="font-size:1.1rem;margin-bottom:12px;color:var(--red);font-weight:600;">Not eligible</div>
                         <div style="color:var(--text-2);font-size:0.95rem;">${escapeHtml(eligibility.reason)}</div>
                     </div>`;
-                document.getElementById('featuredArea').style.display = '';
+                document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
+                setTimeout(() => {
+                    const msg = document.getElementById('eligibilityMsg');
+                    if (msg) {
+                        msg.style.opacity = '0';
+                        setTimeout(() => { if (msg.parentNode) msg.parentNode.innerHTML = ''; }, 400);
+                    }
+                }, 3000);
                 return;
             }
 
@@ -2476,7 +2565,7 @@
 
         // 3. Username search
         document.getElementById('profileArea').innerHTML = '<div class="loader anim"><div class="spin"></div>Searching Nostr for "<b>' + escapeHtml(raw) + '</b>"...</div>';
-        document.getElementById('featuredArea').style.display = 'none';
+        document.getElementById('featuredArea').style.display = 'none'; document.getElementById('tagLbArea').style.display = 'none';
         document.getElementById('reviewFormArea').innerHTML = '';
         document.getElementById('reviewsArea').innerHTML = '';
 
@@ -2491,12 +2580,12 @@
         } else if (results.length > 1) {
             // Multiple results — show dropdown
             document.getElementById('profileArea').innerHTML = '';
-            document.getElementById('featuredArea').style.display = '';
+            document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
             showSearchResults(results, raw);
         } else {
             // No results
             document.getElementById('profileArea').innerHTML = '';
-            document.getElementById('featuredArea').style.display = '';
+            document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
             toast('No profiles found for "' + raw + '"', 'error');
         }
     };
@@ -2613,6 +2702,11 @@
             return;
         }
 
+        // Snapshot the pubkey we're rendering for — if the user navigates away
+        // during any await below, we detect the stale render and abort.
+        const renderingFor = currentLookupPubkey;
+        const isStale = () => currentLookupPubkey !== renderingFor;
+
         // Can't review yourself
         if (currentUser.pubkey === currentLookupPubkey) {
             area.innerHTML = '<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">You can\'t review yourself</div>';
@@ -2622,6 +2716,7 @@
         // Must have at least 20 followers to write a review (anti-bot gate)
         const MIN_REVIEWER_FOLLOWERS = 20;
         const reviewerFollowerCount = await fetchFollowerCount(currentUser.pubkey);
+        if (isStale()) return;
         if (reviewerFollowerCount < MIN_REVIEWER_FOLLOWERS) {
             area.innerHTML = `<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">You need at least ${MIN_REVIEWER_FOLLOWERS} followers to leave a review. You currently have ${reviewerFollowerCount}.</div>`;
             return;
@@ -2714,8 +2809,11 @@
 
             // Invalidate leaderboard cache so all windows reflect the new review
             Object.keys(lbCache).forEach(k => delete lbCache[k]);
+            Object.keys(tagLbCache).forEach(k => delete tagLbCache[k]);
+            lbRawEvents = null; // force re-fetch of raw events
             // Re-render leaderboard in the background
             loadLbWindow(currentLbWindow);
+            loadTagWindow(currentTagKey);
 
             // Refresh everything
             const reviews = await fetchReviews(currentLookupPubkey);
@@ -2811,10 +2909,12 @@
         return `
             <div class="rc anim" style="animation-delay:${index * 0.04}s" data-rpk="${review.pubkey}">
                 <div class="rc-top">
-                    <img class="rc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
-                    <div class="rc-who">
-                        <div class="rc-name">${shortNpub(npub)}</div>
-                        <div class="rc-npub">${shortNpub(npub)}</div>
+                    <div class="rc-reviewer-link" onclick="window._lbLookup('${review.pubkey}')" role="button" tabindex="0" aria-label="View profile">
+                        <img class="rc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
+                        <div class="rc-who">
+                            <div class="rc-name">${shortNpub(npub)}</div>
+                            <div class="rc-npub">${shortNpub(npub)}</div>
+                        </div>
                     </div>
                     <div class="rc-right">
                         ${starsHtml(review.rating, '1rem')}
@@ -2950,8 +3050,12 @@
             renderHistoryReviews();
 
         } catch (e) {
-            area.innerHTML = '<div class="empty">Error loading profile</div>';
+            area.innerHTML = '<div class="empty" id="histErrMsg" style="transition:opacity 0.4s;">Error loading profile</div>';
             console.error(e);
+            setTimeout(() => {
+                const msg = document.getElementById('histErrMsg');
+                if (msg) { msg.style.opacity = '0'; setTimeout(() => { if (msg.parentNode) msg.innerHTML = ''; }, 400); }
+            }, 3000);
         }
     }
 
@@ -2987,10 +3091,12 @@
                 html += `
                     <div class="rc anim" data-hrpk="${review.pubkey}" data-rid="${review.id}">
                         <div class="rc-top">
-                            <img class="rc-avi hr-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
-                            <div class="rc-who">
-                                <div class="rc-name hr-name">${shortNpub(reviewerNpub)}</div>
-                                <div class="rc-npub">${shortNpub(reviewerNpub)}</div>
+                            <div class="rc-reviewer-link" onclick="window._lbLookup('${review.pubkey}')" role="button" tabindex="0" aria-label="View profile">
+                                <img class="rc-avi hr-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
+                                <div class="rc-who">
+                                    <div class="rc-name hr-name">${shortNpub(reviewerNpub)}</div>
+                                    <div class="rc-npub">${shortNpub(reviewerNpub)}</div>
+                                </div>
                             </div>
                             <div class="rc-right">
                                 ${starsHtml(review.rating, '1rem')}
@@ -3011,10 +3117,12 @@
                 html += `
                     <div class="rc anim" data-hspk="${subjectPubkey || ''}" data-rid="${review.id}">
                         <div class="rc-top">
-                            <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
-                            <div class="rc-who" style="cursor:pointer" onclick="document.getElementById('npubInput').value='${escapeHtml(subjectNpub)}'; switchTab('lookup'); lookupProfile();">
-                                <div class="rc-name hs-name" style="color:var(--text-3);font-style:italic;font-weight:400">Loading...</div>
-                                <div class="rc-npub hs-npub">${shortNpub(subjectNpub)}</div>
+                            <div class="rc-reviewer-link" onclick="window._lbLookup('${subjectPubkey}')" role="button" tabindex="0" aria-label="View profile">
+                                <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
+                                <div class="rc-who">
+                                    <div class="rc-name hs-name" style="color:var(--text-3);font-style:italic;font-weight:400">Loading...</div>
+                                    <div class="rc-npub hs-npub">${shortNpub(subjectNpub)}</div>
+                                </div>
                             </div>
                             <div class="rc-right">
                                 ${starsHtml(review.rating, '1rem')}
@@ -3103,17 +3211,22 @@
      */
     async function fetchRanked(sinceTs) {
         const p = await initPool();
-        const filter = { kinds: [REVIEW_KIND], limit: 1000 };
-        if (sinceTs) filter.since = sinceTs;
 
         try {
-            const events = await p.querySync(RELAYS, filter);
-            if (!events.length) return [];
+            // Fetch all events once — reused across all time window tabs
+            if (!lbRawEvents) {
+                const events = await p.querySync(RELAYS, { kinds: [REVIEW_KIND], limit: 1000 });
+                lbRawEvents = deduplicateReviews(events);
+            }
 
-            const deduped = deduplicateReviews(events);
+            // Apply time window client-side after dedup
+            const inWindow = sinceTs
+                ? lbRawEvents.filter(e => e.created_at >= sinceTs)
+                : lbRawEvents;
+
             const subjects = new Map();
 
-            for (const event of deduped) {
+            for (const event of inWindow) {
                 const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
                 if (!subjectPubkey) continue;
                 const ratingTag = event.tags.find(t => t[0] === 'rating');
@@ -3143,6 +3256,188 @@
             return [];
         }
     }
+
+    /**
+     * Rank profiles by how many reviews include a given category tag.
+     */
+    async function fetchRankedByTag(tagKey) {
+        const p = await initPool();
+        try {
+            const events = await p.querySync(RELAYS, { kinds: [REVIEW_KIND], '#t': [tagKey], limit: 1000 });
+            if (!events.length) return [];
+
+            const deduped = deduplicateReviews(events);
+            const subjects = new Map();
+
+            for (const event of deduped) {
+                const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
+                if (!subjectPubkey) continue;
+                subjects.set(subjectPubkey, (subjects.get(subjectPubkey) || 0) + 1);
+            }
+
+            return Array.from(subjects.entries())
+                .map(([pubkey, count]) => ({ pubkey, avgRating: count.toString(), reviewCount: count }))
+                .sort((a, b) => b.reviewCount - a.reviewCount)
+                .slice(0, 16);
+        } catch (e) {
+            console.warn('fetchRankedByTag error:', e);
+            return [];
+        }
+    }
+
+    // =====================================================================
+    // TAG LEADERBOARD
+    // =====================================================================
+
+    const TAG_CATEGORIES = [
+        { key: 'trade',     label: 'Trustworthy',   pillClass: 'active-trade'     },
+        { key: 'knowledge', label: 'Knowledgeable',  pillClass: 'active-knowledge' },
+        { key: 'helpful',   label: 'Helpful',        pillClass: 'active-helpful'   },
+        { key: 'funny',     label: 'Funny',          pillClass: 'active-funny'     },
+        { key: 'warning',   label: 'Warning',        pillClass: 'active-warning'   },
+    ];
+
+    let currentTagKey = 'trade';
+    let tagPage = 0;
+    const TAG_PAGE_SIZE = 12;
+    const tagLbCache = {};
+
+    async function renderTagLeaderboard() {
+        const area = document.getElementById('tagLbArea');
+        if (!area) return;
+
+        const pillsHtml = TAG_CATEGORIES.map(c => `
+            <button class="tag-lb-pill ${currentTagKey === c.key ? c.pillClass : ''}"
+                id="tagPill-${c.key}"
+                onclick="window._tagSwitch('${c.key}')">${c.label}</button>
+        `).join('');
+
+        area.innerHTML = `
+            <div class="tag-lb-section">
+                <div class="lb-header">
+                    <div class="lb-title">Most tagged</div>
+                </div>
+                <div class="tag-lb-pills">${pillsHtml}</div>
+                <div class="tag-lb-grid" id="tagLbGrid">
+                    <div class="loader anim"><div class="spin"></div>Loading...</div>
+                </div>
+            </div>
+        `;
+
+        await loadTagWindow(currentTagKey);
+    }
+
+    async function loadTagWindow(key) {
+        const grid = document.getElementById('tagLbGrid');
+        if (!grid) return;
+
+        TAG_CATEGORIES.forEach(c => {
+            const pill = document.getElementById(`tagPill-${c.key}`);
+            if (pill) pill.className = `tag-lb-pill${key === c.key ? ' ' + c.pillClass : ''}`;
+        });
+
+        if (tagLbCache[key]) {
+            renderTagGrid(grid, key, tagLbCache[key]);
+            return;
+        }
+
+        grid.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
+        const ranked = await fetchRankedByTag(key);
+        tagLbCache[key] = ranked;
+        renderTagGrid(grid, key, ranked);
+    }
+
+    function renderTagGrid(container, tagKey, ranked) {
+        if (!ranked.length) {
+            container.innerHTML = '<div class="empty anim">No one tagged yet.</div>';
+            return;
+        }
+
+        const cat = TAG_CATEGORIES.find(c => c.key === tagKey);
+        const total = ranked.length;
+        const totalPages = Math.ceil(total / TAG_PAGE_SIZE);
+        tagPage = Math.max(0, Math.min(tagPage, totalPages - 1));
+
+        const start = tagPage * TAG_PAGE_SIZE;
+        const page = ranked.slice(start, start + TAG_PAGE_SIZE);
+
+        const rankLabel = (globalIndex) => {
+            if (globalIndex === 0) return '<div class="fc-rank gold">#1</div>';
+            if (globalIndex === 1) return '<div class="fc-rank silver">#2</div>';
+            if (globalIndex === 2) return '<div class="fc-rank bronze">#3</div>';
+            return `<div class="fc-rank" style="color:var(--text-3)">#${globalIndex + 1}</div>`;
+        };
+
+        const cardsHtml = page.map((entry, i) => {
+            const globalIndex = start + i;
+            const npub = NostrTools.nip19.npubEncode(entry.pubkey);
+            return `
+                <div class="featured-card anim" style="animation-delay:${i * 0.04}s"
+                    onclick="window._lbLookup('${entry.pubkey}');">
+                    ${rankLabel(globalIndex)}
+                    <div class="fc-top">
+                        <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-tfc-pk="${entry.pubkey}-${tagKey}">
+                        <div style="min-width:0;flex:1">
+                            <div class="fc-name" data-tfc-name="${entry.pubkey}-${tagKey}" style="color:var(--text-3);font-weight:400;font-style:italic">Loading...</div>
+                            <div class="fc-npub">${shortNpub(npub)}</div>
+                        </div>
+                    </div>
+                    <div class="fc-bottom">
+                        <div class="fc-score" style="font-size:1.6rem">${entry.reviewCount}</div>
+                        <div class="fc-meta" style="font-size:0.82rem;color:var(--text-2)">
+                            ${cat ? `<span class="rtag rtag-${tagKey}">${cat.label}</span>` : ''}
+                            <br>tag${entry.reviewCount !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const paginationHtml = totalPages > 1 ? `
+            <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:8px 0;margin-top:4px;">
+                <button onclick="window._tagPage(-1)" ${tagPage === 0 ? 'disabled' : ''}
+                    style="background:var(--bg-raised);border:1px solid var(--border);color:${tagPage === 0 ? 'var(--text-3)' : 'var(--text)'};font-family:inherit;font-size:0.85rem;padding:7px 16px;border-radius:8px;cursor:${tagPage === 0 ? 'default' : 'pointer'};transition:all 0.15s;">
+                    ← Prev
+                </button>
+                <span style="font-size:0.8rem;color:var(--text-3)">${tagPage + 1} / ${totalPages}</span>
+                <button onclick="window._tagPage(1)" ${tagPage >= totalPages - 1 ? 'disabled' : ''}
+                    style="background:var(--bg-raised);border:1px solid var(--border);color:${tagPage >= totalPages - 1 ? 'var(--text-3)' : 'var(--text)'};font-family:inherit;font-size:0.85rem;padding:7px 16px;border-radius:8px;cursor:${tagPage >= totalPages - 1 ? 'default' : 'pointer'};transition:all 0.15s;">
+                    Next →
+                </button>
+            </div>
+        ` : '';
+
+        container.innerHTML = cardsHtml + paginationHtml;
+
+        for (const entry of page) {
+            getProfile(entry.pubkey).then(profile => {
+                if (!profile) return;
+                const nameEl = container.querySelector(`[data-tfc-name="${entry.pubkey}-${tagKey}"]`);
+                const imgEl  = container.querySelector(`[data-tfc-pk="${entry.pubkey}-${tagKey}"]`);
+                if (nameEl && (profile.display_name || profile.name)) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
+                    nameEl.style.color = '';
+                    nameEl.style.fontWeight = '';
+                    nameEl.style.fontStyle = '';
+                }
+                if (imgEl && profile.picture) imgEl.src = sanitizeUrl(profile.picture);
+            });
+        }
+    }
+
+    window._tagSwitch = async function(key) {
+        currentTagKey = key;
+        tagPage = 0;
+        await loadTagWindow(key);
+    };
+
+    window._tagPage = function(dir) {
+        tagPage += dir;
+        const grid = document.getElementById('tagLbGrid');
+        if (grid && tagLbCache[currentTagKey]) {
+            renderTagGrid(grid, currentTagKey, tagLbCache[currentTagKey]);
+        }
+    };
 
     /** Top 3 locked, shuffle 3 more from the rest of the pool */
     function buildSelection(ranked, extraCount = 13) {
@@ -3215,6 +3510,7 @@
 
     // Cache ranked results per window so tab switching is instant
     const lbCache = {};
+    let lbRawEvents = null; // raw deduped events, shared across all time windows
 
     async function renderFeatured() {
         const area = document.getElementById('featuredArea');
@@ -3278,6 +3574,8 @@
 
     /** Lookup from leaderboard card — skips eligibility (already on the board) and updates button */
     window._lbLookup = async function(pubkey) {
+        const npub = NostrTools.nip19.npubEncode(pubkey);
+        document.getElementById('npubInput').value = npub;
         switchTab('lookup');
         updateSearchBtn();
         await lookupByPubkey(pubkey);
@@ -3293,6 +3591,7 @@
 
     // Load featured profiles on the front page
     renderFeatured();
+    renderTagLeaderboard();
 
     </script>
 </body>
