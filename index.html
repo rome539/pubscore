@@ -1857,15 +1857,21 @@
         return [];
     }
 
-    /** Fetch follower count — how many people follow this pubkey (kind 3 #p tag) */
+    /** Fetch follower count — how many people follow this pubkey (kind 3 #p tag)
+     *  Optimized: only fetches enough to confirm minimum threshold (20 events).
+     */
     async function fetchFollowerCount(pubkey) {
         const p = await initPool();
         try {
-            const events = await p.querySync(RELAYS, { kinds: [3], '#p': [pubkey], limit: 500 });
+            const events = await Promise.race([
+                p.querySync(RELAYS, { kinds: [3], '#p': [pubkey], limit: 20 }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000))
+            ]);
             // Deduplicate by author (one follow-list per person)
             const authors = new Set(events.map(e => e.pubkey));
             return authors.size;
         } catch (e) {
+            console.warn('fetchFollowerCount error/timeout:', e);
             return 0;
         }
     }
@@ -2423,7 +2429,7 @@
                 currentLookupPubkey = null;
                 document.getElementById('profileArea').innerHTML = `
                     <div class="empty anim" style="padding:40px;text-align:center;">
-                        <div style="font-size:2rem;margin-bottom:12px">🚫</div>
+                        <div style="font-size:1.1rem;margin-bottom:12px;color:var(--red);font-weight:600;">Not eligible</div>
                         <div style="color:var(--text-2);font-size:0.95rem;">${escapeHtml(eligibility.reason)}</div>
                     </div>`;
                 document.getElementById('featuredArea').style.display = '';
@@ -2436,6 +2442,7 @@
             renderProfileCard(pubkey, npub, profile, follows, reviews);
             await renderReviewForm();
             renderReviews(reviews);
+            updateSearchBtn();
         } catch (e) {
             console.error(e);
             toast('Error: ' + e.message, 'error');
@@ -3148,7 +3155,7 @@
             const npub = NostrTools.nip19.npubEncode(entry.pubkey);
             return `
                 <div class="featured-card anim" style="animation-delay:${i * 0.05}s"
-                    onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; switchTab('lookup'); lookupProfile();">
+                    onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; window._lbLookup('${entry.pubkey}');">
                     ${rankLabel(i)}
                     <div class="fc-top">
                         <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-fc-pk="${entry.pubkey}">
@@ -3246,6 +3253,14 @@
         const grid = document.getElementById('lbGrid');
         if (!grid || !lbCache[currentLbWindow]) return;
         renderLbGrid(grid, lbCache[currentLbWindow]);
+    };
+
+    /** Lookup from leaderboard card — skips eligibility (already on the board) and updates button */
+    window._lbLookup = async function(pubkey) {
+        switchTab('lookup');
+        updateSearchBtn();
+        await lookupByPubkey(pubkey);
+        updateSearchBtn();
     };
 
     // =====================================================================
