@@ -2616,6 +2616,14 @@
             return;
         }
 
+        // Must have at least 20 followers to write a review (anti-bot gate)
+        const MIN_REVIEWER_FOLLOWERS = 20;
+        const reviewerFollowerCount = await fetchFollowerCount(currentUser.pubkey);
+        if (reviewerFollowerCount < MIN_REVIEWER_FOLLOWERS) {
+            area.innerHTML = `<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">You need at least ${MIN_REVIEWER_FOLLOWERS} followers to leave a review. You currently have ${reviewerFollowerCount}.</div>`;
+            return;
+        }
+
         // Check for existing review (to show "update" mode)
         const existing = currentReviews.find(r => r.pubkey === currentUser.pubkey);
         const existingContent = existing ? escapeHtml(existing.content) : '';
@@ -2687,6 +2695,10 @@
         const content = document.getElementById('reviewContent').value.trim();
         if (!content) return toast('Write a review', 'error');
         if (content.length > 2000) return toast('Too long (2000 max)', 'error');
+
+        // Anti-bot: verify reviewer has at least 20 followers before publishing
+        const reviewerFollowers = await fetchFollowerCount(currentUser.pubkey);
+        if (reviewerFollowers < 20) return toast('You need at least 20 followers to review', 'error');
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
