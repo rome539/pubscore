@@ -2082,6 +2082,10 @@
         // Show featured area if returning to lookup with nothing loaded
         if (tab === 'lookup' && !currentLookupPubkey) {
             document.getElementById('featuredArea').style.display = '';
+
+            document.getElementById('profileArea').innerHTML = '';
+            document.getElementById('reviewFormArea').innerHTML = '';
+            document.getElementById('reviewsArea').innerHTML = '';   
         }
     };
 
