@@ -2627,7 +2627,7 @@
 
         showConfirmModal({
             title: 'Share on Nostr',
-            body: `This will post to your Nostr feed:\n\n"${content.substring(0, 120)}..."`,
+            body: `This will post to your Nostr feed:\n\n${content}`,
             confirmLabel: 'Post it',
             style: 'positive',
             onConfirm: async () => {
