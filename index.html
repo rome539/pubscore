@@ -344,6 +344,46 @@
         }
 
         /* ================================================================
+           ELIGIBILITY BANNER
+           ================================================================ */
+        .eligibility-banner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            background: var(--red-bg);
+            border: 1px solid var(--red-border);
+            border-radius: var(--r);
+            animation: fadeUp 0.2s ease-out both;
+            transition: opacity 0.4s;
+        }
+
+        .eligibility-banner-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: var(--red);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .eligibility-banner-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--red);
+            margin-bottom: 2px;
+        }
+
+        .eligibility-banner-body {
+            color: var(--text-2);
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+
+        /* ================================================================
            PROFILE CARD
            ================================================================ */
         .profile-card {
@@ -1652,9 +1692,6 @@
         }
 
         /* ================================================================
-           RESPONSIVE
-           ================================================================ */
-        /* ================================================================
            RESPONSIVE — Tablet
            ================================================================ */
         @media (max-width: 768px) {
@@ -1844,6 +1881,7 @@
                 <input type="text" id="npubInput" placeholder="Search by npub, hex pubkey, or username" autocomplete="off" spellcheck="false">
                 <button id="searchBtn" onclick="window._searchBtnClick()">Look up</button>
             </div>
+            <div id="eligibilityBanner"></div>
             <div id="featuredArea"></div>
             <div id="tagLbArea"></div>
             <div id="profileArea"></div>
@@ -2834,22 +2872,12 @@
     // PROFILE LOOKUP — supports npub, hex, and username search
     // =====================================================================
 
-    /**
-     * Search for profiles by username.
-     *
-     * Strategy (multi-layered):
-     * 1. Check the local profileCache first (instant)
-     * 2. Try NIP-50 search on relays that support it (relay.mostr.pub)
-     * 3. Try NIP-05 lookup if the query looks like user@domain
-     * 4. Fall back to fetching a batch of recent kind 0s and filtering client-side
-     */
     async function searchProfiles(query) {
         const q = query.toLowerCase().trim();
         if (!q) return [];
 
-        const results = new Map(); // pubkey -> { pubkey, profile, score }
+        const results = new Map();
 
-        /** Score a profile against the query — NIP-05 verified profiles rank higher */
         function matchProfile(pk, profile) {
             const displayName = (profile.display_name || '').toLowerCase();
             const name = (profile.name || '').toLowerCase();
@@ -2862,10 +2890,8 @@
             else if (displayName.startsWith(q) || name.startsWith(q)) score = 4;
             else if (either.includes(q) || nip05.includes(q)) score = 2;
 
-            // Boost verified (NIP-05) profiles at every tier
             if (score > 0 && hasNip05) score += 1;
 
-            // Extra boost if NIP-05 local part matches query exactly (e.g. "jack" -> jack@cash.app)
             const nip05Local = nip05.split('@')[0];
             if (nip05Local === q) score += 2;
 
@@ -2877,12 +2903,10 @@
             }
         }
 
-        // 1. Search the local profileCache first (instant)
         for (const [pk, profile] of Object.entries(profileCache)) {
             matchProfile(pk, profile);
         }
 
-        // 2. NIP-50 search on relay.mostr.pub (supports search filter)
         const NIP50_RELAYS = ['wss://relay.mostr.pub', 'wss://nostr.wine'];
         const p = await initPool();
         try {
@@ -2895,12 +2919,8 @@
                 try {
                     const profile = JSON.parse(event.content);
                     profileCache[event.pubkey] = profile;
-                    // Always include NIP-50 results — relay already filtered by relevance
-                    // Try to score by name, but if no name match still include with score 1
-                    const existing = results.get(event.pubkey);
                     matchProfile(event.pubkey, profile);
                     if (!results.has(event.pubkey)) {
-                        // No name matched but relay said it's relevant — include it
                         results.set(event.pubkey, { pubkey: event.pubkey, profile, score: 1 });
                     }
                 } catch (e) {}
@@ -2909,17 +2929,13 @@
             console.warn('NIP-50 search error:', e);
         }
 
-        // 3. NIP-05 lookup if query looks like user@domain or just a username
-        //    Try querying nostr.directory and nostr.band lookup endpoints
         const nip05Candidates = [];
         if (q.includes('@')) {
             nip05Candidates.push(q);
         } else {
-            // Try common domains for bare username
             nip05Candidates.push(`${q}@nostr.com`, `${q}@iris.to`, `${q}@snort.social`, `${q}@primal.net`);
         }
 
-        // Run NIP-05 lookups in parallel with a short timeout
         await Promise.allSettled(nip05Candidates.map(async nip05addr => {
             try {
                 const [user, domain] = nip05addr.split('@');
@@ -2939,8 +2955,6 @@
             } catch (e) {}
         }));
 
-        // 4. Fallback: fetch recent kind-0 batch and filter client-side
-        //    Only do this if NIP-50 returned nothing
         if (results.size === 0) {
             try {
                 const events = await p.querySync(RELAYS, {
@@ -2960,12 +2974,7 @@
             }
         }
 
-        // Sort by score (NIP-05 verified profiles naturally rank higher due to scoring boost)
         const sorted = Array.from(results.values()).sort((a, b) => b.score - a.score);
-
-        // Eligibility is enforced on actual lookup — don't slow search down with extra relay queries
-        // Prefer NIP-05 verified profiles — fill up to 8 slots with verified first,
-        // then pad with unverified only if fewer than 4 verified results exist
         const verified = sorted.filter(r => r.profile && r.profile.nip05);
         const unverified = sorted.filter(r => !r.profile || !r.profile.nip05);
         return verified.length >= 4 ? verified.slice(0, 8) : [...verified, ...unverified].slice(0, 8);
@@ -2977,6 +2986,7 @@
         currentReviews = [];
         currentPage = 0;
         document.getElementById('npubInput').value = '';
+        document.getElementById('eligibilityBanner').innerHTML = '';
         document.getElementById('profileArea').innerHTML = '';
         document.getElementById('reviewFormArea').innerHTML = '';
         document.getElementById('reviewsArea').innerHTML = '';
@@ -3053,7 +3063,7 @@
                 getProfile(r.pubkey).then(profile => {
                     if (!profile) return;
                     const card = el.querySelector(`[data-pk="${r.pubkey}"]`);
-                    if (!card) return; // dropdown may have closed
+                    if (!card) return;
 
                     const nameEl = card.querySelector('.sr-name');
                     const imgEl = card.querySelector('.sr-img');
@@ -3082,6 +3092,9 @@
         currentLookupPubkey = pubkey;
         currentPage = 0;
 
+        // Clear any previous eligibility banner
+        document.getElementById('eligibilityBanner').innerHTML = '';
+
         // Hide featured section
         document.getElementById('featuredArea').style.display = 'none'; document.getElementById('tagLbArea').style.display = 'none';
 
@@ -3101,20 +3114,31 @@
             const eligibility = await checkProfileEligibility(pubkey, follows);
             if (!eligibility.ok) {
                 currentLookupPubkey = null;
-                const profileArea = document.getElementById('profileArea');
-                profileArea.innerHTML = `
-                    <div class="empty anim" id="eligibilityMsg" style="padding:40px;text-align:center;transition:opacity 0.4s;">
-                        <div style="font-size:1.1rem;margin-bottom:12px;color:var(--red);font-weight:600;">Not eligible</div>
-                        <div style="color:var(--text-2);font-size:0.95rem;">${escapeHtml(eligibility.reason)}</div>
+                document.getElementById('profileArea').innerHTML = '';
+                document.getElementById('featuredArea').style.display = '';
+                document.getElementById('tagLbArea').style.display = '';
+
+                // Show banner at the top, above the featured sections
+                const banner = document.getElementById('eligibilityBanner');
+                banner.innerHTML = `
+                    <div id="eligibilityMsg" class="eligibility-banner">
+                        <svg class="eligibility-banner-icon" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <div>
+                            <div class="eligibility-banner-title">Not eligible</div>
+                            <div class="eligibility-banner-body">${escapeHtml(eligibility.reason)}</div>
+                        </div>
                     </div>`;
-                document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
                 setTimeout(() => {
                     const msg = document.getElementById('eligibilityMsg');
                     if (msg) {
                         msg.style.opacity = '0';
-                        setTimeout(() => { if (msg.parentNode) msg.parentNode.innerHTML = ''; }, 400);
+                        setTimeout(() => { banner.innerHTML = ''; }, 400);
                     }
-                }, 3000);
+                }, 4000);
                 return;
             }
 
@@ -3162,18 +3186,15 @@
         const results = await searchProfiles(raw);
 
         if (results.length === 1) {
-            // Single result — go straight to it
             const npub = NostrTools.nip19.npubEncode(results[0].pubkey);
             document.getElementById('npubInput').value = npub;
             document.getElementById('profileArea').innerHTML = '';
             await lookupByPubkey(results[0].pubkey);
         } else if (results.length > 1) {
-            // Multiple results — show dropdown
             document.getElementById('profileArea').innerHTML = '';
             document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
             showSearchResults(results, raw);
         } else {
-            // No results
             document.getElementById('profileArea').innerHTML = '';
             document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
             toast('No profiles found for "' + raw + '"', 'error');
@@ -3239,7 +3260,6 @@
         const nip05 = sanitizeNip05(profile.nip05);
         const followCount = follows.length;
 
-        // Calculate average rating
         let avgRating = 0;
         let totalReviews = reviews.length;
         if (totalReviews > 0) {
@@ -3277,7 +3297,6 @@
             </div>
         `;
 
-        // Update the browser URL so the link is always shareable
         const url = new URL(window.location);
         url.searchParams.set('npub', npub);
         history.replaceState(null, '', url);
@@ -3298,24 +3317,19 @@
             return;
         }
 
-        // View-only users can't write reviews
         if (!canSign()) {
             area.innerHTML = '<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">Sign in with an extension or nsec to leave reviews</div>';
             return;
         }
 
-        // Snapshot the pubkey we're rendering for — if the user navigates away
-        // during any await below, we detect the stale render and abort.
         const renderingFor = currentLookupPubkey;
         const isStale = () => currentLookupPubkey !== renderingFor;
 
-        // Can't review yourself
         if (currentUser.pubkey === currentLookupPubkey) {
             area.innerHTML = '<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">You can\'t review yourself</div>';
             return;
         }
 
-        // Must have at least 20 followers to write a review (anti-bot gate)
         const MIN_REVIEWER_FOLLOWERS = 20;
         const reviewerFollowerCount = await fetchFollowerCount(currentUser.pubkey);
         if (isStale()) return;
@@ -3324,7 +3338,6 @@
             return;
         }
 
-        // Check for existing review (to show "update" mode)
         const existing = currentReviews.find(r => r.pubkey === currentUser.pubkey);
         const existingContent = existing ? escapeHtml(existing.content) : '';
         const existingRating = existing ? parseInt(existing.tags.find(t => t[0] === 'rating')?.[1] || '0') : 0;
@@ -3369,7 +3382,6 @@
         `;
     }
 
-    /** Set star rating */
     window._setRating = function(rating) {
         selectedRating = rating;
         document.querySelectorAll('#starInput button').forEach(btn => {
@@ -3377,7 +3389,6 @@
         });
     };
 
-    /** Toggle a category tag */
     window._toggleCat = function(category, element) {
         if (selectedCategories.has(category)) {
             selectedCategories.delete(category);
@@ -3388,7 +3399,6 @@
         }
     };
 
-    /** Submit or update a review */
     window._submitReview = async function() {
         if (!currentUser) return toast('Sign in first', 'error');
         if (!canSign()) return toast('View-only mode — sign in with extension or nsec to review', 'error');
@@ -3398,7 +3408,6 @@
         if (!content) return toast('Write a review', 'error');
         if (content.length > 2000) return toast('Too long (2000 max)', 'error');
 
-        // Anti-bot: verify reviewer has at least 20 followers before publishing
         const reviewerFollowers = await fetchFollowerCount(currentUser.pubkey);
         if (reviewerFollowers < 20) return toast('You need at least 20 followers to review', 'error');
 
@@ -3410,15 +3419,12 @@
             await publishReview(currentLookupPubkey, selectedRating, content, Array.from(selectedCategories));
             toast('Review published', 'success');
 
-            // Invalidate leaderboard cache so all windows reflect the new review
             Object.keys(lbCache).forEach(k => delete lbCache[k]);
             Object.keys(tagLbCache).forEach(k => delete tagLbCache[k]);
-            lbRawEvents = null; // force re-fetch of raw events
-            // Re-render leaderboard in the background
+            lbRawEvents = null;
             loadLbWindow(currentLbWindow);
             loadTagWindow(currentTagKey);
 
-            // Refresh everything
             const reviews = await fetchReviews(currentLookupPubkey);
             currentReviews = reviews;
             renderReviews(reviews);
@@ -3450,7 +3456,6 @@
         }
 
         const sorted = sortReviews(reviews, currentSort);
-        const totalPages = Math.ceil(sorted.length / REVIEWS_PER_PAGE);
         const showCount = Math.min((currentPage + 1) * REVIEWS_PER_PAGE, sorted.length);
         const visible = sorted.slice(0, showCount);
         const hasMore = showCount < sorted.length;
@@ -3473,7 +3478,6 @@
             ` : ''}
         `;
 
-        // Lazy-load reviewer profile names and avatars
         visible.forEach(async (review) => {
             const profile = await getProfile(review.pubkey);
             const card = document.querySelector(`[data-rpk="${review.pubkey}"]`);
@@ -3490,11 +3494,9 @@
         });
     }
 
-    /** Show more reviews (next page) */
     window._showMore = function() {
         currentPage++;
         renderReviews(currentReviews);
-        // Scroll the new content into view smoothly
         const cards = document.querySelectorAll('.rc');
         if (cards.length > 0) {
             const target = cards[cards.length - Math.min(REVIEWS_PER_PAGE, cards.length)];
@@ -3502,7 +3504,6 @@
         }
     };
 
-    /** Render a single review card */
     function renderCard(review, index) {
         const npub = NostrTools.nip19.npubEncode(review.pubkey);
         const content = escapeHtml(capLength(review.content, 1000));
@@ -3533,14 +3534,12 @@
         `;
     }
 
-    /** Change sort order */
     window._sort = function(sortBy) {
         currentSort = sortBy;
         currentPage = 0;
         renderReviews(currentReviews);
     };
 
-    /** Delete a review */
     window._del = async function(eventId, context) {
         if (!currentUser) return toast('Sign in first', 'error');
         if (!canSign()) return toast('View-only mode — sign in with extension or nsec to delete', 'error');
@@ -3555,7 +3554,6 @@
                     toast('Deletion request sent', 'success');
 
                     if (context === 'lookup' && currentLookupPubkey) {
-                        // Remove from local array and re-render
                         currentReviews = currentReviews.filter(r => r.id !== eventId);
                         renderReviews(currentReviews);
 
@@ -3583,7 +3581,7 @@
     // MY PROFILE & REVIEWS HISTORY
     // =====================================================================
 
-    let historyTab = 'received'; // 'received' | 'written'
+    let historyTab = 'received';
 
     async function loadHistory() {
         const area = document.getElementById('historyArea');
@@ -3596,7 +3594,6 @@
         area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading your profile...</div>';
 
         try {
-            // Use cached profile if already loaded, otherwise fetch
             const profilePromise = (currentUser.profile && (currentUser.profile.name || currentUser.profile.display_name))
                 ? Promise.resolve(currentUser.profile)
                 : fetchProfile(currentUser.pubkey).then(p => { currentUser.profile = p; return p; });
@@ -3614,7 +3611,6 @@
             const { preview: bio } = sanitizeBio(profile.about || '', 200);
             const nip05 = sanitizeNip05(profile.nip05);
 
-            // Calculate score from received reviews
             const parsed = receivedReviews.map(parseReview);
             const avgRating = parsed.length
                 ? (parsed.reduce((s, r) => s + r.rating, 0) / parsed.length).toFixed(1)
@@ -3657,7 +3653,6 @@
                 <div id="histReviewsArea"></div>
             `;
 
-            // Store for tab switching
             window._histData = { receivedReviews, writtenReviews };
             renderHistoryReviews();
 
@@ -3696,7 +3691,6 @@
         let html = '';
         for (const review of parsed) {
             if (isReceived) {
-                // Show who wrote the review (reviewer = review.pubkey)
                 const reviewerNpub = NostrTools.nip19.npubEncode(review.pubkey);
                 const content = escapeHtml(capLength(review.content, 500));
                 const categories = review.categories.map(catTag).join('');
@@ -3720,7 +3714,6 @@
                     </div>
                 `;
             } else {
-                // Show who was reviewed (subject = p tag)
                 const pTag = review.tags.find(t => t[0] === 'p');
                 const subjectPubkey = pTag ? pTag[1] : null;
                 const subjectNpub = subjectPubkey ? NostrTools.nip19.npubEncode(subjectPubkey) : 'Unknown';
@@ -3753,7 +3746,6 @@
 
         area.innerHTML = html;
 
-        // Lazy-load profile data for all cards
         if (isReceived) {
             for (const review of parsed) {
                 getProfile(review.pubkey).then(profile => {
@@ -3796,15 +3788,6 @@
     }
 
     // =====================================================================
-    // FEATURED — Top Rated Profiles (front page)
-    // =====================================================================
-
-    /**
-     * Fetch recent review events from relays (not filtered by subject),
-     * aggregate by subject pubkey, calculate average rating,
-     * and return the top rated profiles.
-     */
-    // =====================================================================
     // LEADERBOARDS
     // =====================================================================
 
@@ -3817,17 +3800,10 @@
 
     let currentLbWindow = 'alltime';
 
-    /**
-     * Rank profiles by average rating within a time window.
-     * sinceTs: unix timestamp (null = all time)
-     */
     async function fetchRanked(sinceTs) {
         const p = await initPool();
 
         try {
-            // Fetch all events once — query each relay individually and merge
-            // to ensure we discover ALL subjects (global querySync can miss some
-            // due to NIP-33 replaceable event handling across relays)
             if (!lbRawEvents) {
                 const perRelayResults = await Promise.allSettled(
                     RELAYS.map(r => p.querySync([r], { kinds: [REVIEW_KIND], limit: 1000 }))
@@ -3841,26 +3817,20 @@
                 lbRawEvents = deduplicateReviews(allEvents);
             }
 
-            // Apply time window client-side after dedup
             const inWindow = sinceTs
                 ? lbRawEvents.filter(e => e.created_at >= sinceTs)
                 : lbRawEvents;
 
-            // Collect unique subjects from p tags
             const subjectSet = new Set();
             for (const event of inWindow) {
                 const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
                 if (subjectPubkey) subjectSet.add(subjectPubkey);
             }
 
-            // Also add every reviewer's pubkey as a potential subject —
-            // they may have been reviewed by others but the global query
-            // didn't return those review events
             for (const event of inWindow) {
                 if (event.pubkey) subjectSet.add(event.pubkey);
             }
 
-            // Fetch actual reviews per subject with concurrency limit
             const subjectArr = Array.from(subjectSet);
             const perSubjectResults = await throttledAll(
                 subjectArr.map((pk) => async () => {
@@ -3905,9 +3875,6 @@
         }
     }
 
-    /**
-     * Rank profiles by how many reviews include a given category tag.
-     */
     async function fetchRankedByTag(tagKey) {
         const p = await initPool();
         try {
@@ -3923,11 +3890,9 @@
                 subjects.set(subjectPubkey, (subjects.get(subjectPubkey) || 0) + 1);
             }
 
-            // Collect all tagged profiles and shuffle randomly
             const all = Array.from(subjects.entries())
                 .map(([pubkey, count]) => ({ pubkey, reviewCount: count }));
 
-            // Fisher-Yates shuffle
             for (let i = all.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [all[i], all[j]] = [all[j], all[i]];
@@ -4050,12 +4015,10 @@
 
     window._tagSwitch = async function(key) {
         currentTagKey = key;
-        // Clear cache so profiles are re-shuffled
         delete tagLbCache[key];
         await loadTagWindow(key);
     };
 
-    // Shuffle re-fetches fresh tagged data for the current tag
     window._tagShuffle = async function() {
         const grid = document.getElementById('tagLbGrid');
         if (!grid) return;
@@ -4063,11 +4026,9 @@
         await loadTagWindow(currentTagKey);
     };
 
-    /** Top 3 locked, shuffle 3 more from the rest of the pool */
     function buildSelection(ranked, extraCount = 13) {
         const top3 = ranked.slice(0, 3);
         const rest = ranked.slice(3);
-        // Fisher-Yates shuffle the remainder
         for (let i = rest.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [rest[i], rest[j]] = [rest[j], rest[i]];
@@ -4075,7 +4036,6 @@
         return [...top3, ...rest.slice(0, extraCount)];
     }
 
-    /** Render a leaderboard grid into `container` */
     function renderLbGrid(container, ranked) {
         if (!ranked.length) {
             container.innerHTML = '<div class="empty anim">No reviews in this period yet.</div>';
@@ -4115,7 +4075,6 @@
             `;
         }).join('');
 
-        // Lazy-load names and avatars
         for (const entry of selection) {
             getProfile(entry.pubkey).then(profile => {
                 if (!profile) return;
@@ -4132,9 +4091,8 @@
         }
     }
 
-    // Cache ranked results per window so tab switching is instant
     const lbCache = {};
-    let lbRawEvents = null; // raw deduped events, shared across all time windows
+    let lbRawEvents = null;
 
     async function renderFeatured() {
         const area = document.getElementById('featuredArea');
@@ -4164,12 +4122,10 @@
         const grid = document.getElementById('lbGrid');
         if (!grid) return;
 
-        // Update tab active state
         document.querySelectorAll('.lb-tab').forEach(b => {
             b.classList.toggle('active', b.textContent.trim() === LB_WINDOWS.find(w => w.key === key)?.label);
         });
 
-        // Use cache if available
         if (lbCache[key]) {
             renderLbGrid(grid, lbCache[key]);
             return;
@@ -4189,7 +4145,6 @@
         await loadLbWindow(key);
     };
 
-    // Shuffle clears cache and re-fetches fresh data
     window._lbShuffle = async function() {
         const grid = document.getElementById('lbGrid');
         if (!grid) return;
@@ -4197,7 +4152,6 @@
         await loadLbWindow(currentLbWindow);
     };
 
-    /** Lookup from leaderboard card — skips eligibility (already on the board) and updates button */
     window._lbLookup = async function(pubkey) {
         const npub = NostrTools.nip19.npubEncode(pubkey);
         document.getElementById('npubInput').value = npub;
@@ -4214,7 +4168,6 @@
     await initPool();
     console.log('PubScore initialized');
 
-    // Deep link: auto-lookup if ?npub= is in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const deepNpub = urlParams.get('npub');
 
@@ -4227,12 +4180,10 @@
             updateSearchBtn();
         } catch (e) {
             console.warn('Invalid deep link npub:', e);
-            // Fall back to showing the home page
             await renderFeatured();
             renderTagLeaderboard();
         }
     } else {
-        // No deep link — load featured profiles on the front page
         await renderFeatured();
         renderTagLeaderboard();
     }
