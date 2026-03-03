@@ -3867,10 +3867,17 @@
                 subjects.set(subjectPubkey, (subjects.get(subjectPubkey) || 0) + 1);
             }
 
-            return Array.from(subjects.entries())
-                .map(([pubkey, count]) => ({ pubkey, avgRating: count.toString(), reviewCount: count }))
-                .sort((a, b) => b.reviewCount - a.reviewCount)
-                .slice(0, 16);
+            // Collect all tagged profiles and shuffle randomly
+            const all = Array.from(subjects.entries())
+                .map(([pubkey, count]) => ({ pubkey, reviewCount: count }));
+
+            // Fisher-Yates shuffle
+            for (let i = all.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [all[i], all[j]] = [all[j], all[i]];
+            }
+
+            return all.slice(0, 8);
         } catch (e) {
             console.warn('fetchRankedByTag error:', e);
             return [];
@@ -3890,8 +3897,6 @@
     ];
 
     let currentTagKey = 'trade';
-    let tagPage = 0;
-    const TAG_PAGE_SIZE = 12;
     const tagLbCache = {};
 
     async function renderTagLeaderboard() {
@@ -3907,7 +3912,7 @@
         area.innerHTML = `
             <div class="tag-lb-section">
                 <div class="lb-header">
-                    <div class="lb-title">Most tagged</div>
+                    <div class="lb-title">Tagged</div>
                 </div>
                 <div class="tag-lb-pills">${pillsHtml}</div>
                 <div class="tag-lb-grid" id="tagLbGrid">
@@ -3946,27 +3951,12 @@
         }
 
         const cat = TAG_CATEGORIES.find(c => c.key === tagKey);
-        const total = ranked.length;
-        const totalPages = Math.ceil(total / TAG_PAGE_SIZE);
-        tagPage = Math.max(0, Math.min(tagPage, totalPages - 1));
 
-        const start = tagPage * TAG_PAGE_SIZE;
-        const page = ranked.slice(start, start + TAG_PAGE_SIZE);
-
-        const rankLabel = (globalIndex) => {
-            if (globalIndex === 0) return '<div class="fc-rank gold">#1</div>';
-            if (globalIndex === 1) return '<div class="fc-rank silver">#2</div>';
-            if (globalIndex === 2) return '<div class="fc-rank bronze">#3</div>';
-            return `<div class="fc-rank" style="color:var(--text-3)">#${globalIndex + 1}</div>`;
-        };
-
-        const cardsHtml = page.map((entry, i) => {
-            const globalIndex = start + i;
+        const cardsHtml = ranked.map((entry, i) => {
             const npub = NostrTools.nip19.npubEncode(entry.pubkey);
             return `
                 <div class="featured-card anim" style="animation-delay:${i * 0.04}s"
                     onclick="window._lbLookup('${entry.pubkey}');">
-                    ${rankLabel(globalIndex)}
                     <div class="fc-top">
                         <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-tfc-pk="${entry.pubkey}-${tagKey}">
                         <div style="min-width:0;flex:1">
@@ -3975,33 +3965,17 @@
                         </div>
                     </div>
                     <div class="fc-bottom">
-                        <div class="fc-score" style="font-size:1.6rem">${entry.reviewCount}</div>
                         <div class="fc-meta" style="font-size:0.82rem;color:var(--text-2)">
                             ${cat ? `<span class="rtag rtag-${tagKey}">${cat.label}</span>` : ''}
-                            <br>tag${entry.reviewCount !== 1 ? 's' : ''}
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
 
-        const paginationHtml = totalPages > 1 ? `
-            <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:8px 0;margin-top:4px;">
-                <button onclick="window._tagPage(-1)" ${tagPage === 0 ? 'disabled' : ''}
-                    style="background:var(--bg-raised);border:1px solid var(--border);color:${tagPage === 0 ? 'var(--text-3)' : 'var(--text)'};font-family:inherit;font-size:0.85rem;padding:7px 16px;border-radius:8px;cursor:${tagPage === 0 ? 'default' : 'pointer'};transition:all 0.15s;">
-                    ← Prev
-                </button>
-                <span style="font-size:0.8rem;color:var(--text-3)">${tagPage + 1} / ${totalPages}</span>
-                <button onclick="window._tagPage(1)" ${tagPage >= totalPages - 1 ? 'disabled' : ''}
-                    style="background:var(--bg-raised);border:1px solid var(--border);color:${tagPage >= totalPages - 1 ? 'var(--text-3)' : 'var(--text)'};font-family:inherit;font-size:0.85rem;padding:7px 16px;border-radius:8px;cursor:${tagPage >= totalPages - 1 ? 'default' : 'pointer'};transition:all 0.15s;">
-                    Next →
-                </button>
-            </div>
-        ` : '';
+        container.innerHTML = cardsHtml;
 
-        container.innerHTML = cardsHtml + paginationHtml;
-
-        for (const entry of page) {
+        for (const entry of ranked) {
             getProfile(entry.pubkey).then(profile => {
                 if (!profile) return;
                 const nameEl = container.querySelector(`[data-tfc-name="${entry.pubkey}-${tagKey}"]`);
@@ -4019,16 +3993,9 @@
 
     window._tagSwitch = async function(key) {
         currentTagKey = key;
-        tagPage = 0;
+        // Clear cache so profiles are re-shuffled
+        delete tagLbCache[key];
         await loadTagWindow(key);
-    };
-
-    window._tagPage = function(dir) {
-        tagPage += dir;
-        const grid = document.getElementById('tagLbGrid');
-        if (grid && tagLbCache[currentTagKey]) {
-            renderTagGrid(grid, currentTagKey, tagLbCache[currentTagKey]);
-        }
     };
 
     /** Top 3 locked, shuffle 3 more from the rest of the pool */
