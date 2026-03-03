@@ -4296,20 +4296,53 @@
 
     let currentLbWindow = 'alltime';
 
+    // Paginated relay fetch — keeps requesting older events until a page
+    // comes back smaller than the page size, meaning we've exhausted the relay.
+    const RELAY_PAGE_SIZE = 500;
+    const MAX_PAGES = 20; // safety cap: 10 000 events max per relay
+
+    async function paginatedFetch(pool, relays, baseFilter) {
+        const allEvents = [];
+
+        for (const relay of relays) {
+            let until = undefined;
+            for (let page = 0; page < MAX_PAGES; page++) {
+                const filter = { ...baseFilter, limit: RELAY_PAGE_SIZE };
+                if (until !== undefined) filter.until = until;
+
+                let batch;
+                try {
+                    batch = await pool.querySync([relay], filter);
+                } catch (e) {
+                    console.warn(`paginatedFetch relay ${relay} page ${page} error:`, e);
+                    break;
+                }
+
+                if (!batch || !batch.length) break;
+
+                allEvents.push(...batch);
+
+                // Find oldest timestamp in this batch for the next cursor
+                let oldest = Infinity;
+                for (const ev of batch) {
+                    if (ev.created_at < oldest) oldest = ev.created_at;
+                }
+                until = oldest - 1;
+
+                // Partial page means we've drained this relay
+                if (batch.length < RELAY_PAGE_SIZE) break;
+            }
+        }
+
+        return allEvents;
+    }
+
     async function fetchRanked(sinceTs) {
         const p = await initPool();
 
         try {
             if (!lbRawEvents) {
-                const perRelayResults = await Promise.allSettled(
-                    RELAYS.map(r => p.querySync([r], { kinds: [REVIEW_KIND], limit: 1000 }))
-                );
-                const allEvents = [];
-                for (const result of perRelayResults) {
-                    if (result.status === 'fulfilled' && result.value) {
-                        allEvents.push(...result.value);
-                    }
-                }
+                const allEvents = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND] });
                 lbRawEvents = deduplicateReviews(allEvents);
             }
 
@@ -4317,54 +4350,34 @@
                 ? lbRawEvents.filter(e => e.created_at >= sinceTs)
                 : lbRawEvents;
 
-            const subjectSet = new Set();
-            for (const event of inWindow) {
-                const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
-                if (subjectPubkey) subjectSet.add(subjectPubkey);
+            // Aggregate ratings locally — no per-pubkey relay queries
+            const subjects = new Map();
+            for (const ev of inWindow) {
+                const subjectPubkey = ev.tags.find(t => t[0] === 'p')?.[1];
+                if (!subjectPubkey) continue;
+                const ratingTag = ev.tags.find(t => t[0] === 'rating');
+                const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
+                if (rating < 1 || rating > 5) continue;
+
+                if (!subjects.has(subjectPubkey)) {
+                    subjects.set(subjectPubkey, { total: 0, count: 0 });
+                }
+                const agg = subjects.get(subjectPubkey);
+                agg.total += rating;
+                agg.count++;
             }
 
-            for (const event of inWindow) {
-                if (event.pubkey) subjectSet.add(event.pubkey);
-            }
-
-            const subjectArr = Array.from(subjectSet);
-            const perSubjectResults = await throttledAll(
-                subjectArr.map((pk) => async () => {
-                    const evts = await p.querySync(RELAYS, {
-                        kinds: [REVIEW_KIND],
-                        '#p': [pk]
-                    });
-                    const deduped = deduplicateReviews(evts);
-                    const filtered = sinceTs
-                        ? deduped.filter(e => e.created_at >= sinceTs)
-                        : deduped;
-                    let total = 0, count = 0;
-                    for (const ev of filtered) {
-                        const ratingTag = ev.tags.find(t => t[0] === 'rating');
-                        const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
-                        if (rating >= 1 && rating <= 5) {
-                            total += rating;
-                            count++;
-                        }
-                    }
-                    return { pubkey: pk, total, count };
-                }),
-                3
-            );
-
-            return perSubjectResults
-                .filter(r => r.status === 'fulfilled' && r.value.count >= 1)
-                .map(r => r.value)
-                .map(d => ({
-                    pubkey: d.pubkey,
+            return Array.from(subjects.entries())
+                .filter(([, d]) => d.count >= 1)
+                .map(([pubkey, d]) => ({
+                    pubkey,
                     avgRating: (d.total / d.count).toFixed(1),
                     reviewCount: d.count
                 }))
                 .sort((a, b) => {
                     const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
                     return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
-                })
-                .slice(0, 16);
+                });
         } catch (e) {
             console.warn('fetchRanked error:', e);
             return [];
@@ -4374,7 +4387,7 @@
     async function fetchRankedByTag(tagKey) {
         const p = await initPool();
         try {
-            const events = await p.querySync(RELAYS, { kinds: [REVIEW_KIND], '#t': [tagKey], limit: 1000 });
+            const events = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND], '#t': [tagKey] });
             if (!events.length) return [];
 
             const deduped = deduplicateReviews(events);
@@ -4394,7 +4407,7 @@
                 [all[i], all[j]] = [all[j], all[i]];
             }
 
-            return all.slice(0, 8);
+            return all;
         } catch (e) {
             console.warn('fetchRankedByTag error:', e);
             return [];
@@ -4468,9 +4481,10 @@
             return;
         }
 
+        const display = ranked.slice(0, 8);
         const cat = TAG_CATEGORIES.find(c => c.key === tagKey);
 
-        const cardsHtml = ranked.map((entry, i) => {
+        const cardsHtml = display.map((entry, i) => {
             const npub = NostrTools.nip19.npubEncode(entry.pubkey);
             return `
                 <div class="featured-card anim" style="animation-delay:${i * 0.04}s"
@@ -4493,7 +4507,7 @@
 
         container.innerHTML = cardsHtml;
 
-        for (const entry of ranked) {
+        for (const entry of display) {
             getProfile(entry.pubkey).then(profile => {
                 if (!profile) return;
                 const nameEl = container.querySelector(`[data-tfc-name="${entry.pubkey}-${tagKey}"]`);
@@ -4511,34 +4525,86 @@
 
     window._tagSwitch = async function(key) {
         currentTagKey = key;
-        delete tagLbCache[key];
         await loadTagWindow(key);
     };
 
     window._tagShuffle = async function() {
         const grid = document.getElementById('tagLbGrid');
         if (!grid) return;
-        delete tagLbCache[currentTagKey];
-        await loadTagWindow(currentTagKey);
+        const btn = document.querySelector('[onclick="window._tagShuffle()"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Shuffling…'; }
+        // Let the browser paint the button text before doing work
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        try {
+            if (tagLbCache[currentTagKey]) {
+                const reshuffled = fisherYates(tagLbCache[currentTagKey]);
+                tagLbCache[currentTagKey] = reshuffled;
+                renderTagGrid(grid, currentTagKey, reshuffled);
+            } else {
+                delete tagLbCache[currentTagKey];
+                await loadTagWindow(currentTagKey);
+            }
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Shuffle'; }
+        }
     };
+
+    function fisherYates(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
 
     function buildSelection(ranked, extraCount = 13) {
         const top3 = ranked.slice(0, 3);
         const rest = ranked.slice(3);
-        for (let i = rest.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [rest[i], rest[j]] = [rest[j], rest[i]];
-        }
-        return [...top3, ...rest.slice(0, extraCount)];
+        const shuffled = fisherYates(rest);
+        return [...top3, ...shuffled.slice(0, extraCount)];
     }
 
-    function renderLbGrid(container, ranked) {
+    async function renderLbGrid(container, ranked) {
         if (!ranked.length) {
             container.innerHTML = '<div class="empty anim">No reviews in this period yet.</div>';
             return;
         }
 
         const selection = buildSelection(ranked);
+
+        // Refine counts for displayed cards with targeted per-pubkey queries
+        const p = await initPool();
+        await Promise.all(selection.map(async (entry) => {
+            try {
+                const evts = await p.querySync(RELAYS, {
+                    kinds: [REVIEW_KIND],
+                    '#p': [entry.pubkey]
+                });
+                const deduped = deduplicateReviews(evts);
+                let total = 0, count = 0;
+                for (const ev of deduped) {
+                    const ratingTag = ev.tags.find(t => t[0] === 'rating');
+                    const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
+                    if (rating >= 1 && rating <= 5) {
+                        total += rating;
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    entry.avgRating = (total / count).toFixed(1);
+                    entry.reviewCount = count;
+                }
+            } catch (e) {
+                // Keep the locally-aggregated values as fallback
+            }
+        }));
+
+        // Re-sort after refinement so #1/#2/#3 reflect accurate counts
+        selection.sort((a, b) => {
+            const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
+            return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
+        });
 
         const rankLabel = (i) => {
             if (i === 0) return '<div class="fc-rank gold">#1</div>';
@@ -4623,7 +4689,7 @@
         });
 
         if (lbCache[key]) {
-            renderLbGrid(grid, lbCache[key]);
+            await renderLbGrid(grid, lbCache[key]);
             return;
         }
 
@@ -4633,7 +4699,7 @@
         const sinceTs = win?.seconds ? Math.floor(Date.now() / 1000) - win.seconds : null;
         const ranked = await fetchRanked(sinceTs);
         lbCache[key] = ranked;
-        renderLbGrid(grid, ranked);
+        await renderLbGrid(grid, ranked);
     }
 
     window._lbSwitch = async function(key) {
@@ -4644,8 +4710,18 @@
     window._lbShuffle = async function() {
         const grid = document.getElementById('lbGrid');
         if (!grid) return;
-        delete lbCache[currentLbWindow];
-        await loadLbWindow(currentLbWindow);
+        const btn = document.querySelector('[onclick="window._lbShuffle()"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Shuffling…'; }
+        try {
+            if (lbCache[currentLbWindow]) {
+                await renderLbGrid(grid, lbCache[currentLbWindow]);
+            } else {
+                delete lbCache[currentLbWindow];
+                await loadLbWindow(currentLbWindow);
+            }
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Shuffle'; }
+        }
     };
 
     window._lbLookup = async function(pubkey) {
