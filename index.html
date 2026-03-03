@@ -398,6 +398,190 @@
             line-height: 1.4;
         }
 
+        .pc-clients {
+            position: relative;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .pc-client-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .pc-client-btn:hover {
+            border-color: var(--accent-border);
+            color: var(--accent);
+            background: var(--accent-bg);
+        }
+
+        .pc-client-btn svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pc-client-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 170px;
+            max-height: 260px;
+            overflow-y: auto;
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--r);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+            z-index: 40;
+            overflow-x: hidden;
+        }
+
+        .pc-client-menu.open {
+            display: block;
+        }
+
+        .pc-client-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.1s, color 0.1s;
+        }
+
+        .pc-client-menu a:hover {
+            background: var(--bg-hover);
+            color: var(--accent);
+        }
+
+        .pc-client-menu a svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* ================================================================
+           SHARE BUTTONS — on profile cards
+           ================================================================ */
+        .pc-share-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .pc-share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .pc-share-btn:hover {
+            border-color: var(--accent-border);
+            color: var(--accent);
+            background: var(--accent-bg);
+        }
+
+        .pc-share-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .pc-share-btn.accent {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .pc-share-btn.accent:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
+        .pc-share-btn.accent svg {
+            stroke: var(--bg);
+        }
+
+        .pc-copy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--text-2);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .pc-copy-pill:hover {
+            border-color: var(--accent-border);
+            color: var(--accent);
+            background: var(--accent-bg);
+        }
+
+        .pc-copy-pill svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .pc-bio {
             color: var(--text-2);
             font-size: 0.95rem;
@@ -878,6 +1062,107 @@
             visibility: visible;
         }
 
+        /* ================================================================
+           CONFIRM MODAL — custom replacement for window.confirm()
+           ================================================================ */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-bg.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: 14px;
+            padding: 28px;
+            width: 340px;
+            max-width: 90vw;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        }
+
+        .modal-bg.open .modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-2);
+            line-height: 1.5;
+            margin-bottom: 24px;
+            white-space: pre-line;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .modal-actions button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .modal-cancel {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-2);
+        }
+
+        .modal-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
+            color: var(--text);
+        }
+
+        .modal-confirm {
+            background: var(--red);
+            border: 1px solid var(--red);
+            color: #fff;
+        }
+
+        .modal-confirm:hover {
+            background: #c04848;
+            border-color: #c04848;
+        }
+
+        .modal-confirm.positive {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: var(--bg);
+        }
+
+        .modal-confirm.positive:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
         .drawer-head {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border);
@@ -1060,6 +1345,8 @@
             border: 1px solid var(--border-strong);
             border-radius: var(--r);
             overflow: hidden;
+            overflow-y: auto;
+            max-height: 320px;
             z-index: 30;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
@@ -1435,6 +1722,7 @@
             .pc-avatar { width: 72px; height: 72px; }
             .pc-name { font-size: 1.4rem; }
             .pc-npub { font-size: 0.68rem; }
+            .pc-clients { justify-content: center; }
             .pc-rating-row {
                 flex-direction: column;
                 text-align: center;
@@ -1610,11 +1898,44 @@
                 <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
                 <button class="btn btn-accent" style="width:100%;" onclick="loginNsec()">Sign in with nsec</button>
             </div>
+
+            <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
+            <p style="margin-bottom:12px;">Just want to browse?</p>
+
+            <!-- npub view-only login -->
+            <button class="login-opt" onclick="window._toggleNpubLogin()">
+                <div class="login-opt-icon" style="background:var(--blue-bg);border-color:rgba(91,156,245,0.25);">
+                    <svg viewBox="0 0 24 24" style="stroke:var(--blue)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="login-opt-text">
+                    View Only (npub)
+                    <small>Browse your profile &amp; reviews — no signing</small>
+                </div>
+            </button>
+
+            <!-- npub input (toggles open) -->
+            <div class="nsec-panel" id="npubLoginPanel">
+                <input type="text" id="npubLoginInput" placeholder="npub1..." autocomplete="off" style="font-family:monospace;font-size:0.88rem;">
+                <button class="btn" style="width:100%;background:var(--blue);border-color:var(--blue);color:#fff;" onclick="window._loginNpub()">View profile</button>
+            </div>
         </div>
     </div>
 
     <!-- ================================================================
-         JAVASCRIPT
+         CONFIRM MODAL (custom replacement for window.confirm)
+         ================================================================ -->
+    <div class="modal-bg" id="confirmModalBg">
+        <div class="modal">
+            <div class="modal-title" id="modalTitle">Sign out</div>
+            <div class="modal-body" id="modalBody">Are you sure you want to sign out? Your session will end.</div>
+            <div class="modal-actions">
+                <button class="modal-cancel" id="modalCancel">Cancel</button>
+                <button class="modal-confirm" id="modalConfirm">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
          ================================================================ -->
     <script type="module">
 
@@ -1885,6 +2206,33 @@
         return currentUser;
     }
 
+    /** Login via npub (view-only — no signing capability) */
+    async function loginWithNpub(npubString) {
+        if (!npubString) throw new Error('Enter your npub');
+        if (!npubString.startsWith('npub1')) throw new Error('Invalid npub format');
+
+        const { data: pubkey } = NostrTools.nip19.decode(npubString);
+        if (!pubkey || pubkey.length !== 64) throw new Error('Invalid npub');
+
+        const npub = npubString;
+        currentUser = { pubkey, npub, profile: {}, loginMethod: 'viewonly' };
+        fetchProfile(pubkey).then(profile => {
+            if (currentUser && currentUser.pubkey === pubkey) {
+                currentUser.profile = profile;
+                updateAuthPill();
+                const historyActive = document.getElementById('section-history')?.classList.contains('active');
+                if (historyActive) loadHistory();
+            }
+        });
+
+        return currentUser;
+    }
+
+    /** Check if the current user can sign events (write reviews, delete, etc.) */
+    function canSign() {
+        return currentUser && currentUser.loginMethod !== 'viewonly';
+    }
+
     /** Sign a Nostr event using the current auth method */
     async function signEvent(event) {
         if (!currentUser) throw new Error('Not logged in');
@@ -1925,20 +2273,54 @@
         return {};
     }
 
-    /** Fetch follows list (kind 3) from relays */
+    /** Simple TTL cache — entries expire after `ttlMs` milliseconds */
+    function createTtlCache(ttlMs = 5 * 60 * 1000) {
+        const store = new Map();
+        return {
+            get(key) {
+                const entry = store.get(key);
+                if (!entry) return undefined;
+                if (Date.now() - entry.ts > ttlMs) { store.delete(key); return undefined; }
+                return entry.value;
+            },
+            set(key, value) {
+                store.set(key, { value, ts: Date.now() });
+            },
+            invalidate(key) { store.delete(key); },
+            clear() { store.clear(); }
+        };
+    }
+
+    const followsCache = createTtlCache(5 * 60 * 1000);
+    const followerCountCache = createTtlCache(5 * 60 * 1000);
+
+    /** Fetch follows list (kind 3) from relays (cached 5 min) */
     async function fetchFollows(pubkey) {
+        const cached = followsCache.get(pubkey);
+        if (cached !== undefined) return cached;
+
         const p = await initPool();
         try {
             const event = await p.get(RELAYS, { kinds: [3], authors: [pubkey], limit: 1 });
-            if (event) return event.tags.filter(t => t[0] === 'p').map(t => t[1]);
+            if (event) {
+                const follows = event.tags.filter(t => t[0] === 'p').map(t => t[1]);
+                followsCache.set(pubkey, follows);
+                return follows;
+            }
         } catch (e) {}
-        return [];
+        const empty = [];
+        followsCache.set(pubkey, empty);
+        return empty;
     }
 
     /** Fetch follower count — how many people follow this pubkey (kind 3 #p tag)
      *  Optimized: only fetches enough to confirm minimum threshold (20 events).
+     *  Cached for 5 minutes.
      */
     async function fetchFollowerCount(pubkey) {
+        const cached = followerCountCache.get(pubkey);
+        if (cached !== undefined) return cached;
+
         const p = await initPool();
         try {
             const events = await Promise.race([
@@ -1947,7 +2329,9 @@
             ]);
             // Deduplicate by author (one follow-list per person)
             const authors = new Set(events.map(e => e.pubkey));
-            return authors.size;
+            const count = authors.size;
+            followerCountCache.set(pubkey, count);
+            return count;
         } catch (e) {
             console.warn('fetchFollowerCount error/timeout:', e);
             return 0;
@@ -2096,6 +2480,112 @@
         return npub.substring(0, 12) + '...' + npub.substring(npub.length - 6);
     }
 
+    /** Generate the "Open in…" dropdown + "Copy link" pill for a given npub */
+    function clientMenuHtml(npub, showCopyLink = false) {
+        const linkIcon = '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+        const copyIcon = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+        const clients = [
+            { name: 'Jumble',    url: `https://jumble.social/${escapeHtml(npub)}` },
+            { name: 'Primal',    url: `https://primal.net/p/${escapeHtml(npub)}` },
+            { name: 'noStrudel', url: `https://nostrudel.ninja/#/u/${escapeHtml(npub)}` },
+            { name: 'Snort',     url: `https://snort.social/p/${escapeHtml(npub)}` },
+            { name: 'Coracle',   url: `https://coracle.social/${escapeHtml(npub)}` },
+            { name: 'Iris',      url: `https://iris.to/${escapeHtml(npub)}` },
+        ];
+        return `
+            <div class="pc-clients">
+                <button class="pc-client-btn" onclick="this.nextElementSibling.classList.toggle('open')">
+                    ${linkIcon}
+                    Open in…
+                    <svg viewBox="0 0 24 24" style="width:10px;height:10px;margin-left:-2px"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="pc-client-menu">
+                    ${clients.map(c => `
+                        <a href="${c.url}" target="_blank" rel="noopener noreferrer">
+                            ${linkIcon}
+                            ${c.name}
+                        </a>
+                    `).join('')}
+                </div>
+                ${showCopyLink ? `
+                    <button class="pc-copy-pill" onclick="window._copyProfileLink('${escapeHtml(npub)}')">
+                        ${copyIcon}
+                        Copy link
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    /** Build the shareable profile URL */
+    function profileUrl(npub) {
+        return `https://pubscore.space/?npub=${npub}`;
+    }
+
+    /** Generate the share buttons row for a profile card (Nostr share only) */
+    function shareRowHtml(npub, avgRating, reviewCount) {
+        if (!canSign()) return '';
+        const nostrIcon = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+        return `
+            <div class="pc-share-row">
+                <button class="pc-share-btn accent" onclick="window._shareOnNostr('${escapeHtml(npub)}', ${avgRating}, ${reviewCount})">
+                    ${nostrIcon}
+                    Share on Nostr
+                </button>
+            </div>
+        `;
+    }
+
+    /** Copy the profile link to clipboard */
+    window._copyProfileLink = function(npub) {
+        const url = profileUrl(npub);
+        navigator.clipboard.writeText(url).then(() => {
+            toast('Link copied!', 'success');
+        }).catch(() => {
+            // Fallback for older browsers
+            const input = document.createElement('input');
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            toast('Link copied!', 'success');
+        });
+    };
+
+    /** Publish a "share my score" kind 1 note on Nostr */
+    window._shareOnNostr = async function(npub, avgRating, reviewCount) {
+        if (!currentUser || !canSign()) return toast('Sign in with extension or nsec to post', 'error');
+
+        const starStr = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
+        const url = profileUrl(npub);
+        const content = `My PubScore: ${avgRating}/5 ${starStr} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})\n\nRate and review me on PubScore!\n${url}`;
+
+        showConfirmModal({
+            title: 'Share on Nostr',
+            body: `This will post to your Nostr feed:\n\n"${content.substring(0, 120)}..."`,
+            confirmLabel: 'Post it',
+            style: 'positive',
+            onConfirm: async () => {
+                try {
+                    const event = {
+                        kind: 1,
+                        pubkey: currentUser.pubkey,
+                        created_at: Math.floor(Date.now() / 1000),
+                        tags: [['r', url]],
+                        content
+                    };
+                    const signed = await signEvent(event);
+                    const p = await initPool();
+                    await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+                    toast('Posted to Nostr!', 'success');
+                } catch (e) {
+                    toast('Failed to post: ' + e.message, 'error');
+                }
+            }
+        });
+    };
+
     /** Generate a category tag badge */
     function catTag(category) {
         const labels = {
@@ -2178,9 +2668,12 @@
             const profile = currentUser.profile || {};
             const avatar = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
             const name = sanitizeDisplayName(profile.display_name || profile.name || 'Anon');
+            const viewBadge = currentUser.loginMethod === 'viewonly'
+                ? ' <span style="font-size:0.7rem;color:var(--blue);font-weight:600">view</span>'
+                : '';
             pill.innerHTML = `
                 <img src="${avatar}" onerror="this.src='${DEFAULT_AVATAR}'">
-                <span>${capLength(name, 16)}</span>
+                <span>${capLength(name, 16)}${viewBadge}</span>
             `;
         } else {
             pill.innerHTML = `
@@ -2192,10 +2685,15 @@
         }
     }
 
-    /** Handle auth pill click — open drawer or confirm logout */
+    /** Handle auth pill click — open drawer or show custom logout modal */
     window._authAction = function() {
         if (currentUser) {
-            if (confirm('Sign out?')) doLogout();
+            showConfirmModal({
+                title: 'Sign out',
+                body: 'Are you sure you want to sign out? Your session will end.',
+                confirmLabel: 'Sign out',
+                onConfirm: doLogout
+            });
         } else {
             document.getElementById('drawerBg').classList.add('open');
             document.getElementById('drawer').classList.add('open');
@@ -2203,19 +2701,78 @@
         }
     };
 
+    /** Reusable confirm modal — accepts { title, body, confirmLabel, onConfirm } */
+    let _modalOnConfirm = null;
+
+    function showConfirmModal({ title, body, confirmLabel = 'Confirm', onConfirm, style = 'destructive' }) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalBody').textContent = body;
+        document.getElementById('modalConfirm').textContent = confirmLabel;
+        const confirmBtn = document.getElementById('modalConfirm');
+        confirmBtn.className = style === 'positive' ? 'modal-confirm positive' : 'modal-confirm';
+        _modalOnConfirm = onConfirm;
+        document.getElementById('confirmModalBg').classList.add('open');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModalBg').classList.remove('open');
+        _modalOnConfirm = null;
+    }
+
+    document.getElementById('modalCancel').addEventListener('click', closeConfirmModal);
+    document.getElementById('modalConfirm').addEventListener('click', () => {
+        const fn = _modalOnConfirm;
+        closeConfirmModal();
+        if (fn) fn();
+    });
+    document.getElementById('confirmModalBg').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeConfirmModal();
+    });
+
     /** Close the login drawer */
     window._closeDrawer = function() {
         document.getElementById('drawerBg').classList.remove('open');
         document.getElementById('drawer').classList.remove('open');
         document.getElementById('nsecInput').value = '';
+        document.getElementById('npubLoginInput').value = '';
+        document.getElementById('npubLoginPanel').classList.remove('show');
+        document.getElementById('nsecPanel').classList.remove('show');
     };
 
     // Close drawer on backdrop click
     document.getElementById('drawerBg').addEventListener('click', () => window._closeDrawer());
 
+    // Close any open client dropdown menus when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.pc-clients')) {
+            document.querySelectorAll('.pc-client-menu.open').forEach(m => m.classList.remove('open'));
+        }
+    });
+
     /** Toggle the nsec input panel */
     window._toggleNsec = function() {
         document.getElementById('nsecPanel').classList.toggle('show');
+        document.getElementById('npubLoginPanel').classList.remove('show');
+    };
+
+    /** Toggle the npub view-only input panel */
+    window._toggleNpubLogin = function() {
+        document.getElementById('npubLoginPanel').classList.toggle('show');
+        document.getElementById('nsecPanel').classList.remove('show');
+    };
+
+    /** Handle npub view-only login */
+    window._loginNpub = async function() {
+        const input = document.getElementById('npubLoginInput');
+        try {
+            await loginWithNpub(input.value.trim());
+            input.value = '';
+            window._closeDrawer();
+            updateAuthPill();
+            toast('Viewing as read-only', 'info');
+        } catch (e) {
+            toast(e.message, 'error');
+        }
     };
 
     /** Handle extension login button */
@@ -2399,6 +2956,13 @@
         document.getElementById('reviewsArea').innerHTML = '';
         document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
         closeSearchResults();
+        // Clear the URL param
+        const url = new URL(window.location);
+        url.searchParams.delete('npub');
+        history.replaceState(null, '', url);
+        // Render featured sections if they haven't been loaded yet (e.g. deep link entry)
+        if (!document.getElementById('featuredArea').innerHTML.trim()) renderFeatured();
+        if (!document.getElementById('tagLbArea').innerHTML.trim()) renderTagLeaderboard();
         // Make sure we're on the lookup tab
         switchTab('lookup');
     }
@@ -2668,6 +3232,7 @@
                         <div class="pc-name">${name}</div>
                         ${nip05 ? `<div class="pc-nip05">${nip05}</div>` : ''}
                         <div class="pc-npub">${escapeHtml(npub)}</div>
+                        ${clientMenuHtml(npub)}
                     </div>
                 </div>
                 ${bio ? `<div class="pc-bio">${bio}</div>` : ''}
@@ -2683,8 +3248,14 @@
                         </div>
                     </div>
                 </div>
+                ${shareRowHtml(npub, avgRating, totalReviews)}
             </div>
         `;
+
+        // Update the browser URL so the link is always shareable
+        const url = new URL(window.location);
+        url.searchParams.set('npub', npub);
+        history.replaceState(null, '', url);
     }
 
     // =====================================================================
@@ -2699,6 +3270,12 @@
 
         if (!currentUser || !currentLookupPubkey) {
             area.innerHTML = '';
+            return;
+        }
+
+        // View-only users can't write reviews
+        if (!canSign()) {
+            area.innerHTML = '<div class="review-form anim" style="text-align:center;color:var(--text-3);padding:20px;">Sign in with an extension or nsec to leave reviews</div>';
             return;
         }
 
@@ -2789,6 +3366,7 @@
     /** Submit or update a review */
     window._submitReview = async function() {
         if (!currentUser) return toast('Sign in first', 'error');
+        if (!canSign()) return toast('View-only mode — sign in with extension or nsec to review', 'error');
         if (!selectedRating) return toast('Select a rating', 'error');
 
         const content = document.getElementById('reviewContent').value.trim();
@@ -2904,7 +3482,7 @@
         const npub = NostrTools.nip19.npubEncode(review.pubkey);
         const content = escapeHtml(capLength(review.content, 1000));
         const categories = review.categories.map(catTag).join('');
-        const isOwn = currentUser && review.pubkey === currentUser.pubkey;
+        const isOwn = currentUser && review.pubkey === currentUser.pubkey && canSign();
 
         return `
             <div class="rc anim" style="animation-delay:${index * 0.04}s" data-rpk="${review.pubkey}">
@@ -2940,33 +3518,40 @@
     /** Delete a review */
     window._del = async function(eventId, context) {
         if (!currentUser) return toast('Sign in first', 'error');
-        if (!confirm('Delete this review?')) return;
+        if (!canSign()) return toast('View-only mode — sign in with extension or nsec to delete', 'error');
 
-        try {
-            await deleteReview(eventId);
-            toast('Deletion request sent', 'success');
+        showConfirmModal({
+            title: 'Delete review',
+            body: 'Are you sure you want to delete this review? This cannot be undone.',
+            confirmLabel: 'Delete',
+            onConfirm: async () => {
+                try {
+                    await deleteReview(eventId);
+                    toast('Deletion request sent', 'success');
 
-            if (context === 'lookup' && currentLookupPubkey) {
-                // Remove from local array and re-render
-                currentReviews = currentReviews.filter(r => r.id !== eventId);
-                renderReviews(currentReviews);
+                    if (context === 'lookup' && currentLookupPubkey) {
+                        // Remove from local array and re-render
+                        currentReviews = currentReviews.filter(r => r.id !== eventId);
+                        renderReviews(currentReviews);
 
-                const [profile, follows] = await Promise.all([
-                    fetchProfile(currentLookupPubkey),
-                    fetchFollows(currentLookupPubkey)
-                ]);
-                renderProfileCard(
-                    currentLookupPubkey,
-                    NostrTools.nip19.npubEncode(currentLookupPubkey),
-                    profile, follows, currentReviews
-                );
-                await renderReviewForm();
-            } else if (context === 'history') {
-                loadHistory();
+                        const [profile, follows] = await Promise.all([
+                            fetchProfile(currentLookupPubkey),
+                            fetchFollows(currentLookupPubkey)
+                        ]);
+                        renderProfileCard(
+                            currentLookupPubkey,
+                            NostrTools.nip19.npubEncode(currentLookupPubkey),
+                            profile, follows, currentReviews
+                        );
+                        await renderReviewForm();
+                    } else if (context === 'history') {
+                        loadHistory();
+                    }
+                } catch (e) {
+                    toast('Delete failed: ' + e.message, 'error');
+                }
             }
-        } catch (e) {
-            toast('Delete failed: ' + e.message, 'error');
-        }
+        });
     };
 
     // =====================================================================
@@ -3018,6 +3603,7 @@
                             <div class="pc-name">${escapeHtml(name)}</div>
                             ${nip05 ? `<div class="pc-nip05">${escapeHtml(nip05)}</div>` : ''}
                             <div class="pc-npub">${escapeHtml(npub)}</div>
+                            ${clientMenuHtml(npub, true)}
                         </div>
                     </div>
                     ${bio ? `<div class="pc-bio">${bio}</div>` : ''}
@@ -3031,6 +3617,7 @@
                             </div>
                         </div>
                     </div>
+                    ${shareRowHtml(npub, avgRating, receivedReviews.length)}
                 </div>
 
                 <div class="hist-tabs anim">
@@ -3132,7 +3719,7 @@
                         <div class="rc-body">${content}</div>
                         <div class="rc-foot">
                             <div class="rc-tags">${categories}</div>
-                            <button class="btn-red" onclick="window._del('${review.id}','history')">Delete</button>
+                            ${canSign() ? `<button class="btn-red" onclick="window._del('${review.id}','history')">Delete</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -3589,9 +4176,27 @@
     await initPool();
     console.log('PubScore initialized');
 
-    // Load featured profiles on the front page
-    renderFeatured();
-    renderTagLeaderboard();
+    // Deep link: auto-lookup if ?npub= is in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const deepNpub = urlParams.get('npub');
+
+    if (deepNpub && deepNpub.startsWith('npub1')) {
+        try {
+            const pubkey = NostrTools.nip19.decode(deepNpub).data;
+            document.getElementById('npubInput').value = deepNpub;
+            await lookupByPubkey(pubkey);
+            updateSearchBtn();
+        } catch (e) {
+            console.warn('Invalid deep link npub:', e);
+            // Fall back to showing the home page
+            renderFeatured();
+            renderTagLeaderboard();
+        }
+    } else {
+        // No deep link — load featured profiles on the front page
+        renderFeatured();
+        renderTagLeaderboard();
+    }
 
     </script>
 </body>
