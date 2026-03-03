@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>PubScore</title>
 
     <!-- Primary SEO -->
@@ -1204,6 +1205,291 @@
             border-color: var(--accent-dim);
         }
 
+        /* ================================================================
+           SHARE COMPOSER MODAL
+           ================================================================ */
+        .share-modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 210;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .share-modal-bg.open {
+            display: flex;
+        }
+
+        .share-modal {
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: 16px;
+            padding: 0;
+            width: 480px;
+            max-width: 96vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            transform: scale(0.94) translateY(8px);
+            opacity: 0;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        .share-modal-bg.open .share-modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .share-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+        }
+
+        .share-modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-modal-title svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .share-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background 0.15s;
+            font-family: inherit;
+        }
+
+        .share-modal-close:hover {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        .share-modal-close svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .share-modal-body {
+            padding: 16px 24px 24px;
+        }
+
+        .share-composer-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .share-composer-textarea {
+            width: 100%;
+            min-height: 130px;
+            padding: 14px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .share-composer-textarea:focus {
+            border-color: var(--accent-border);
+            box-shadow: 0 0 0 3px var(--accent-bg);
+        }
+
+        .share-char-count {
+            font-size: 0.75rem;
+            color: var(--text-3);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .share-char-count.warn {
+            color: var(--accent);
+        }
+
+        .share-char-count.over {
+            color: var(--red);
+        }
+
+        .share-hashtags-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin: 16px 0 8px;
+        }
+
+        .share-hashtags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .share-hashtag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .share-hashtag-chip:hover {
+            border-color: var(--accent-border);
+            color: var(--text-2);
+        }
+
+        .share-hashtag-chip.active {
+            background: var(--accent-bg);
+            border-color: var(--accent-border);
+            color: var(--accent);
+        }
+
+        .share-hashtag-chip .chip-check {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: opacity 0.12s;
+        }
+
+        .share-hashtag-chip.active .chip-check {
+            opacity: 1;
+        }
+
+        .share-reset-link {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: color 0.15s;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .share-reset-link:hover {
+            color: var(--text-2);
+        }
+
+        .share-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .share-btn-cancel {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .share-btn-cancel:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
+            color: var(--text);
+        }
+
+        .share-btn-post {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: var(--bg);
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .share-btn-post:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
+        .share-btn-post:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .share-btn-post svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: var(--bg);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .drawer-head {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border);
@@ -1820,6 +2106,58 @@
             .toast.show {
                 transform: translateY(0);
             }
+
+            /* Share Composer Modal — slide up from bottom on mobile */
+            .share-modal-bg {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .share-modal {
+                width: 100%;
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                transform: translateY(100%);
+                opacity: 1;
+                max-height: 92dvh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .share-modal-bg.open .share-modal {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .share-modal-body {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                flex: 1;
+                min-height: 0;
+            }
+
+            .share-composer-textarea {
+                min-height: 110px;
+                font-size: 1rem;
+            }
+
+            .share-hashtag-chip {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+
+            .share-modal-footer {
+                padding: 14px 20px;
+                padding-bottom: calc(14px + env(safe-area-inset-bottom));
+            }
+
+            .share-btn-post,
+            .share-btn-cancel {
+                flex: 1;
+                justify-content: center;
+                padding: 13px 16px;
+                font-size: 0.95rem;
+            }
         }
 
         /* ================================================================
@@ -1976,6 +2314,39 @@
             <div class="modal-actions">
                 <button class="modal-cancel" id="modalCancel">Cancel</button>
                 <button class="modal-confirm" id="modalConfirm">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         SHARE COMPOSER MODAL
+         ================================================================ -->
+    <div class="share-modal-bg" id="shareModalBg">
+        <div class="share-modal">
+            <div class="share-modal-header">
+                <div class="share-modal-title">
+                    <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Share on Nostr
+                </div>
+                <button class="share-modal-close" onclick="window._closeShareModal()">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="share-modal-body">
+                <div class="share-composer-label">Your message</div>
+                <textarea class="share-composer-textarea" id="shareComposerText" placeholder="Write your message..." oninput="window._shareUpdateCount()"></textarea>
+                <div class="share-char-count" id="shareCharCount">0 / 280</div>
+                <button class="share-reset-link" onclick="window._shareResetText()">↺ Reset to default</button>
+
+                <div class="share-hashtags-label">Hashtags</div>
+                <div class="share-hashtags-grid" id="shareHashtagsGrid"></div>
+            </div>
+            <div class="share-modal-footer">
+                <button class="share-btn-cancel" onclick="window._closeShareModal()">Cancel</button>
+                <button class="share-btn-post" id="sharePostBtn" onclick="window._submitShareOnNostr()">
+                    <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Post it
+                </button>
             </div>
         </div>
     </div>
@@ -2623,31 +2994,137 @@
 
         const starStr = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
         const url = profileUrl(npub);
-        const content = `My PubScore: ${avgRating}/5 ${starStr} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})\nRate and review me on PubScore! ${url}`;
+        const defaultText = `My PubScore: ${avgRating}/5 ${starStr} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})\nRate and review me on PubScore! ${url}`;
 
-        showConfirmModal({
-            title: 'Share on Nostr',
-            body: `This will post to your Nostr feed:\n\n"${content.substring(0, 120)}..."`,
-            confirmLabel: 'Post it',
-            style: 'positive',
-            onConfirm: async () => {
-                try {
-                    const event = {
-                        kind: 1,
-                        pubkey: currentUser.pubkey,
-                        created_at: Math.floor(Date.now() / 1000),
-                        tags: [['r', url]],
-                        content
-                    };
-                    const signed = await signEvent(event);
-                    const p = await initPool();
-                    await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
-                    toast('Posted to Nostr!', 'success');
-                } catch (e) {
-                    toast('Failed to post: ' + e.message, 'error');
-                }
+        // Available hashtag options
+        const availableHashtags = [
+            { tag: 'nostr',       default: true },
+            { tag: 'pubscore',    default: true },
+            { tag: 'reputation',  default: false },
+            { tag: 'bitcoin',     default: false },
+            { tag: 'decentralized', default: false },
+            { tag: 'reviews',     default: false },
+            { tag: 'zaps',        default: false },
+            { tag: 'value4value', default: false },
+        ];
+
+        // Store modal state on window for the submit handler
+        window._shareModalState = {
+            npub,
+            avgRating,
+            reviewCount,
+            defaultText,
+            availableHashtags,
+            activeHashtags: new Set(availableHashtags.filter(h => h.default).map(h => h.tag)),
+        };
+
+        // Populate textarea
+        const textarea = document.getElementById('shareComposerText');
+        textarea.value = defaultText;
+        window._shareUpdateCount();
+
+        // Render hashtag chips
+        const grid = document.getElementById('shareHashtagsGrid');
+        grid.innerHTML = availableHashtags.map(h => `
+            <button class="share-hashtag-chip ${h.default ? 'active' : ''}"
+                id="chip-${h.tag}"
+                onclick="window._shareToggleHashtag('${h.tag}')">
+                <svg class="chip-check" viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg>
+                #${h.tag}
+            </button>
+        `).join('');
+
+        // Open modal
+        document.getElementById('shareModalBg').classList.add('open');
+        textarea.focus();
+        textarea.setSelectionRange(0, 0);
+    };
+
+    window._shareUpdateCount = function() {
+        const textarea = document.getElementById('shareComposerText');
+        const count = document.getElementById('shareCharCount');
+        if (!textarea || !count) return;
+        const len = textarea.value.length;
+        count.textContent = `${len} / 280`;
+        count.className = 'share-char-count' + (len > 280 ? ' over' : len > 240 ? ' warn' : '');
+        const postBtn = document.getElementById('sharePostBtn');
+        if (postBtn) postBtn.disabled = len === 0 || len > 280;
+    };
+
+    window._shareResetText = function() {
+        const state = window._shareModalState;
+        if (!state) return;
+        document.getElementById('shareComposerText').value = state.defaultText;
+        window._shareUpdateCount();
+    };
+
+    window._shareToggleHashtag = function(tag) {
+        const state = window._shareModalState;
+        if (!state) return;
+        if (state.activeHashtags.has(tag)) {
+            state.activeHashtags.delete(tag);
+        } else {
+            state.activeHashtags.add(tag);
+        }
+        const chip = document.getElementById(`chip-${tag}`);
+        if (chip) chip.classList.toggle('active', state.activeHashtags.has(tag));
+    };
+
+    window._closeShareModal = function() {
+        document.getElementById('shareModalBg').classList.remove('open');
+    };
+
+    // Close share modal on backdrop click
+    document.getElementById('shareModalBg').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('shareModalBg')) window._closeShareModal();
+    });
+
+    window._submitShareOnNostr = async function() {
+        const state = window._shareModalState;
+        if (!state || !currentUser || !canSign()) return;
+
+        const textarea = document.getElementById('shareComposerText');
+        let content = textarea.value.trim();
+        if (!content) return;
+
+        // Append selected hashtags (only those not already in the text)
+        if (state.activeHashtags.size > 0) {
+            const existingTags = (content.match(/#\w+/g) || []).map(t => t.slice(1).toLowerCase());
+            const toAppend = [...state.activeHashtags].filter(t => !existingTags.includes(t.toLowerCase()));
+            if (toAppend.length > 0) {
+                content += '\n\n' + toAppend.map(t => `#${t}`).join(' ');
             }
-        });
+        }
+
+        const url = profileUrl(state.npub);
+        const postBtn = document.getElementById('sharePostBtn');
+        if (postBtn) { postBtn.disabled = true; postBtn.textContent = 'Posting…'; }
+
+        try {
+            const tags = [['r', url]];
+            // Add hashtag t-tags for discoverability
+            for (const tag of state.activeHashtags) {
+                tags.push(['t', tag]);
+            }
+            const event = {
+                kind: 1,
+                pubkey: currentUser.pubkey,
+                created_at: Math.floor(Date.now() / 1000),
+                tags,
+                content
+            };
+            const signed = await signEvent(event);
+            const p = await initPool();
+            await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
+            window._closeShareModal();
+            toast('Posted to Nostr!', 'success');
+        } catch (e) {
+            toast('Failed to post: ' + e.message, 'error');
+            if (postBtn) {
+                postBtn.disabled = false;
+                postBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Post it';
+            }
+        }
     };
 
     /** Generate a category tag badge */
