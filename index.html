@@ -1152,7 +1152,6 @@
             line-height: 1.5;
             margin-bottom: 24px;
             white-space: pre-line;
-            word-break: break-all;
         }
 
         .modal-actions {
@@ -2628,7 +2627,7 @@
 
         showConfirmModal({
             title: 'Share on Nostr',
-            body: `This will post to your Nostr feed:\n\n${content}`,
+            body: `This will post to your Nostr feed:\n\n"${content.substring(0, 120)}..."`,
             confirmLabel: 'Post it',
             style: 'positive',
             onConfirm: async () => {
