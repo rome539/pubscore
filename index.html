@@ -2138,6 +2138,26 @@
         return pool;
     }
 
+    /** Run async tasks with concurrency limit to avoid overwhelming relays. */
+    async function throttledAll(tasks, limit = 3) {
+        const results = new Array(tasks.length);
+        let idx = 0;
+        async function worker() {
+            while (idx < tasks.length) {
+                const i = idx++;
+                try {
+                    results[i] = { status: "fulfilled", value: await tasks[i]() };
+                } catch (e) {
+                    results[i] = { status: "rejected", reason: e };
+                }
+            }
+        }
+        const workers = [];
+        for (let w = 0; w < Math.min(limit, tasks.length); w++) workers.push(worker());
+        await Promise.all(workers);
+        return results;
+    }
+
     // Initialize secure key store
     SecureKeyStore = createSecureKeyStore(NostrTools);
 
@@ -3840,10 +3860,10 @@
                 if (event.pubkey) subjectSet.add(event.pubkey);
             }
 
-            // Fetch actual reviews per subject individually for accurate counts
+            // Fetch actual reviews per subject with concurrency limit
             const subjectArr = Array.from(subjectSet);
-            const perSubjectResults = await Promise.allSettled(
-                subjectArr.map(async (pk) => {
+            const perSubjectResults = await throttledAll(
+                subjectArr.map((pk) => async () => {
                     const evts = await p.querySync(RELAYS, {
                         kinds: [REVIEW_KIND],
                         '#p': [pk]
@@ -3862,7 +3882,8 @@
                         }
                     }
                     return { pubkey: pk, total, count };
-                })
+                }),
+                3
             );
 
             return perSubjectResults
@@ -3948,6 +3969,7 @@
             <div class="tag-lb-section">
                 <div class="lb-header">
                     <div class="lb-title">Tagged</div>
+                    <button class="featured-header button" onclick="window._tagShuffle()" style="background:none;border:none;color:var(--text-3);font-family:inherit;font-size:0.82rem;cursor:pointer;transition:color 0.15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'">Shuffle</button>
                 </div>
                 <div class="tag-lb-pills">${pillsHtml}</div>
                 <div class="tag-lb-grid" id="tagLbGrid">
@@ -4031,6 +4053,14 @@
         // Clear cache so profiles are re-shuffled
         delete tagLbCache[key];
         await loadTagWindow(key);
+    };
+
+    // Shuffle re-fetches fresh tagged data for the current tag
+    window._tagShuffle = async function() {
+        const grid = document.getElementById('tagLbGrid');
+        if (!grid) return;
+        delete tagLbCache[currentTagKey];
+        await loadTagWindow(currentTagKey);
     };
 
     /** Top 3 locked, shuffle 3 more from the rest of the pool */
@@ -4159,11 +4189,12 @@
         await loadLbWindow(key);
     };
 
-    // Shuffle re-renders with a new random pick from cached ranked data
-    window._lbShuffle = function() {
+    // Shuffle clears cache and re-fetches fresh data
+    window._lbShuffle = async function() {
         const grid = document.getElementById('lbGrid');
-        if (!grid || !lbCache[currentLbWindow]) return;
-        renderLbGrid(grid, lbCache[currentLbWindow]);
+        if (!grid) return;
+        delete lbCache[currentLbWindow];
+        await loadLbWindow(currentLbWindow);
     };
 
     /** Lookup from leaderboard card — skips eligibility (already on the board) and updates button */
@@ -4191,17 +4222,18 @@
         try {
             const pubkey = NostrTools.nip19.decode(deepNpub).data;
             document.getElementById('npubInput').value = deepNpub;
+            updateSearchBtn();
             await lookupByPubkey(pubkey);
             updateSearchBtn();
         } catch (e) {
             console.warn('Invalid deep link npub:', e);
             // Fall back to showing the home page
-            renderFeatured();
+            await renderFeatured();
             renderTagLeaderboard();
         }
     } else {
         // No deep link — load featured profiles on the front page
-        renderFeatured();
+        await renderFeatured();
         renderTagLeaderboard();
     }
 
