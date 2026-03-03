@@ -2623,7 +2623,7 @@
 
         const starStr = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
         const url = profileUrl(npub);
-        const content = `My PubScore: ${avgRating}/5 ${starStr} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})\n\nRate and review me on PubScore!\n${url}`;
+        const content = `My PubScore: ${avgRating}/5 ${starStr} (${reviewCount} review${reviewCount !== 1 ? 's' : ''})\nRate and review me on PubScore! ${url}`;
 
         showConfirmModal({
             title: 'Share on Nostr',
@@ -3114,9 +3114,14 @@
             const eligibility = await checkProfileEligibility(pubkey, follows);
             if (!eligibility.ok) {
                 currentLookupPubkey = null;
+                document.getElementById('npubInput').value = '';
+                updateSearchBtn();
                 document.getElementById('profileArea').innerHTML = '';
                 document.getElementById('featuredArea').style.display = '';
                 document.getElementById('tagLbArea').style.display = '';
+                const url = new URL(window.location);
+                url.searchParams.delete('npub');
+                history.replaceState(null, '', url);
 
                 // Show banner at the top, above the featured sections
                 const banner = document.getElementById('eligibilityBanner');
