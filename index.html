@@ -3693,14 +3693,21 @@
         const val = document.getElementById('npubInput').value.trim();
         const btn = document.getElementById('searchBtn');
         if (!btn) return;
-        if (val) {
-            btn.textContent = 'Clear';
+        if (currentLookupPubkey && val) {
+            btn.textContent = 'Back';
             btn.style.background = 'var(--bg-elevated)';
             btn.style.color = 'var(--text-2)';
+            btn.style.border = '1px solid var(--border)';
+        } else if (val) {
+            btn.textContent = 'Clear';
+            btn.style.background = 'var(--bg-elevated)';
+            btn.style.color = 'var(--text-3)';
+            btn.style.border = '1px solid var(--border)';
         } else {
             btn.textContent = 'Look up';
             btn.style.background = '';
             btn.style.color = '';
+            btn.style.border = '';
         }
     }
 
@@ -3717,10 +3724,17 @@
 
     document.getElementById('npubInput').addEventListener('input', (e) => {
         const val = e.target.value.trim();
-        updateSearchBtn();
         if (!val && currentLookupPubkey) {
             goHome();
+        } else if (val && currentLookupPubkey) {
+            // User changed the npub — auto-lookup if it looks like a valid npub or hex
+            if (val.startsWith('npub1') || /^[0-9a-f]{64}$/i.test(val)) {
+                lookupProfile();
+                return;
+            }
+            currentLookupPubkey = null;
         }
+        updateSearchBtn();
         if (val) closeSearchResults();
     });
 
