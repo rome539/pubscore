@@ -1004,6 +1004,7 @@
         .rc-tags {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         /* Category tags on review cards */
@@ -2422,7 +2423,7 @@
         };
         const signed = await signEvent(event);
         const p = await initPool();
-        await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+        await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
     }
 
     /** Publish (or update) a review for a subject pubkey */
@@ -2446,7 +2447,7 @@
 
         const signed = await signEvent(event);
         const p = await initPool();
-        await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+        await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
     }
 
     // =====================================================================
@@ -2582,7 +2583,7 @@
                     };
                     const signed = await signEvent(event);
                     const p = await initPool();
-                    await Promise.any(RELAYS.map(r => p.publish([r], signed)));
+                    await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
                     toast('Posted to Nostr!', 'success');
                 } catch (e) {
                     toast('Failed to post: ' + e.message, 'error');
@@ -3804,10 +3805,20 @@
         const p = await initPool();
 
         try {
-            // Fetch all events once — reused across all time window tabs
+            // Fetch all events once — query each relay individually and merge
+            // to ensure we discover ALL subjects (global querySync can miss some
+            // due to NIP-33 replaceable event handling across relays)
             if (!lbRawEvents) {
-                const events = await p.querySync(RELAYS, { kinds: [REVIEW_KIND], limit: 1000 });
-                lbRawEvents = deduplicateReviews(events);
+                const perRelayResults = await Promise.allSettled(
+                    RELAYS.map(r => p.querySync([r], { kinds: [REVIEW_KIND], limit: 1000 }))
+                );
+                const allEvents = [];
+                for (const result of perRelayResults) {
+                    if (result.status === 'fulfilled' && result.value) {
+                        allEvents.push(...result.value);
+                    }
+                }
+                lbRawEvents = deduplicateReviews(allEvents);
             }
 
             // Apply time window client-side after dedup
@@ -3815,28 +3826,53 @@
                 ? lbRawEvents.filter(e => e.created_at >= sinceTs)
                 : lbRawEvents;
 
-            const subjects = new Map();
-
+            // Collect unique subjects from p tags
+            const subjectSet = new Set();
             for (const event of inWindow) {
                 const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
-                if (!subjectPubkey) continue;
-                const ratingTag = event.tags.find(t => t[0] === 'rating');
-                const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
-                if (rating < 1 || rating > 5) continue;
-
-                if (!subjects.has(subjectPubkey)) subjects.set(subjectPubkey, { total: 0, count: 0 });
-                const e = subjects.get(subjectPubkey);
-                e.total += rating;
-                e.count++;
+                if (subjectPubkey) subjectSet.add(subjectPubkey);
             }
 
-            return Array.from(subjects.entries())
-                .map(([pubkey, d]) => ({
-                    pubkey,
+            // Also add every reviewer's pubkey as a potential subject —
+            // they may have been reviewed by others but the global query
+            // didn't return those review events
+            for (const event of inWindow) {
+                if (event.pubkey) subjectSet.add(event.pubkey);
+            }
+
+            // Fetch actual reviews per subject individually for accurate counts
+            const subjectArr = Array.from(subjectSet);
+            const perSubjectResults = await Promise.allSettled(
+                subjectArr.map(async (pk) => {
+                    const evts = await p.querySync(RELAYS, {
+                        kinds: [REVIEW_KIND],
+                        '#p': [pk]
+                    });
+                    const deduped = deduplicateReviews(evts);
+                    const filtered = sinceTs
+                        ? deduped.filter(e => e.created_at >= sinceTs)
+                        : deduped;
+                    let total = 0, count = 0;
+                    for (const ev of filtered) {
+                        const ratingTag = ev.tags.find(t => t[0] === 'rating');
+                        const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
+                        if (rating >= 1 && rating <= 5) {
+                            total += rating;
+                            count++;
+                        }
+                    }
+                    return { pubkey: pk, total, count };
+                })
+            );
+
+            return perSubjectResults
+                .filter(r => r.status === 'fulfilled' && r.value.count >= 1)
+                .map(r => r.value)
+                .map(d => ({
+                    pubkey: d.pubkey,
                     avgRating: (d.total / d.count).toFixed(1),
                     reviewCount: d.count
                 }))
-                .filter(e => e.reviewCount >= 1)
                 .sort((a, b) => {
                     const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
                     return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
