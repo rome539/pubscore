@@ -100,13 +100,13 @@ That's the number displayed on the profile card. No decay, no weighting by follo
 
 PubScore broadcasts to and reads from these relays:
 
-- `wss://relay.damus.io`
-- `wss://relay.nostr.band`
-- `wss://nos.lol`
-- `wss://relay.snort.social`
-- `wss://relay.primal.net`
+wss://relay.damus.io
+wss://relay.mostr.pub
+wss://relay.nostrplebs.com
+wss://relay.primal.net
+wss://nos.lol
 
-Publishing uses `Promise.any` — the event is considered sent as soon as at least one relay accepts it. Reading uses `querySync` to gather results from all relays and merge them.
+Publishing uses Promise.allSettled — the event is sent to all relays and each is allowed to succeed or fail independently. Reading uses querySync to gather results from all relays and merge them.
 
 ---
 
@@ -151,16 +151,17 @@ All relay data is treated as untrusted:
 - `escapeHtml()` on every string before `innerHTML`
 - `sanitizeUrl()` blocks `javascript:`, `data:`, `vbscript:`, `file:` protocols on avatar/image URLs
 - `capLength()` prevents DOM bloat from oversized strings
-- Display names capped at 100 chars, bios at 500, reviews at 2000
+- Display names capped at 100 chars, bios at 500, reviews at 2,000
 
 ### Content Security Policy
 
-The HTML includes a strict CSP via meta tag:
+The HTML includes a strict CSP via `<meta>` tag:
 
-- `script-src` limited to `self`, `unsafe-inline` (required for inline module), and the esm.sh CDN
+- `script-src` limited to `self`, `unsafe-inline` (required for inline module), and the unpkg, jsDelivr, and esm.sh CDNs
 - `connect-src` allows `https:` and `wss:` for relay connections
-- `object-src: none`, `base-uri: self`, `frame-ancestors: none`
+- `object-src: none`, `base-uri: self`, `form-action: self`, `frame-ancestors: none`
 - `upgrade-insecure-requests` enforced
+- `referrer` set to `no-referrer`
 
 ---
 
