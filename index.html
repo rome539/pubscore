@@ -4475,7 +4475,10 @@
         await loadTagWindow(currentTagKey);
     }
 
+    let _tagGeneration = 0;
+
     async function loadTagWindow(key) {
+        const thisLoad = ++_tagGeneration;
         const grid = document.getElementById('tagLbGrid');
         if (!grid) return;
 
@@ -4491,6 +4494,7 @@
 
         grid.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
         const ranked = await fetchRankedByTag(key);
+        if (_tagGeneration !== thisLoad) return;
         tagLbCache[key] = ranked;
         renderTagGrid(grid, key, ranked);
     }
@@ -4585,7 +4589,7 @@
         return [...top3, ...shuffled.slice(0, extraCount)];
     }
 
-    async function renderLbGrid(container, ranked) {
+    async function renderLbGrid(container, ranked, generation) {
         if (!ranked.length) {
             container.innerHTML = '<div class="empty anim">No reviews in this period yet.</div>';
             return;
@@ -4621,6 +4625,7 @@
         }));
 
         // Re-sort after refinement so #1/#2/#3 reflect accurate counts
+        if (generation !== undefined && _lbGeneration !== generation) return;
         selection.sort((a, b) => {
             const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
             return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
@@ -4700,7 +4705,10 @@
         await loadLbWindow(currentLbWindow);
     }
 
+    let _lbGeneration = 0;
+
     async function loadLbWindow(key) {
+        const thisLoad = ++_lbGeneration;
         const grid = document.getElementById('lbGrid');
         if (!grid) return;
 
@@ -4709,7 +4717,7 @@
         });
 
         if (lbCache[key]) {
-            await renderLbGrid(grid, lbCache[key]);
+            await renderLbGrid(grid, lbCache[key], thisLoad);
             return;
         }
 
@@ -4718,8 +4726,9 @@
         const win = LB_WINDOWS.find(w => w.key === key);
         const sinceTs = win?.seconds ? Math.floor(Date.now() / 1000) - win.seconds : null;
         const ranked = await fetchRanked(sinceTs);
+        if (_lbGeneration !== thisLoad) return;
         lbCache[key] = ranked;
-        await renderLbGrid(grid, ranked);
+        await renderLbGrid(grid, ranked, thisLoad);
     }
 
     window._lbSwitch = async function(key) {
