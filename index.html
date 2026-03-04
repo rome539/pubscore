@@ -4717,6 +4717,7 @@
         });
 
         if (lbCache[key]) {
+            grid.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading...</div>';
             await renderLbGrid(grid, lbCache[key], thisLoad);
             return;
         }
