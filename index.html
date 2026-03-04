@@ -1062,6 +1062,7 @@
         .rtag-knowledge { background: var(--blue-bg); color: var(--blue); }
         .rtag-helpful { background: var(--green-bg); color: var(--green); }
         .rtag-funny { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+        .rtag-creative { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
         .rtag-warning { background: var(--red-bg); color: var(--red); }
 
         /* ================================================================
@@ -1771,6 +1772,7 @@
         .tag-lb-pill.active-knowledge { background: var(--blue-bg);             border-color: rgba(91,156,245,0.25);         color: var(--blue); }
         .tag-lb-pill.active-helpful   { background: var(--green-bg);            border-color: rgba(78,202,130,0.25);         color: var(--green); }
         .tag-lb-pill.active-funny     { background: rgba(168,85,247,0.1);       border-color: rgba(168,85,247,0.25);         color: #a855f7; }
+        .tag-lb-pill.active-creative   { background: rgba(245,158,11,0.1);       border-color: rgba(245,158,11,0.25);         color: #f59e0b; }
         .tag-lb-pill.active-warning   { background: var(--red-bg);              border-color: var(--red-border);             color: var(--red); }
 
         .tag-lb-grid {
@@ -3134,6 +3136,7 @@
             knowledge: 'Knowledgeable',
             helpful: 'Helpful',
             funny: 'Funny',
+            creative: 'Creative',
             warning: 'Warning'
         };
         const classes = {
@@ -3141,6 +3144,7 @@
             knowledge: 'rtag-knowledge',
             helpful: 'rtag-helpful',
             funny:    'rtag-funny',
+            creative: 'rtag-creative',
             warning: 'rtag-warning'
         };
         return `<span class="rtag ${classes[category] || ''}">${escapeHtml(labels[category] || category)}</span>`;
@@ -3459,6 +3463,7 @@
 
     /** Clear the lookup and return to the start/featured page */
     function goHome() {
+        _lookupGeneration++;   // cancel any in-flight lookupByPubkey
         currentLookupPubkey = null;
         currentReviews = [];
         currentPage = 0;
@@ -3565,9 +3570,14 @@
     }
 
     /** Lookup by already-resolved pubkey (skip parsing) */
+    let _lookupGeneration = 0;
+
     async function lookupByPubkey(pubkey) {
+        const thisLookup = ++_lookupGeneration;
         currentLookupPubkey = pubkey;
         currentPage = 0;
+
+        const isStale = () => _lookupGeneration !== thisLookup;
 
         // Clear any previous eligibility banner
         document.getElementById('eligibilityBanner').innerHTML = '';
@@ -3587,8 +3597,12 @@
                 fetchReviews(pubkey)
             ]);
 
+            // Race condition guard: user navigated away while we were loading
+            if (isStale()) return;
+
             // Eligibility gate: must follow 20+ and have 10+ followers
             const eligibility = await checkProfileEligibility(pubkey, follows);
+            if (isStale()) return;
             if (!eligibility.ok) {
                 currentLookupPubkey = null;
                 document.getElementById('npubInput').value = '';
@@ -3624,11 +3638,15 @@
                 return;
             }
 
+            // Race condition guard: user navigated away during eligibility check
+            if (isStale()) return;
+
             currentReviews = reviews;
             const npub = NostrTools.nip19.npubEncode(pubkey);
 
             renderProfileCard(pubkey, npub, profile, follows, reviews);
             await renderReviewForm();
+            if (isStale()) return;
             renderReviews(reviews);
             updateSearchBtn();
         } catch (e) {
@@ -3862,6 +3880,7 @@
                         <button class="cat-tag ${selectedCategories.has('knowledge') ? 'sel' : ''}" data-cat="knowledge" onclick="window._toggleCat('knowledge',this)">Knowledgeable</button>
                         <button class="cat-tag ${selectedCategories.has('helpful') ? 'sel' : ''}" data-cat="helpful" onclick="window._toggleCat('helpful',this)">Helpful</button>
                         <button class="cat-tag ${selectedCategories.has('funny') ? 'sel' : ''}" data-cat="funny" onclick="window._toggleCat('funny',this)">Funny</button>
+                        <button class="cat-tag ${selectedCategories.has('creative') ? 'sel' : ''}" data-cat="creative" onclick="window._toggleCat('creative',this)">Creative</button>
                         <button class="cat-tag ${selectedCategories.has('warning') ? 'sel' : ''}" data-cat="warning" onclick="window._toggleCat('warning',this)">Warning</button>
                     </div>
                 </div>
@@ -4423,6 +4442,7 @@
         { key: 'knowledge', label: 'Knowledgeable',  pillClass: 'active-knowledge' },
         { key: 'helpful',   label: 'Helpful',        pillClass: 'active-helpful'   },
         { key: 'funny',     label: 'Funny',          pillClass: 'active-funny'     },
+        { key: 'creative',  label: 'Creative',       pillClass: 'active-creative'  },
         { key: 'warning',   label: 'Warning',        pillClass: 'active-warning'   },
     ];
 
