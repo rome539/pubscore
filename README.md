@@ -12,7 +12,7 @@ You paste someone's `npub` (or hex pubkey), see their profile and existing revie
 
 ### Front Page
 
-On load, PubScore queries relays for up to 200 recent review events, aggregates them by subject, calculates average ratings, and displays a randomized selection of the highest-rated profiles. Hit "Shuffle" to re-randomize from the top 20 pool without re-fetching.
+On load, PubScore paginates through relays to fetch all review events, deduplicates and aggregates them by subject, and calculates average ratings. The top 3 highest-rated profiles are pinned, and 13 more are randomly selected from the remaining pool to display 16 cards total. Hit "Shuffle" to re-randomize the selection without re-fetching.
 
 ---
 
