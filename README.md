@@ -10,9 +10,9 @@ PubScore is a single-file web app that lets anyone rate and review Nostr profile
 
 You paste someone's `npub` (or hex pubkey), see their profile and existing reviews, and leave your own rating + written review. Everything is signed with your Nostr key and broadcast to relays. That's it.
 
-### Front Page
+## Front Page
 
-On load, PubScore paginates through relays to fetch all review events, deduplicates and aggregates them by subject, and calculates average ratings. The top 3 highest-rated profiles are pinned, and 13 more are randomly selected from the remaining pool to display 16 cards total. Hit "Shuffle" to re-randomize the selection without re-fetching.
+On load, PubScore paginates through relays to fetch all review events (up to 10,000 per relay), deduplicates and aggregates them by subject, and calculates average ratings. The top 3 highest-rated profiles are pinned, and 13 more are randomly selected from the remaining pool to display 16 cards total. Hit **Shuffle** to re-randomize the selection without re-fetching.
 
 ---
 
@@ -95,18 +95,17 @@ That's the number displayed on the profile card. No decay, no weighting by follo
 6. Take the top 20, randomly pick 6 to display
 
 ---
-
 ## Relays
 
 PubScore broadcasts to and reads from these relays:
 
-wss://relay.damus.io
-wss://relay.mostr.pub
-wss://relay.nostrplebs.com
-wss://relay.primal.net
-wss://nos.lol
+- `wss://relay.damus.io`
+- `wss://relay.mostr.pub`
+- `wss://relay.nostrplebs.com`
+- `wss://relay.primal.net`
+- `wss://nos.lol`
 
-Publishing uses Promise.allSettled — the event is sent to all relays and each is allowed to succeed or fail independently. Reading uses querySync to gather results from all relays and merge them.
+Publishing uses `Promise.allSettled` — the event is sent to all relays and each is allowed to succeed or fail independently. Reading uses `querySync` to gather results from all relays and merge them.
 
 ---
 
