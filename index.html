@@ -1066,6 +1066,249 @@
         .rtag-warning { background: var(--red-bg); color: var(--red); }
 
         /* ================================================================
+           API DOCS DRAWER — slides in from left
+           ================================================================ */
+        .api-drawer-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+        }
+
+        .api-drawer-bg.open {
+            display: block;
+        }
+
+        .api-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 480px;
+            max-width: 92vw;
+            height: 100vh;
+            height: 100dvh;
+            background: var(--bg-raised);
+            border-right: 1px solid var(--border);
+            z-index: 101;
+            transform: translateX(-100%);
+            visibility: hidden;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .api-drawer.open {
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        .api-drawer-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .api-drawer-header h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .api-drawer-header h2 em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--accent);
+        }
+
+        .api-drawer-close {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-2);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .api-drawer-close:hover {
+            color: var(--text);
+            border-color: var(--border-strong);
+            background: var(--bg-hover);
+        }
+
+        .api-drawer-close svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .api-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px 32px;
+            padding-bottom: max(32px, calc(32px + env(safe-area-inset-bottom)));
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .api-drawer-body p {
+            color: var(--text-2);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .api-drawer-body h3 {
+            font-family: 'Karla', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-3);
+            margin: 24px 0 10px;
+        }
+
+        .api-drawer-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .api-endpoint {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .api-endpoint:hover {
+            border-color: var(--border-strong);
+            background: var(--bg-hover);
+        }
+
+        .api-endpoint-method {
+            font-family: 'Karla', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+
+        .api-endpoint-path {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        .api-endpoint-desc {
+            font-size: 0.8rem;
+            color: var(--text-3);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .api-example {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 12px 14px;
+            margin: 10px 0 16px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .api-example code {
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: var(--text-2);
+            line-height: 1.5;
+            white-space: pre;
+        }
+
+        .api-example-copy {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-3);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            opacity: 0;
+        }
+
+        .api-example:hover .api-example-copy {
+            opacity: 1;
+        }
+
+        .api-example-copy:hover {
+            color: var(--accent);
+            border-color: var(--accent-border);
+        }
+
+        .api-example-copy svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .api-base-url {
+            background: var(--accent-bg);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--r);
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .api-base-url code {
+            font-family: monospace;
+            font-size: 0.88rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .api-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: var(--green-bg);
+            color: var(--green);
+            border: 1px solid rgba(78, 202, 130, 0.2);
+        }
+
+        /* ================================================================
            LOGIN DRAWER — slides in from right
            ================================================================ */
         .drawer-bg {
@@ -1432,6 +1675,7 @@
             justify-content: flex-end;
             gap: 8px;
             padding: 16px 24px;
+            padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom)));
             border-top: 1px solid var(--border);
             background: var(--bg);
         }
@@ -1522,6 +1766,7 @@
 
         .drawer-body {
             padding: 24px;
+            padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
             flex: 1;
             overflow-y: auto;
         }
@@ -2191,7 +2436,7 @@
          ================================================================ -->
     <div class="topbar">
         <div class="topbar-inner">
-            <div class="brand">Pub<em>Score</em></div>
+            <div class="brand" onclick="window._toggleApiDocs()" style="cursor:pointer;" title="API Documentation">Pub<em>Score</em></div>
             <div class="topbar-right">
                 <div class="topbar-nav">
                     <button class="active" data-tab="lookup" onclick="switchTab('lookup')">Lookup</button>
@@ -2203,6 +2448,120 @@
                     </div>
                     <span>Sign in</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Docs Drawer -->
+    <div class="api-drawer-bg" id="apiDrawerBg" onclick="window._closeApiDocs()">
+        <div class="api-drawer" id="apiDrawer" onclick="event.stopPropagation()">
+            <div class="api-drawer-header">
+                <h2>Pub<em>Score</em> API</h2>
+                <button class="api-drawer-close" onclick="window._closeApiDocs()">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="api-drawer-body">
+                <p>Public, read-only API for Nostr review data. No authentication required. All reviews are cryptographically signed, validated, and spam-filtered.</p>
+
+                <div class="api-base-url">
+                    <code>https://api.pubscore.space</code>
+                    <span class="api-badge">Public</span>
+                </div>
+
+                <h3>Endpoints</h3>
+
+                <div class="api-endpoint" onclick="window._copyApi('/reviews?npub={npub}')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/reviews?npub={npub}</div>
+                    <div class="api-endpoint-desc">Full reviews for a profile — rating, text, categories, reviewer, timestamp.</div>
+                </div>
+
+                <div class="api-endpoint" onclick="window._copyApi('/score?npub={npub}')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/score?npub={npub}</div>
+                    <div class="api-endpoint-desc">Lightweight score only — average rating + review count.</div>
+                </div>
+
+                <div class="api-endpoint" onclick="window._copyApi('/scores?npubs={npub1,npub2,...}')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/scores?npubs={npub1,npub2,...}</div>
+                    <div class="api-endpoint-desc">Batch scores for up to 200 npubs in a single request.</div>
+                </div>
+
+                <div class="api-endpoint" onclick="window._copyApi('/leaderboard?window=all&limit=50')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/leaderboard?window={all|week|month}&amp;limit={n}</div>
+                    <div class="api-endpoint-desc">Top rated profiles. Window filters by time period, limit caps results (max 1000).</div>
+                </div>
+
+                <div class="api-endpoint" onclick="window._copyApi('/leaderboard/tag?tag=funny&window=all')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/leaderboard/tag?tag={tag}&amp;window={all|week|month}</div>
+                    <div class="api-endpoint-desc">Everyone tagged with a category. Tags: trade, knowledge, helpful, funny, creative, warning.</div>
+                </div>
+
+                <div class="api-endpoint" onclick="window._copyApi('/health')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/health</div>
+                    <div class="api-endpoint-desc">API status, uptime, review count, ingester stats.</div>
+                </div>
+
+                <h3>Example: Get a score</h3>
+                <div class="api-example">
+                    <code>fetch('https://api.pubscore.space/score?npub=npub1...')
+  .then(r => r.json())
+  .then(data => {
+    console.log(data.avgRating) // 4.2
+    console.log(data.count)     // 17
+  })</code>
+                    <button class="api-example-copy" onclick="event.stopPropagation(); window._copyCode(this)" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
+
+                <h3>Example: Batch scores</h3>
+                <div class="api-example">
+                    <code>const npubs = ['npub1abc...', 'npub1def...']
+const url = `https://api.pubscore.space/scores?npubs=${npubs.join(',')}`
+const { scores } = await fetch(url).then(r => r.json())
+// scores['npub1abc...'] = { avgRating: 4.2, count: 17 }</code>
+                    <button class="api-example-copy" onclick="event.stopPropagation(); window._copyCode(this)" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
+
+                <h3>Example: Full reviews</h3>
+                <div class="api-example">
+                    <code>const { reviews, avgRating, count } = await fetch(
+  'https://api.pubscore.space/reviews?npub=npub1...'
+).then(r => r.json())
+
+reviews.forEach(r => {
+  console.log(r.reviewer, r.rating, r.content)
+})</code>
+                    <button class="api-example-copy" onclick="event.stopPropagation(); window._copyCode(this)" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
+
+                <h3>Validation Rules</h3>
+                <p style="margin-bottom:8px">Every review stored in the API has passed these checks:</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ Valid Nostr event signature</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ Reviewer has ≥30 followers</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ Rating between 1–5</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ No self-reviews</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ One review per reviewer per profile</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:16px">✓ Max 20 reviews per reviewer per day</p>
+
+                <h3>Rate Limits</h3>
+                <p>120 requests per minute per IP. No authentication needed.</p>
+
+                <h3>CORS</h3>
+                <p>Open to all origins. Use it from any frontend, app, or script.</p>
+
+                <h3>Open Source</h3>
+                <p>The API is open source. <a href="https://github.com/rome539/pubscore-api" target="_blank" rel="noopener" style="color:var(--accent);">View on GitHub →</a></p>
             </div>
         </div>
     </div>
@@ -2699,18 +3058,6 @@
     // RELAY QUERIES
     // =====================================================================
 
-    /** Fetch a profile (kind 0) from relays */
-    async function fetchProfile(pubkey) {
-        const p = await initPool();
-        try {
-            const event = await p.get(RELAYS, { kinds: [0], authors: [pubkey], limit: 1 });
-            if (event) return JSON.parse(event.content);
-        } catch (e) {
-            console.warn('fetchProfile error:', e);
-        }
-        return {};
-    }
-
     /** Simple TTL cache — entries expire after `ttlMs` milliseconds */
     function createTtlCache(ttlMs = 5 * 60 * 1000) {
         const store = new Map();
@@ -2727,6 +3074,30 @@
             invalidate(key) { store.delete(key); },
             clear() { store.clear(); }
         };
+    }
+
+    /** Fetch a profile (kind 0) from relays (cached 5 min) */
+    const profileFetchCache = createTtlCache(5 * 60 * 1000);
+
+    async function fetchProfile(pubkey) {
+        const cached = profileFetchCache.get(pubkey);
+        if (cached !== undefined) return cached;
+
+        const p = await initPool();
+        try {
+            const event = await p.get(RELAYS, { kinds: [0], authors: [pubkey], limit: 1 });
+            if (event) {
+                const profile = JSON.parse(event.content);
+                profileFetchCache.set(pubkey, profile);
+                profileCache[pubkey] = profile;
+                return profile;
+            }
+        } catch (e) {
+            console.warn('fetchProfile error:', e);
+        }
+        const empty = {};
+        profileFetchCache.set(pubkey, empty);
+        return empty;
     }
 
     const followsCache = createTtlCache(5 * 60 * 1000);
@@ -2795,6 +3166,22 @@
         return { ok: true };
     }
 
+    /** Synchronous eligibility check — uses pre-fetched follower count */
+    function checkProfileEligibilitySync(pubkey, follows, followerCount) {
+        const MIN_FOLLOWING = 20;
+        const MIN_FOLLOWERS = 10;
+
+        if (follows.length < MIN_FOLLOWING) {
+            return { ok: false, reason: `This profile follows fewer than ${MIN_FOLLOWING} people and can't be looked up.` };
+        }
+
+        if (followerCount < MIN_FOLLOWERS) {
+            return { ok: false, reason: `This profile has fewer than ${MIN_FOLLOWERS} followers and can't be looked up.` };
+        }
+
+        return { ok: true };
+    }
+
     /**
      * Deduplicate replaceable events.
      * Keeps only the newest event per author + d-tag combination.
@@ -2813,18 +3200,38 @@
         return Array.from(map.values());
     }
 
-    /** Fetch all reviews for a given subject pubkey */
+    /** Fetch all reviews for a given subject pubkey — via PubScore API */
     async function fetchReviews(subjectPubkey) {
-        const p = await initPool();
         try {
-            const events = await p.querySync(RELAYS, {
-                kinds: [REVIEW_KIND],
-                '#p': [subjectPubkey]
-            });
-            return deduplicateReviews(events);
+            const npub = NostrTools.nip19.npubEncode(subjectPubkey);
+            const resp = await fetch(`https://api.pubscore.space/reviews?npub=${npub}`);
+            if (!resp.ok) throw new Error(`API ${resp.status}`);
+            const data = await resp.json();
+            // Convert API response to match the event-like format the UI expects
+            return (data.reviews || []).map(r => ({
+                pubkey: r.reviewerHex,
+                created_at: r.created_at,
+                content: r.content || '',
+                tags: [
+                    ['p', subjectPubkey],
+                    ['rating', String(r.rating)],
+                    ...(r.categories || []).map(c => ['t', c])
+                ]
+            }));
         } catch (e) {
-            console.warn('fetchReviews error:', e);
-            return [];
+            console.warn('fetchReviews API error, falling back to relays:', e);
+            // Fallback to direct relay fetch
+            const p = await initPool();
+            try {
+                const events = await p.querySync(RELAYS, {
+                    kinds: [REVIEW_KIND],
+                    '#p': [subjectPubkey]
+                });
+                return deduplicateReviews(events);
+            } catch (e2) {
+                console.warn('fetchReviews relay fallback error:', e2);
+                return [];
+            }
         }
     }
 
@@ -3231,6 +3638,48 @@
     }
 
     /** Handle auth pill click — open drawer or show custom logout modal */
+    // =====================================================================
+    // API DOCS DRAWER
+    // =====================================================================
+
+    window._toggleApiDocs = function() {
+        const bg = document.getElementById('apiDrawerBg');
+        const drawer = document.getElementById('apiDrawer');
+        const isOpen = bg.classList.contains('open');
+        if (isOpen) {
+            window._closeApiDocs();
+        } else {
+            bg.classList.add('open');
+            drawer.classList.add('open');
+        }
+    };
+
+    window._closeApiDocs = function() {
+        document.getElementById('apiDrawerBg').classList.remove('open');
+        document.getElementById('apiDrawer').classList.remove('open');
+    };
+
+    window._copyApi = function(path) {
+        const url = 'https://api.pubscore.space' + path;
+        navigator.clipboard.writeText(url).then(() => {
+            toast('Copied: ' + url, 'success');
+        }).catch(() => {});
+    };
+
+    window._copyCode = function(btn) {
+        const code = btn.parentElement.querySelector('code');
+        if (code) {
+            navigator.clipboard.writeText(code.textContent).then(() => {
+                toast('Copied to clipboard', 'success');
+            }).catch(() => {});
+        }
+    };
+
+    // Close API drawer on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') window._closeApiDocs();
+    });
+
     window._authAction = function() {
         if (currentUser) {
             showConfirmModal({
@@ -3591,18 +4040,19 @@
         document.getElementById('reviewsArea').innerHTML = '';
 
         try {
-            const [profile, follows, reviews] = await Promise.all([
+            // Run everything in parallel — including follower count for eligibility
+            const [profile, follows, reviews, followerCount] = await Promise.all([
                 fetchProfile(pubkey),
                 fetchFollows(pubkey),
-                fetchReviews(pubkey)
+                fetchReviews(pubkey),
+                fetchFollowerCount(pubkey)
             ]);
 
             // Race condition guard: user navigated away while we were loading
             if (isStale()) return;
 
             // Eligibility gate: must follow 20+ and have 10+ followers
-            const eligibility = await checkProfileEligibility(pubkey, follows);
-            if (isStale()) return;
+            const eligibility = checkProfileEligibilitySync(pubkey, follows, followerCount);
             if (!eligibility.ok) {
                 currentLookupPubkey = null;
                 document.getElementById('npubInput').value = '';
@@ -4356,80 +4806,103 @@
         return allEvents;
     }
 
-    async function fetchRanked(sinceTs) {
-        const p = await initPool();
-
+    async function fetchRanked(sinceTs, windowKey) {
         try {
-            if (!lbRawEvents) {
-                const allEvents = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND] });
-                lbRawEvents = deduplicateReviews(allEvents);
-            }
+            // Map frontend window keys directly to API params
+            let windowParam = 'all';
+            if (windowKey === '24h') windowParam = '24h';
+            else if (windowKey === '7d') windowParam = 'week';
+            else if (windowKey === '30d') windowParam = 'month';
+            else if (windowKey === 'alltime' || !windowKey) windowParam = 'all';
 
-            const inWindow = sinceTs
-                ? lbRawEvents.filter(e => e.created_at >= sinceTs)
-                : lbRawEvents;
-
-            // Aggregate ratings locally — no per-pubkey relay queries
-            const subjects = new Map();
-            for (const ev of inWindow) {
-                const subjectPubkey = ev.tags.find(t => t[0] === 'p')?.[1];
-                if (!subjectPubkey) continue;
-                const ratingTag = ev.tags.find(t => t[0] === 'rating');
-                const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
-                if (rating < 1 || rating > 5) continue;
-
-                if (!subjects.has(subjectPubkey)) {
-                    subjects.set(subjectPubkey, { total: 0, count: 0 });
-                }
-                const agg = subjects.get(subjectPubkey);
-                agg.total += rating;
-                agg.count++;
-            }
-
-            return Array.from(subjects.entries())
-                .filter(([, d]) => d.count >= 1)
-                .map(([pubkey, d]) => ({
-                    pubkey,
-                    avgRating: (d.total / d.count).toFixed(1),
-                    reviewCount: d.count
-                }))
-                .sort((a, b) => {
-                    const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
-                    return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
-                });
+            const resp = await fetch(`https://api.pubscore.space/leaderboard?window=${windowParam}&limit=100`);
+            if (!resp.ok) throw new Error(`API ${resp.status}`);
+            const data = await resp.json();
+            return (data.profiles || []).map(p => ({
+                pubkey: p.pubkey,
+                avgRating: parseFloat(p.avgRating).toFixed(1),
+                reviewCount: p.count
+            }));
         } catch (e) {
-            console.warn('fetchRanked error:', e);
-            return [];
+            console.warn('fetchRanked API error, falling back to relays:', e);
+            // Fallback to relay-based fetch
+            const p = await initPool();
+            try {
+                if (!lbRawEvents) {
+                    const allEvents = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND] });
+                    lbRawEvents = deduplicateReviews(allEvents);
+                }
+                const inWindow = sinceTs
+                    ? lbRawEvents.filter(e => e.created_at >= sinceTs)
+                    : lbRawEvents;
+                const subjects = new Map();
+                for (const ev of inWindow) {
+                    const subjectPubkey = ev.tags.find(t => t[0] === 'p')?.[1];
+                    if (!subjectPubkey) continue;
+                    const ratingTag = ev.tags.find(t => t[0] === 'rating');
+                    const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
+                    if (rating < 1 || rating > 5) continue;
+                    if (!subjects.has(subjectPubkey)) subjects.set(subjectPubkey, { total: 0, count: 0 });
+                    const agg = subjects.get(subjectPubkey);
+                    agg.total += rating;
+                    agg.count++;
+                }
+                return Array.from(subjects.entries())
+                    .filter(([, d]) => d.count >= 1)
+                    .map(([pubkey, d]) => ({
+                        pubkey,
+                        avgRating: (d.total / d.count).toFixed(1),
+                        reviewCount: d.count
+                    }))
+                    .sort((a, b) => {
+                        const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
+                        return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
+                    });
+            } catch (e2) {
+                console.warn('fetchRanked relay fallback error:', e2);
+                return [];
+            }
         }
     }
 
     async function fetchRankedByTag(tagKey) {
-        const p = await initPool();
         try {
-            const events = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND], '#t': [tagKey] });
-            if (!events.length) return [];
-
-            const deduped = deduplicateReviews(events);
-            const subjects = new Map();
-
-            for (const event of deduped) {
-                const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
-                if (!subjectPubkey) continue;
-                subjects.set(subjectPubkey, (subjects.get(subjectPubkey) || 0) + 1);
-            }
-
-            const all = Array.from(subjects.entries())
-                .map(([pubkey, count]) => ({ pubkey, reviewCount: count }));
-
+            const resp = await fetch(`https://api.pubscore.space/leaderboard/tag?tag=${tagKey}&window=all`);
+            if (!resp.ok) throw new Error(`API error ${resp.status}`);
+            const data = await resp.json();
+            const all = (data.profiles || []).map(p => ({
+                pubkey: p.pubkey,
+                reviewCount: p.count
+            }));
+            // Shuffle so every load is different
             for (let i = all.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [all[i], all[j]] = [all[j], all[i]];
             }
-
             return all;
         } catch (e) {
-            console.warn('fetchRankedByTag error:', e);
-            return [];
+            console.warn('fetchRankedByTag API error, falling back to relays:', e);
+            const p = await initPool();
+            try {
+                const events = await paginatedFetch(p, RELAYS, { kinds: [REVIEW_KIND], '#t': [tagKey] });
+                if (!events.length) return [];
+                const deduped = deduplicateReviews(events);
+                const subjects = new Map();
+                for (const event of deduped) {
+                    const subjectPubkey = event.tags.find(t => t[0] === 'p')?.[1];
+                    if (!subjectPubkey) continue;
+                    subjects.set(subjectPubkey, (subjects.get(subjectPubkey) || 0) + 1);
+                }
+                const all = Array.from(subjects.entries()).map(([pubkey, count]) => ({ pubkey, reviewCount: count }));
+                for (let i = all.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [all[i], all[j]] = [all[j], all[i]];
+                }
+                return all;
+            } catch (e2) {
+                console.warn('fetchRankedByTag relay fallback error:', e2);
+                return [];
+            }
         }
     }
 
@@ -4552,24 +5025,15 @@
         await loadTagWindow(key);
     };
 
-    window._tagShuffle = async function() {
+    window._tagShuffle = function() {
         const grid = document.getElementById('tagLbGrid');
         if (!grid) return;
-        const btn = document.querySelector('[onclick="window._tagShuffle()"]');
-        if (btn) { btn.disabled = true; btn.textContent = 'Shuffling…'; }
-        // Let the browser paint the button text before doing work
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        try {
-            if (tagLbCache[currentTagKey]) {
-                const reshuffled = fisherYates(tagLbCache[currentTagKey]);
-                tagLbCache[currentTagKey] = reshuffled;
-                renderTagGrid(grid, currentTagKey, reshuffled);
-            } else {
-                delete tagLbCache[currentTagKey];
-                await loadTagWindow(currentTagKey);
-            }
-        } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Shuffle'; }
+        if (tagLbCache[currentTagKey]) {
+            const reshuffled = fisherYates(tagLbCache[currentTagKey]);
+            tagLbCache[currentTagKey] = reshuffled;
+            renderTagGrid(grid, currentTagKey, reshuffled);
+        } else {
+            loadTagWindow(currentTagKey);
         }
     };
 
@@ -4597,34 +5061,7 @@
 
         const selection = buildSelection(ranked);
 
-        // Refine counts for displayed cards with targeted per-pubkey queries
-        const p = await initPool();
-        await Promise.all(selection.map(async (entry) => {
-            try {
-                const evts = await p.querySync(RELAYS, {
-                    kinds: [REVIEW_KIND],
-                    '#p': [entry.pubkey]
-                });
-                const deduped = deduplicateReviews(evts);
-                let total = 0, count = 0;
-                for (const ev of deduped) {
-                    const ratingTag = ev.tags.find(t => t[0] === 'rating');
-                    const rating = ratingTag ? parseInt(ratingTag[1]) || 0 : 0;
-                    if (rating >= 1 && rating <= 5) {
-                        total += rating;
-                        count++;
-                    }
-                }
-                if (count > 0) {
-                    entry.avgRating = (total / count).toFixed(1);
-                    entry.reviewCount = count;
-                }
-            } catch (e) {
-                // Keep the locally-aggregated values as fallback
-            }
-        }));
-
-        // Re-sort after refinement so #1/#2/#3 reflect accurate counts
+        // Data from API is already accurate — no need for per-pubkey relay refinement
         if (generation !== undefined && _lbGeneration !== generation) return;
         selection.sort((a, b) => {
             const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
@@ -4726,7 +5163,7 @@
 
         const win = LB_WINDOWS.find(w => w.key === key);
         const sinceTs = win?.seconds ? Math.floor(Date.now() / 1000) - win.seconds : null;
-        const ranked = await fetchRanked(sinceTs);
+        const ranked = await fetchRanked(sinceTs, key);
         if (_lbGeneration !== thisLoad) return;
         lbCache[key] = ranked;
         await renderLbGrid(grid, ranked, thisLoad);
