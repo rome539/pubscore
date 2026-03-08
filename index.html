@@ -1854,7 +1854,8 @@
             margin-bottom: 14px;
         }
 
-        .nsec-panel input {
+        .nsec-panel input[type="password"],
+        .nsec-panel input[type="text"] {
             width: 100%;
             padding: 14px 16px;
             background: var(--bg);
@@ -1866,6 +1867,7 @@
             outline: none;
             margin-bottom: 14px;
             transition: border-color 0.15s;
+            box-sizing: border-box;
         }
 
         .nsec-panel input:focus {
@@ -2633,10 +2635,14 @@ reviews.forEach(r => {
             <!-- nsec input (toggles open) -->
             <div class="nsec-panel" id="nsecPanel">
                 <div class="nsec-warn">
-                    Your nsec is held in a secure closure and wiped on logout, tab close, or 15 min inactivity. For max safety, use a browser extension instead.
+                    ⚠️ Using your private key in a web app carries inherent risk. If this site were ever compromised, your key could be exposed. A browser extension like <strong>nos2x</strong> or <strong>Alby</strong> is always the safer option.
                 </div>
+                <label style="display:flex;align-items:flex-start;gap:10px;margin:12px 0;cursor:pointer;font-size:0.83rem;color:var(--text-2);line-height:1.5;">
+                    <input type="checkbox" id="nsecRiskCheck" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('nsecSignInBtn').disabled=!this.checked;document.getElementById('nsecSignInBtn').style.opacity=this.checked?'1':'0.5';document.getElementById('nsecSignInBtn').style.cursor=this.checked?'pointer':'not-allowed';">
+                    I understand the risks of using my private key in a web app and prefer this over a browser extension.
+                </label>
                 <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
-                <button class="btn btn-accent" style="width:100%;" onclick="loginNsec()">Sign in with nsec</button>
+                <button id="nsecSignInBtn" class="btn btn-accent" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled onclick="loginNsec()">Sign in with nsec</button>
             </div>
 
             <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
@@ -3747,6 +3753,11 @@ reviews.forEach(r => {
     window._toggleNsec = function() {
         document.getElementById('nsecPanel').classList.toggle('show');
         document.getElementById('npubLoginPanel').classList.remove('show');
+        // Reset checkbox when panel is toggled
+        const cb = document.getElementById('nsecRiskCheck');
+        const btn = document.getElementById('nsecSignInBtn');
+        if (cb) { cb.checked = false; }
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
     };
 
     /** Toggle the npub view-only input panel */
