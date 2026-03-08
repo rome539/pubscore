@@ -4401,9 +4401,33 @@ reviews.forEach(r => {
             loadLbWindow(currentLbWindow);
             loadTagWindow(currentTagKey);
 
-            const reviews = await fetchReviews(currentLookupPubkey);
-            currentReviews = reviews;
-            renderReviews(reviews);
+            // Optimistically update local state immediately so UI reflects the
+            // new/updated review without waiting for the API to index it.
+            const optimisticReview = {
+                pubkey: currentUser.pubkey,
+                created_at: Math.floor(Date.now() / 1000),
+                content,
+                tags: [
+                    ['p', currentLookupPubkey],
+                    ['rating', String(selectedRating)],
+                    ...Array.from(selectedCategories).map(c => ['t', c])
+                ]
+            };
+            // Remove any existing review by this user then prepend the new one
+            const filtered = (currentReviews || []).filter(r => r.pubkey !== currentUser.pubkey);
+            currentReviews = [optimisticReview, ...filtered];
+            renderReviews(currentReviews);
+
+            // Then fetch in the background and silently update if the API has caught up
+            fetchReviews(currentLookupPubkey).then(reviews => {
+                // Only apply if the fresh data actually contains our new review
+                const hasOurs = reviews.some(r => r.pubkey === currentUser.pubkey &&
+                    r.created_at >= optimisticReview.created_at);
+                if (hasOurs) {
+                    currentReviews = reviews;
+                    renderReviews(reviews);
+                }
+            }).catch(() => {/* keep optimistic state on error */});
 
             const [profile, follows] = await Promise.all([
                 fetchProfile(currentLookupPubkey),
