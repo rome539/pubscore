@@ -25,7 +25,9 @@
     <meta name="twitter:image" content="https://pubscore.space/og-preview.png">
 
     <!-- Icons -->
-    <link rel="icon" type="image/png" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/apple-touch-icon.png">
+    <link rel="shortcut icon" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
     <!-- Security: Content Security Policy -->
@@ -3265,7 +3267,7 @@ reviews.forEach(r => {
         };
         const signed = await signEvent(event);
         const p = await initPool();
-        await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
+        await Promise.allSettled(p.publish(RELAYS, signed));
     }
 
     /** Publish (or update) a review for a subject pubkey */
@@ -3289,7 +3291,7 @@ reviews.forEach(r => {
 
         const signed = await signEvent(event);
         const p = await initPool();
-        await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
+        await Promise.allSettled(p.publish(RELAYS, signed));
     }
 
     // =====================================================================
@@ -3528,7 +3530,7 @@ reviews.forEach(r => {
             };
             const signed = await signEvent(event);
             const p = await initPool();
-            await Promise.allSettled(RELAYS.map(r => p.publish([r], signed)));
+            await Promise.allSettled(p.publish(RELAYS, signed));
             window._closeShareModal();
             toast('Posted to Nostr!', 'success');
         } catch (e) {
