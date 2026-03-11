@@ -2922,6 +2922,45 @@ reviews.forEach(r => {
         return pool;
     }
 
+    /**
+     * Publish a signed event to ALL relays reliably.
+     * Ensures each relay connection is established before attempting to publish,
+     * and retries once on failure per relay.
+     */
+    async function publishToAllRelays(signed) {
+        const p = await initPool();
+        const results = await Promise.allSettled(
+            RELAYS.map(async (url) => {
+                try {
+                    // Ensure the relay WebSocket is connected before publishing
+                    const relay = await p.ensureRelay(url);
+                    return await relay.publish(signed);
+                } catch (err1) {
+                    // Retry once — the first attempt may fail if the socket was stale
+                    try {
+                        const relay = await p.ensureRelay(url);
+                        return await relay.publish(signed);
+                    } catch (err2) {
+                        throw new Error(`${url}: ${err2.message || err2}`);
+                    }
+                }
+            })
+        );
+
+        const succeeded = results.filter(r => r.status === 'fulfilled').length;
+        const failed = results.filter(r => r.status === 'rejected');
+
+        if (failed.length > 0) {
+            console.warn(`Published to ${succeeded}/${RELAYS.length} relays. Failures:`, failed.map(r => r.reason?.message || r.reason));
+        }
+
+        if (succeeded === 0) {
+            throw new Error('Failed to publish to any relay');
+        }
+
+        return { succeeded, failed: failed.length, total: RELAYS.length };
+    }
+
     /** Run async tasks with concurrency limit to avoid overwhelming relays. */
     async function throttledAll(tasks, limit = 3) {
         const results = new Array(tasks.length);
@@ -3274,8 +3313,7 @@ reviews.forEach(r => {
             content: ''
         };
         const signed = await signEvent(event);
-        const p = await initPool();
-        await Promise.allSettled(p.publish(RELAYS, signed));
+        await publishToAllRelays(signed);
     }
 
     /** Publish (or update) a review for a subject pubkey */
@@ -3298,8 +3336,7 @@ reviews.forEach(r => {
         };
 
         const signed = await signEvent(event);
-        const p = await initPool();
-        await Promise.allSettled(p.publish(RELAYS, signed));
+        await publishToAllRelays(signed);
     }
 
     // =====================================================================
@@ -3537,10 +3574,9 @@ reviews.forEach(r => {
                 content
             };
             const signed = await signEvent(event);
-            const p = await initPool();
-            await Promise.allSettled(p.publish(RELAYS, signed));
+            const { succeeded, total } = await publishToAllRelays(signed);
             window._closeShareModal();
-            toast('Posted to Nostr!', 'success');
+            toast(`Posted to Nostr! (${succeeded}/${total} relays)`, 'success');
         } catch (e) {
             toast('Failed to post: ' + e.message, 'error');
             if (postBtn) {
