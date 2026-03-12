@@ -30,6 +30,11 @@
     <link rel="shortcut icon" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#09090b">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Security: Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
@@ -7034,6 +7039,15 @@ reviews.forEach(r => {
     } else {
         await renderFeatured();
         renderTagLeaderboard();
+    }
+
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+            console.log('[SW] Registered:', reg.scope);
+        }).catch(err => {
+            console.warn('[SW] Registration failed:', err);
+        });
     }
 
     </script>
