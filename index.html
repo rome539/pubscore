@@ -89,6 +89,318 @@
         }
 
         /* ================================================================
+           LIGHT THEME
+           ================================================================ */
+        [data-theme="light"] {
+            --bg: #f5f5f7;
+            --bg-raised: #ffffff;
+            --bg-elevated: #eeeef1;
+            --bg-hover: #e4e4e9;
+
+            --border: rgba(0, 0, 0, 0.10);
+            --border-strong: rgba(0, 0, 0, 0.18);
+
+            --text: #18181b;
+            --text-2: #4a4a54;
+            --text-3: #7c7c88;
+
+            --accent: #9a7b14;
+            --accent-dim: #7d6408;
+            --accent-bg: rgba(154, 123, 20, 0.12);
+            --accent-border: rgba(154, 123, 20, 0.28);
+
+            --red: #b83232;
+            --red-bg: rgba(184, 50, 50, 0.10);
+            --red-border: rgba(184, 50, 50, 0.22);
+
+            --green: #1e8a4e;
+            --green-bg: rgba(30, 138, 78, 0.10);
+
+            --blue: #2d6bc4;
+            --blue-bg: rgba(45, 107, 196, 0.10);
+        }
+
+        /* ---- Topbar ---- */
+        [data-theme="light"] .topbar {
+            background: rgba(245, 245, 247, 0.92);
+            border-bottom-color: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ---- Toasts ---- */
+        [data-theme="light"] .toast.info {
+            background: #ffffff;
+            border: 1px solid var(--border-strong);
+            color: var(--text-2);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="light"] .toast.success {
+            background: #edf8f2;
+            border: 1px solid rgba(30, 138, 78, 0.25);
+            color: var(--green);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        [data-theme="light"] .toast.error {
+            background: #fdf0f0;
+            border: 1px solid rgba(184, 50, 50, 0.2);
+            color: var(--red);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        /* ---- Cards — subtle lift shadows ---- */
+        [data-theme="light"] .profile-card,
+        [data-theme="light"] .review-form,
+        [data-theme="light"] .rc,
+        [data-theme="light"] .featured-card {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        [data-theme="light"] .featured-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        /* ---- Dropdowns & menus — lighter shadows ---- */
+        [data-theme="light"] .pc-client-menu {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+        }
+
+        [data-theme="light"] .search-results {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+        }
+
+        [data-theme="light"] .modal {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="light"] .share-modal {
+            box-shadow: 0 16px 48px rgba(0,0,0,0.10);
+        }
+
+        /* ---- Overlays — lighter ---- */
+        [data-theme="light"] .drawer-bg,
+        [data-theme="light"] .api-drawer-bg,
+        [data-theme="light"] .modal-bg,
+        [data-theme="light"] .share-modal-bg {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(8px);
+        }
+
+        [data-theme="light"] .api-drawer,
+        [data-theme="light"] .drawer {
+            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+        }
+
+        /* ---- nsec warning banner ---- */
+        [data-theme="light"] .nsec-warn {
+            background: #fdf0f0;
+        }
+
+        /* ---- Stars — golden but darker for white bg contrast ---- */
+        [data-theme="light"] .star.filled {
+            color: #a88417;
+        }
+
+        [data-theme="light"] .pc-big-score {
+            color: #9a7b14;
+        }
+
+        /* ---- Rank badges ---- */
+        [data-theme="light"] .fc-rank.gold   { color: #8c6d10; }
+        [data-theme="light"] .fc-rank.silver { color: #6e6e7a; }
+        [data-theme="light"] .fc-rank.bronze { color: #8a5a2e; }
+
+        /* ---- Category tags — only override hardcoded ones (funny, creative) ---- */
+        /* All others use CSS variables and adapt automatically */
+        [data-theme="light"] .rtag-funny     { background: rgba(200,130,8,0.12);   color: #946008; }
+        [data-theme="light"] .rtag-creative  { background: rgba(128,60,200,0.10);  color: #6530a0; }
+
+        /* ---- Tag leaderboard pills — only override hardcoded ones ---- */
+        [data-theme="light"] .tag-lb-pill.active-funny     { background: rgba(200,130,8,0.12);   border-color: rgba(200,130,8,0.28);   color: #946008; }
+        [data-theme="light"] .tag-lb-pill.active-creative  { background: rgba(128,60,200,0.10);  border-color: rgba(128,60,200,0.25);  color: #6530a0; }
+
+        /* ---- Notifications ---- */
+        [data-theme="light"] .notif-dot {
+            border-color: var(--bg-raised);
+        }
+
+        [data-theme="light"] .notif-dropdown {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+        }
+
+        [data-theme="light"] .notif-item.unread {
+            background: rgba(154,123,20,0.04);
+        }
+
+        /* ---- Rating distribution ---- */
+        [data-theme="light"] .rating-dist-bar {
+            background: #a88417;
+        }
+
+        [data-theme="light"] .rating-dist-bar-bg {
+            background: var(--bg-elevated);
+        }
+
+        /* ---- Reviewer reputation badge ---- */
+        [data-theme="light"] .reviewer-score-badge {
+            background: rgba(154,123,20,0.07);
+            border-color: rgba(154,123,20,0.18);
+            color: #8a6c0e;
+        }
+
+        [data-theme="light"] .reviewer-score-badge.no-score {
+            background: var(--bg-elevated);
+            border-color: var(--border);
+            color: var(--text-3);
+        }
+
+        /* ---- Eligibility banner ---- */
+        [data-theme="light"] .eligibility-banner {
+            background: #fdf0f0;
+        }
+
+        /* ---- Focus rings ---- */
+        [data-theme="light"] .search-wrap input:focus,
+        [data-theme="light"] .rf-textarea:focus,
+        [data-theme="light"] .share-composer-textarea:focus {
+            box-shadow: 0 0 0 3px rgba(154, 123, 20, 0.12);
+        }
+
+        /* ---- Accent buttons — white text for contrast ---- */
+        [data-theme="light"] .btn-accent,
+        [data-theme="light"] .pc-share-btn.accent,
+        [data-theme="light"] .share-btn-post {
+            color: #fff;
+        }
+
+        [data-theme="light"] .share-btn-post svg,
+        [data-theme="light"] .pc-share-btn.accent svg {
+            stroke: #fff;
+        }
+
+        /* ---- Hashtag chips ---- */
+        [data-theme="light"] .share-hashtag-chip.active {
+            background: rgba(154,123,20,0.08);
+            border-color: rgba(154,123,20,0.22);
+            color: #8a6c0e;
+        }
+
+        /* ---- History tab counts ---- */
+        [data-theme="light"] .hist-tab.active .hist-tab-count {
+            background: rgba(154,123,20,0.08);
+            color: #8a6c0e;
+        }
+
+        /* ---- API docs ---- */
+        [data-theme="light"] .api-badge {
+            background: rgba(30,138,78,0.08);
+            border-color: rgba(30,138,78,0.18);
+        }
+
+        [data-theme="light"] .api-base-url {
+            background: rgba(154,123,20,0.05);
+            border-color: rgba(154,123,20,0.18);
+        }
+
+        [data-theme="light"] .api-base-url code {
+            color: #8a6c0e;
+        }
+
+        [data-theme="light"] .api-example {
+            background: var(--bg);
+        }
+
+        /* ---- NIP-05 verified ---- */
+        [data-theme="light"] .pc-nip05 {
+            color: #1e8a4e;
+        }
+
+        /* ---- Sort pills active ---- */
+        [data-theme="light"] .sort-pill.on {
+            color: #8a6c0e;
+            background: rgba(154,123,20,0.07);
+        }
+
+        /* ---- Active tabs — white pop with subtle shadow ---- */
+        [data-theme="light"] .lb-tab.active {
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .topbar-nav button.active {
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        [data-theme="light"] .hist-tab.active {
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* ---- Login option buttons ---- */
+        [data-theme="light"] .login-opt {
+            background: var(--bg);
+        }
+
+        [data-theme="light"] .login-opt:hover {
+            background: var(--bg-elevated);
+        }
+
+        /* ---- Confirm modal ---- */
+        [data-theme="light"] .modal-confirm {
+            background: var(--red);
+            border-color: var(--red);
+        }
+
+        [data-theme="light"] .modal-confirm:hover {
+            background: #a02c2c;
+            border-color: #a02c2c;
+        }
+
+        /* ---- Scrollbar theming ---- */
+        [data-theme="light"] .api-drawer-body::-webkit-scrollbar-thumb,
+        [data-theme="light"] .drawer-body::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.12);
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            flex-shrink: 0;
+            padding: 0;
+            color: var(--text-3);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-strong);
+            color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .theme-toggle .sun-icon { display: none; }
+        .theme-toggle .moon-icon { display: block; }
+        [data-theme="light"] .theme-toggle .sun-icon { display: block; }
+        [data-theme="light"] .theme-toggle .moon-icon { display: none; }
+
+        /* ================================================================
            RESET & BASE
            ================================================================ */
         * {
@@ -191,6 +503,10 @@
             color: var(--text);
             background: var(--bg-elevated);
         }
+
+        /* Nav label short/full — short labels hidden by default */
+        .nav-short { display: none; }
+        .nav-full { display: inline; }
 
         /* Auth pill — shows "Sign in" or user avatar+name */
         .auth-pill {
@@ -317,7 +633,7 @@
             pointer-events: none;
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 200;
+            z-index: 999;
             white-space: nowrap;
         }
 
@@ -676,6 +992,562 @@
 
         .star.filled {
             color: var(--accent);
+        }
+
+        /* ================================================================
+           RATING DISTRIBUTION CHART
+           ================================================================ */
+        .rating-dist {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .rating-dist-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            padding: 4px 0;
+        }
+
+        .rating-dist-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .rating-dist-chevron {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: var(--text-3);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .rating-dist.open .rating-dist-chevron {
+            transform: rotate(180deg);
+        }
+
+        .rating-dist-body {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .rating-dist.open .rating-dist-body {
+            display: block;
+        }
+
+        .rating-dist-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .rating-dist-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            width: 14px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .rating-dist-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .rating-dist-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-width: 0;
+        }
+
+        .rating-dist-count {
+            font-size: 0.72rem;
+            color: var(--text-3);
+            width: 24px;
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        /* Category breakdown inside rating dist */
+        .cat-breakdown {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .cat-breakdown-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        .cat-breakdown-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .cat-breakdown-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            width: 95px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .cat-breakdown-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .cat-breakdown-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-width: 0;
+        }
+
+        .cat-breakdown-pct {
+            font-size: 0.72rem;
+            color: var(--text-3);
+            width: 32px;
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        /* Category bar colors */
+        .cat-bar-trade { background: var(--accent); }
+        .cat-bar-knowledge { background: var(--blue); }
+        .cat-bar-helpful { background: var(--green); }
+        .cat-bar-funny { background: #f59e0b; }
+        .cat-bar-creative { background: #a855f7; }
+        .cat-bar-warning { background: var(--red); }
+
+        /* Category label colors */
+        .cat-label-trade { color: var(--accent); }
+        .cat-label-knowledge { color: var(--blue); }
+        .cat-label-helpful { color: var(--green); }
+        .cat-label-funny { color: #f59e0b; }
+        .cat-label-creative { color: #a855f7; }
+        .cat-label-warning { color: var(--red); }
+
+        [data-theme="light"] .cat-label-funny { color: #a06808; }
+        [data-theme="light"] .cat-bar-funny { background: #c88008; }
+        [data-theme="light"] .cat-label-creative { color: #7038b0; }
+        [data-theme="light"] .cat-bar-creative { background: #8040c8; }
+
+        @media (max-width: 540px) {
+            .cat-breakdown-label { width: 75px; font-size: 0.68rem; }
+            .cat-breakdown-bar-bg { height: 7px; }
+            .cat-breakdown-pct { font-size: 0.68rem; width: 28px; }
+            .cat-breakdown-title { font-size: 0.72rem; }
+        }
+
+        @media (max-width: 360px) {
+            .cat-breakdown-label { width: 65px; font-size: 0.62rem; }
+            .cat-breakdown-bar-bg { height: 6px; }
+            .cat-breakdown-row { gap: 6px; }
+        }
+
+        /* ================================================================
+           REVIEWER REPUTATION BADGE
+           ================================================================ */
+        .reviewer-score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            background: var(--accent-bg);
+            border: 1px solid var(--accent-border);
+            border-radius: 100px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-left: 8px;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .reviewer-score-badge.no-score {
+            background: var(--bg-elevated);
+            border-color: var(--border);
+            color: var(--text-3);
+        }
+
+        /* ================================================================
+           NOTIFICATION BELL
+           ================================================================ */
+        .notif-bell {
+            position: relative;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            flex-shrink: 0;
+            padding: 0;
+            color: var(--text-3);
+        }
+
+        .notif-bell:hover {
+            border-color: var(--border-strong);
+            color: var(--accent);
+        }
+
+        .notif-bell svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--red);
+            border-radius: 50%;
+            border: 2px solid var(--bg-raised);
+            display: none;
+        }
+
+        .notif-dot.active {
+            display: block;
+        }
+
+        .notif-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--r);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 60;
+        }
+
+        .notif-dropdown.open {
+            display: block;
+        }
+
+        .notif-dropdown-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notif-dropdown-title {
+            font-family: 'Fraunces', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .notif-clear-btn {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: color 0.15s;
+        }
+
+        .notif-clear-btn:hover {
+            color: var(--accent);
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.1s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .notif-item.unread {
+            background: var(--accent-bg);
+        }
+
+        .notif-item-avi {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .notif-item-text {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.82rem;
+            color: var(--text-2);
+            line-height: 1.4;
+        }
+
+        .notif-item-text strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .notif-item-time {
+            font-size: 0.7rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .notif-empty {
+            padding: 32px 16px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 0.85rem;
+        }
+
+        /* ================================================================
+           FOLLOWING LEADERBOARD TAB
+           ================================================================ */
+        .following-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-3);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        /* ================================================================
+           EMBED BADGE MODAL
+           ================================================================ */
+        .badge-modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 210;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .badge-modal-bg.open {
+            display: flex;
+        }
+
+        .badge-modal {
+            background: var(--bg-raised);
+            border: 1px solid var(--border-strong);
+            border-radius: 16px;
+            padding: 0;
+            width: 480px;
+            max-width: 96vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            transform: scale(0.94) translateY(8px);
+            opacity: 0;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            overflow: hidden;
+        }
+
+        .badge-modal-bg.open .badge-modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .badge-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+        }
+
+        .badge-modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .badge-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .badge-modal-close:hover {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        .badge-modal-close svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .badge-modal-body {
+            padding: 16px 24px 24px;
+        }
+
+        .badge-preview {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+        }
+
+        .badge-option-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .badge-option-label:first-of-type {
+            margin-top: 0;
+        }
+
+        .badge-code-box {
+            position: relative;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            padding-right: 44px;
+            overflow-x: auto;
+        }
+
+        .badge-code-box code {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-2);
+            line-height: 1.5;
+            white-space: pre;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .badge-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-3);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .badge-copy-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent-border);
+        }
+
+        .badge-copy-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        @media (max-width: 540px) {
+            .badge-modal-bg {
+                align-items: flex-end;
+                padding: 0;
+            }
+            .badge-modal {
+                width: 100%;
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                transform: translateY(100%);
+                opacity: 1;
+                max-height: 90dvh;
+                display: flex;
+                flex-direction: column;
+            }
+            .badge-modal-bg.open .badge-modal {
+                transform: translateY(0);
+            }
+            .badge-modal-body {
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                flex: 1;
+                min-height: 0;
+                padding: 16px 18px 24px;
+            }
         }
 
         /* ================================================================
@@ -2239,9 +3111,69 @@
            ================================================================ */
         @media (max-width: 768px) {
             .main { padding: 28px 20px 100px; }
-            .topbar-inner { padding: 0 20px; }
             .featured-grid { grid-template-columns: repeat(2, 1fr); }
             .lb-grid { grid-template-columns: repeat(2, 1fr); }
+
+            /* Notification dropdown — position below topbar on tablet */
+            .notif-dropdown {
+                position: fixed;
+                top: auto;
+                left: 16px;
+                right: 16px;
+                width: auto;
+                max-width: 360px;
+                margin-left: auto;
+                max-height: 60vh;
+                border-radius: 12px;
+                z-index: 200;
+            }
+
+            /* Topbar: grid layout — brand+icons top row, nav full-width bottom row */
+            .topbar-inner {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                grid-template-rows: auto auto;
+                align-items: center;
+                padding: 10px 16px 8px;
+                height: auto;
+                gap: 0;
+            }
+
+            .brand {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .topbar-right {
+                grid-column: 2;
+                grid-row: 1;
+                justify-content: flex-end;
+                gap: 6px;
+            }
+
+            .topbar-nav {
+                grid-column: 1 / -1;
+                grid-row: 2;
+                margin-right: 0;
+                margin-top: 8px;
+                padding: 3px;
+            }
+            .topbar-nav button {
+                flex: 1;
+                text-align: center;
+                font-size: 0.82rem;
+                padding: 8px 10px;
+            }
+
+            /* Show short labels on tablet and below */
+            .nav-full { display: none; }
+            .nav-short { display: inline; }
+
+            /* Hide auth pill text — icon only */
+            .auth-pill span { display: none; }
+            .auth-pill { padding: 4px; }
+            .auth-pill img { width: 28px; height: 28px; }
+            .auth-pill-ph { width: 28px; height: 28px; }
         }
 
         /* ================================================================
@@ -2250,28 +3182,39 @@
         @media (max-width: 540px) {
             .topbar-inner {
                 padding: 0 14px;
-                height: 54px;
+                padding-top: 8px;
+                padding-bottom: 6px;
+                gap: 6px;
             }
 
             .brand { font-size: 1.2rem; }
 
-            /* Stack nav and auth vertically not needed — shrink instead */
-            .topbar-nav {
-                margin-right: 8px;
-                padding: 2px;
-            }
             .topbar-nav button {
                 font-size: 0.78rem;
-                padding: 6px 12px;
+                padding: 8px 6px;
             }
 
-            .auth-pill {
-                font-size: 0.78rem;
-                padding: 4px 10px 4px 4px;
-                gap: 6px;
+            .auth-pill img { width: 26px; height: 26px; }
+            .auth-pill-ph { width: 26px; height: 26px; }
+
+            .theme-toggle, .notif-bell { width: 32px; height: 32px; }
+            .theme-toggle svg, .notif-bell svg { width: 15px; height: 15px; }
+
+            /* Notification dropdown — full width, below both topbar rows */
+            .notif-dropdown {
+                position: fixed;
+                top: auto;
+                left: 8px;
+                right: 8px;
+                width: auto;
+                max-height: 60vh;
+                border-radius: 12px;
+                z-index: 200;
             }
-            .auth-pill img { width: 24px; height: 24px; }
-            .auth-pill-ph { width: 24px; height: 24px; }
+
+            .notif-item { padding: 10px 14px; }
+            .notif-item-avi { width: 30px; height: 30px; }
+            .notif-item-text { font-size: 0.78rem; }
 
             .main { padding: 20px 14px 80px; }
 
@@ -2313,6 +3256,21 @@
             }
             .pc-big-score { font-size: 2.6rem; }
 
+            /* Rating distribution — compact on mobile */
+            .rating-dist { padding-top: 14px; margin-top: 14px; }
+            .rating-dist-title { font-size: 0.72rem; }
+            .rating-dist-bar-bg { height: 7px; }
+            .rating-dist-label { font-size: 0.72rem; }
+            .rating-dist-count { font-size: 0.68rem; }
+            .rating-dist-chevron { width: 14px; height: 14px; }
+
+            /* Reviewer reputation badge — compact on mobile */
+            .reviewer-score-badge {
+                font-size: 0.62rem;
+                padding: 1px 5px;
+                margin-left: 5px;
+            }
+
             /* Review form */
             .review-form { padding: 20px; }
             .cat-tags { gap: 6px; }
@@ -2328,6 +3286,9 @@
             .featured-grid { grid-template-columns: 1fr; }
             .lb-grid { grid-template-columns: 1fr; }
             .featured-card { padding: 16px; }
+
+            /* Following tab — single column */
+            .following-empty { padding: 30px 16px; font-size: 0.82rem; }
 
             /* Leaderboard tabs — scrollable on small screens */
             .lb-tabs {
@@ -2346,11 +3307,42 @@
             .sort-pills { width: 100%; }
             .sort-pill { font-size: 0.75rem; padding: 5px 10px; }
 
-            /* Login drawer */
+            /* Login drawer — full width */
             .drawer { width: 100%; max-width: 100vw; }
             .drawer-body { padding: 20px; }
             .login-opt { padding: 14px; font-size: 0.85rem; }
             .login-opt-icon { width: 36px; height: 36px; }
+
+            /* API drawer — full width on mobile */
+            .api-drawer { width: 100%; max-width: 100vw; }
+            .api-drawer-body { padding: 16px; }
+
+            /* API base URL — wrap on small screens */
+            .api-base-url {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .api-base-url code {
+                font-size: 0.78rem;
+                word-break: break-all;
+            }
+
+            /* API endpoint paths — allow wrapping */
+            .api-endpoint-path {
+                font-size: 0.78rem;
+                word-break: break-all;
+            }
+            .api-endpoint-desc {
+                font-size: 0.75rem;
+            }
+
+            /* API code examples — smaller text */
+            .api-example code {
+                font-size: 0.7rem;
+            }
+
+            /* History tabs — text smaller */
+            .hist-tab { font-size: 0.8rem; padding: 8px 10px; }
 
             /* Toast */
             .toast {
@@ -2415,19 +3407,30 @@
                 padding: 13px 16px;
                 font-size: 0.95rem;
             }
+
+            /* Confirm modal — fit mobile */
+            .modal {
+                width: 90vw;
+                padding: 22px;
+            }
         }
 
         /* ================================================================
            RESPONSIVE — Extra-small (narrow Android devices)
            ================================================================ */
         @media (max-width: 360px) {
-            .topbar-inner { padding: 0 10px; height: 50px; }
+            .topbar-inner { padding: 0 10px; padding-top: 8px; padding-bottom: 6px; gap: 6px; }
             .brand { font-size: 1.05rem; }
-            .topbar-nav { margin-right: 4px; padding: 2px; }
-            .topbar-nav button { font-size: 0.72rem; padding: 5px 8px; }
-            .auth-pill { font-size: 0.72rem; padding: 3px 8px 3px 3px; gap: 4px; }
-            .auth-pill img { width: 22px; height: 22px; }
-            .auth-pill-ph { width: 22px; height: 22px; }
+            .topbar-right { gap: 4px; }
+            .topbar-nav button { font-size: 0.72rem; padding: 6px 4px; }
+            .auth-pill img { width: 24px; height: 24px; }
+            .auth-pill-ph { width: 24px; height: 24px; }
+
+            /* Smaller icon buttons on tiny screens */
+            .theme-toggle, .notif-bell { width: 28px; height: 28px; }
+            .theme-toggle svg, .notif-bell svg { width: 13px; height: 13px; }
+            .notif-dot { width: 6px; height: 6px; top: 2px; right: 2px; }
+
             .main { padding: 16px 10px 72px; }
             .search-wrap input { padding: 14px 12px; font-size: 0.85rem; }
             .lb-tab { font-size: 0.75rem; padding: 6px 10px; }
@@ -2436,6 +3439,16 @@
             .fc-name { font-size: 0.88rem; }
             .fc-score { font-size: 1.3rem; }
             .fc-meta { font-size: 0.68rem; }
+
+            /* Rating distribution — even more compact */
+            .rating-dist-bar-bg { height: 6px; }
+            .rating-dist-row { gap: 6px; margin-bottom: 4px; }
+
+            /* Reviewer badge — tiny on extra-small */
+            .reviewer-score-badge { font-size: 0.58rem; padding: 1px 4px; margin-left: 4px; }
+
+            /* Notification dropdown */
+            .notif-dropdown { left: 4px; right: 4px; }
         }
     </style>
 </head>
@@ -2447,10 +3460,30 @@
     <div class="topbar">
         <div class="topbar-inner">
             <div class="brand" onclick="window._toggleApiDocs()" style="cursor:pointer;" title="API Documentation">Pub<em>Score</em></div>
+            <div class="topbar-nav">
+                <button class="active" data-tab="lookup" onclick="switchTab('lookup')"><span class="nav-full">Lookup</span><span class="nav-short">Look</span></button>
+                <button data-tab="following" onclick="switchTab('following')"><span class="nav-full">Following</span><span class="nav-short">Follows</span></button>
+                <button data-tab="history" onclick="switchTab('history')"><span class="nav-full">My Reviews</span><span class="nav-short">Mine</span></button>
+            </div>
             <div class="topbar-right">
-                <div class="topbar-nav">
-                    <button class="active" data-tab="lookup" onclick="switchTab('lookup')">Lookup</button>
-                    <button data-tab="history" onclick="switchTab('history')">My Reviews</button>
+                <button class="theme-toggle" onclick="window._toggleTheme()" title="Toggle theme">
+                    <svg class="moon-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+                    <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
+                <div style="position:relative" id="notifWrap">
+                    <button class="notif-bell" onclick="window._toggleNotifs()" title="Notifications" id="notifBell">
+                        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                        <span class="notif-dot" id="notifDot"></span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-dropdown-header">
+                            <div class="notif-dropdown-title">Notifications</div>
+                            <button class="notif-clear-btn" onclick="window._clearNotifs()">Clear all</button>
+                        </div>
+                        <div id="notifList">
+                            <div class="notif-empty">No notifications yet</div>
+                        </div>
+                    </div>
                 </div>
                 <button class="auth-pill" id="authPill" onclick="window._authAction()">
                     <div class="auth-pill-ph">
@@ -2517,6 +3550,12 @@
                     <div class="api-endpoint-desc">API status, uptime, review count, ingester stats.</div>
                 </div>
 
+                <div class="api-endpoint" onclick="window._copyApi('/reviews/recent')">
+                    <div class="api-endpoint-method">GET</div>
+                    <div class="api-endpoint-path">/reviews/recent?npub={npub}&amp;since={timestamp}&amp;limit={n}</div>
+                    <div class="api-endpoint-desc">Recent validated reviews. All params optional. Use for notifications and activity feeds.</div>
+                </div>
+
                 <h3>Example: Get a score</h3>
                 <div class="api-example">
                     <code>fetch('https://api.pubscore.space/score?npub=npub1...')
@@ -2549,6 +3588,22 @@ const { scores } = await fetch(url).then(r => r.json())
 
 reviews.forEach(r => {
   console.log(r.reviewer, r.rating, r.content)
+})</code>
+                    <button class="api-example-copy" onclick="event.stopPropagation(); window._copyCode(this)" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
+
+                <h3>Example: Recent reviews (notifications)</h3>
+                <div class="api-example">
+                    <code>// Get new reviews since last check
+const since = Math.floor(Date.now() / 1000) - 3600 // last hour
+const { reviews } = await fetch(
+  `https://api.pubscore.space/reviews/recent?npub=npub1...&since=${since}`
+).then(r => r.json())
+
+reviews.forEach(r => {
+  console.log(r.reviewer, r.rating, r.created_at)
 })</code>
                     <button class="api-example-copy" onclick="event.stopPropagation(); window._copyCode(this)" title="Copy">
                         <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -2601,7 +3656,14 @@ reviews.forEach(r => {
         <!-- My Reviews tab -->
         <div class="section" id="section-history">
             <div id="historyArea">
-                <div class="empty">Sign in to see your review history</div>
+                <div class="empty">Sign in to see your review history<div style="margin-top:16px;font-size:0.75rem;color:var(--accent);opacity:0.35;font-style:italic;letter-spacing:0.5px;" title="Reputation flies — Virgil">fama volat</div></div>
+            </div>
+        </div>
+
+        <!-- Following tab -->
+        <div class="section" id="section-following">
+            <div id="followingArea">
+                <div class="empty">Sign in to see scores for people you follow</div>
             </div>
         </div>
     </div>
@@ -2722,6 +3784,39 @@ reviews.forEach(r => {
                     <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     Post it
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         EMBED BADGE MODAL
+         ================================================================ -->
+    <div class="badge-modal-bg" id="badgeModalBg">
+        <div class="badge-modal">
+            <div class="badge-modal-header">
+                <div class="badge-modal-title">Embed your PubScore</div>
+                <button class="badge-modal-close" onclick="window._closeBadgeModal()">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="badge-modal-body">
+                <div class="badge-preview" id="badgePreview"></div>
+
+                <div class="badge-option-label">Markdown (GitHub, READMEs)</div>
+                <div class="badge-code-box">
+                    <code id="badgeMarkdown"></code>
+                    <button class="badge-copy-btn" onclick="window._copyBadgeCode('badgeMarkdown')" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
+
+                <div class="badge-option-label">HTML (websites, blogs)</div>
+                <div class="badge-code-box">
+                    <code id="badgeHtml"></code>
+                    <button class="badge-copy-btn" onclick="window._copyBadgeCode('badgeHtml')" title="Copy">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2904,6 +3999,179 @@ reviews.forEach(r => {
     let currentSort = 'newest';
     let currentPage = 0;
     const REVIEWS_PER_PAGE = 5;
+
+    // =====================================================================
+    // THEME TOGGLE
+    // =====================================================================
+
+    (function initTheme() {
+        const saved = localStorage.getItem('pubscore-theme');
+        if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+
+    window._toggleTheme = function() {
+        const html = document.documentElement;
+        const isLight = html.getAttribute('data-theme') === 'light';
+        if (isLight) {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('pubscore-theme', 'dark');
+        } else {
+            html.setAttribute('data-theme', 'light');
+            localStorage.setItem('pubscore-theme', 'light');
+        }
+    };
+
+    // =====================================================================
+    // NOTIFICATIONS SYSTEM (API-powered)
+    // =====================================================================
+
+    let notifications = [];
+    let notifPollTimer = null;
+    let lastNotifCheck = Math.floor(Date.now() / 1000);
+    const NOTIF_POLL_INTERVAL = 60000; // check every 60 seconds
+
+    window._toggleNotifs = function() {
+        const dd = document.getElementById('notifDropdown');
+        dd.classList.toggle('open');
+        if (dd.classList.contains('open')) {
+            // Mark all as read
+            notifications.forEach(n => n.unread = false);
+            document.getElementById('notifDot').classList.remove('active');
+            renderNotifList();
+        }
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#notifWrap')) {
+            document.getElementById('notifDropdown').classList.remove('open');
+        }
+    });
+
+    window._clearNotifs = function() {
+        notifications = [];
+        document.getElementById('notifDot').classList.remove('active');
+        renderNotifList();
+    };
+
+    function renderNotifList() {
+        const list = document.getElementById('notifList');
+        if (!notifications.length) {
+            list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+            return;
+        }
+        list.innerHTML = notifications.slice(0, 20).map(n => `
+            <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="window._lbLookup('${n.reviewerPubkey}')">
+                <img class="notif-item-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-notif-pk="${n.reviewerPubkey}">
+                <div>
+                    <div class="notif-item-text"><strong data-notif-name="${n.reviewerPubkey}">${shortNpub(n.reviewerNpub || '')}</strong> left you a ${n.rating}★ review</div>
+                    <div class="notif-item-time">${fmtTimeAgo(n.created_at)}</div>
+                </div>
+            </div>
+        `).join('');
+
+        // Lazy-load reviewer names/avatars
+        for (const n of notifications.slice(0, 20)) {
+            getProfile(n.reviewerPubkey).then(profile => {
+                if (!profile) return;
+                const nameEl = list.querySelector(`[data-notif-name="${n.reviewerPubkey}"]`);
+                const imgEl = list.querySelector(`[data-notif-pk="${n.reviewerPubkey}"]`);
+                if (nameEl && (profile.display_name || profile.name)) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
+                }
+                if (imgEl && profile.picture) imgEl.src = sanitizeUrl(profile.picture);
+            }).catch(() => {});
+        }
+    }
+
+    function fmtTimeAgo(ts) {
+        const diff = Math.floor(Date.now() / 1000) - ts;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    /** Fetch new reviews from the API and add them as notifications */
+    async function checkForNewReviews() {
+        if (!currentUser) return;
+        try {
+            const npub = currentUser.npub;
+            const resp = await fetch(`https://api.pubscore.space/reviews/recent?npub=${npub}&since=${lastNotifCheck}&limit=20`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            let hasNew = false;
+            for (const r of (data.reviews || [])) {
+                // Don't notify for own reviews
+                if (r.reviewerHex === currentUser.pubkey) continue;
+                // Deduplicate
+                if (notifications.some(n => n.reviewerPubkey === r.reviewerHex && n.created_at === r.created_at)) continue;
+
+                notifications.unshift({
+                    reviewerPubkey: r.reviewerHex,
+                    reviewerNpub: r.reviewer,
+                    rating: r.rating,
+                    created_at: r.created_at,
+                    unread: true
+                });
+                hasNew = true;
+
+                if (r.created_at > lastNotifCheck) {
+                    lastNotifCheck = r.created_at;
+                }
+            }
+
+            if (hasNew) {
+                document.getElementById('notifDot').classList.add('active');
+                renderNotifList();
+            }
+        } catch (e) {
+            console.warn('Notification check error:', e);
+        }
+    }
+
+    /** Start polling for new reviews */
+    function startNotifPolling() {
+        if (!currentUser || notifPollTimer) return;
+        // Check immediately on login (catches reviews while offline)
+        checkForNewReviews();
+        // Then poll every 60 seconds
+        notifPollTimer = setInterval(checkForNewReviews, NOTIF_POLL_INTERVAL);
+    }
+
+    /** Stop polling */
+    function stopNotifPolling() {
+        if (notifPollTimer) {
+            clearInterval(notifPollTimer);
+            notifPollTimer = null;
+        }
+    }
+
+    // =====================================================================
+    // REVIEWER SCORE CACHE (for reputation badges)
+    // =====================================================================
+
+    const reviewerScoreCache = createTtlCache(10 * 60 * 1000);
+
+    async function getReviewerScore(pubkey) {
+        const cached = reviewerScoreCache.get(pubkey);
+        if (cached !== undefined) return cached;
+
+        try {
+            const npub = NostrTools.nip19.npubEncode(pubkey);
+            const resp = await fetch(`https://api.pubscore.space/score?npub=${npub}`);
+            if (!resp.ok) throw new Error('API error');
+            const data = await resp.json();
+            const score = { avg: parseFloat(data.avgRating || 0).toFixed(1), count: data.count || 0 };
+            reviewerScoreCache.set(pubkey, score);
+            return score;
+        } catch (e) {
+            const fallback = { avg: '0', count: 0 };
+            reviewerScoreCache.set(pubkey, fallback);
+            return fallback;
+        }
+    }
 
     // Default avatar SVG (data URI)
     const DEFAULT_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(
@@ -3099,6 +4367,7 @@ reviews.forEach(r => {
     function doLogout() {
         currentUser = null;
         SecureKeyStore.clear();
+        stopNotifPolling();
         if (inactivityMonitor) {
             inactivityMonitor.destroy();
             inactivityMonitor = null;
@@ -3377,9 +4646,10 @@ reviews.forEach(r => {
     }
 
     /** Generate the "Open in…" dropdown + "Copy link" pill for a given npub */
-    function clientMenuHtml(npub, showCopyLink = false) {
+    function clientMenuHtml(npub, showCopyLink = false, badgeData = null) {
         const linkIcon = '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
         const copyIcon = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+        const codeIcon = '<svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
         const clients = [
             { name: 'Jumble',    url: `https://jumble.social/${escapeHtml(npub)}` },
             { name: 'Primal',    url: `https://primal.net/p/${escapeHtml(npub)}` },
@@ -3406,6 +4676,12 @@ reviews.forEach(r => {
                     <button class="pc-copy-pill" onclick="window._copyProfileLink('${escapeHtml(npub)}')">
                         ${copyIcon}
                         Copy link
+                    </button>
+                ` : ''}
+                ${badgeData ? `
+                    <button class="pc-copy-pill" onclick="window._openBadgeModal('${escapeHtml(npub)}', ${badgeData.avg}, ${badgeData.count})">
+                        ${codeIcon}
+                        Get Badge
                     </button>
                 ` : ''}
             </div>
@@ -3586,6 +4862,57 @@ reviews.forEach(r => {
         }
     };
 
+    // =====================================================================
+    // EMBED BADGE MODAL
+    // =====================================================================
+
+    window._openBadgeModal = function(npub, avgRating, reviewCount) {
+        const url = profileUrl(npub);
+        const starStr = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
+        const scoreText = avgRating > 0 ? `${avgRating}%2F5_${starStr}_(${reviewCount}_review${reviewCount !== 1 ? 's' : ''})` : 'Not_rated_yet';
+        const color = avgRating >= 4 ? 'brightgreen' : avgRating >= 3 ? 'yellow' : avgRating >= 2 ? 'orange' : avgRating > 0 ? 'red' : 'lightgrey';
+
+        const shieldsUrl = `https://img.shields.io/badge/PubScore-${scoreText}-${color}?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2U4YzQ2YyI+PHBhdGggZD0iTTEyIDIgTDE1LjA5IDguMjYgMjIgOS4yNyAxNyAxNC4xNCAxOC4xOCAyMS4wMiAxMiAxNy43NyA1LjgyIDIxLjAyIDcgMTQuMTQgMiA5LjI3IDguOTEgOC4yNnoiLz48L3N2Zz4=`;
+
+        // Preview
+        const preview = document.getElementById('badgePreview');
+        preview.innerHTML = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="text-decoration:none"><img src="${escapeHtml(shieldsUrl)}" alt="PubScore" style="height:24px"></a>`;
+
+        // Markdown
+        const mdCode = `[![PubScore](${shieldsUrl})](${url})`;
+        document.getElementById('badgeMarkdown').textContent = mdCode;
+
+        // HTML
+        const htmlCode = `<a href="${url}" target="_blank" rel="noopener"><img src="${shieldsUrl}" alt="PubScore"></a>`;
+        document.getElementById('badgeHtml').textContent = htmlCode;
+
+        document.getElementById('badgeModalBg').classList.add('open');
+    };
+
+    window._closeBadgeModal = function() {
+        document.getElementById('badgeModalBg').classList.remove('open');
+    };
+
+    // Close on backdrop click
+    document.getElementById('badgeModalBg').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('badgeModalBg')) window._closeBadgeModal();
+    });
+
+    window._copyBadgeCode = function(elementId) {
+        const code = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            toast('Copied to clipboard!', 'success');
+        }).catch(() => {
+            const input = document.createElement('textarea');
+            input.value = code;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            toast('Copied to clipboard!', 'success');
+        });
+    };
+
     /** Generate a category tag badge */
     function catTag(category) {
         const labels = {
@@ -3605,6 +4932,54 @@ reviews.forEach(r => {
             warning: 'rtag-warning'
         };
         return `<span class="rtag ${classes[category] || ''}">${escapeHtml(labels[category] || category)}</span>`;
+    }
+
+    /** Build category breakdown HTML from reviews */
+    function categoryBreakdownHtml(reviews) {
+        const catLabels = {
+            trade: 'Trustworthy',
+            knowledge: 'Knowledgeable',
+            helpful: 'Helpful',
+            funny: 'Funny',
+            creative: 'Creative',
+            warning: 'Warning'
+        };
+        const catKeys = ['trade', 'knowledge', 'helpful', 'funny', 'creative', 'warning'];
+
+        // Count categories across all reviews
+        const counts = {};
+        let totalTags = 0;
+        for (const r of reviews) {
+            const cats = r.tags ? r.tags.filter(t => t[0] === 't').map(t => t[1]) : (r.categories || []);
+            for (const c of cats) {
+                if (catKeys.includes(c)) {
+                    counts[c] = (counts[c] || 0) + 1;
+                    totalTags++;
+                }
+            }
+        }
+
+        if (totalTags === 0) return '';
+
+        // Sort by count descending, only show categories that exist
+        const sorted = catKeys.filter(k => counts[k] > 0).sort((a, b) => counts[b] - counts[a]);
+        const maxCount = counts[sorted[0]] || 1;
+
+        return `
+            <div class="cat-breakdown">
+                <div class="cat-breakdown-title">Tagged as</div>
+                ${sorted.map(key => {
+                    const count = counts[key];
+                    const pct = Math.round((count / reviews.length) * 100);
+                    const barPct = Math.round((count / maxCount) * 100);
+                    return `<div class="cat-breakdown-row">
+                        <div class="cat-breakdown-label cat-label-${key}">${catLabels[key]}</div>
+                        <div class="cat-breakdown-bar-bg"><div class="cat-breakdown-bar cat-bar-${key}" style="width:${barPct}%"></div></div>
+                        <div class="cat-breakdown-pct">${pct}%</div>
+                    </div>`;
+                }).join('')}
+            </div>
+        `;
     }
 
     /** Parse a review event into a usable object */
@@ -3648,6 +5023,7 @@ reviews.forEach(r => {
             section.classList.toggle('active', section.id === `section-${tab}`);
         });
         if (tab === 'history') loadHistory();
+        if (tab === 'following') loadFollowingScores();
         // Show featured area if returning to lookup with nothing loaded
         if (tab === 'lookup' && !currentLookupPubkey) {
             document.getElementById('featuredArea').style.display = ''; document.getElementById('tagLbArea').style.display = '';
@@ -3724,11 +5100,6 @@ reviews.forEach(r => {
             }).catch(() => {});
         }
     };
-
-    // Close API drawer on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') window._closeApiDocs();
-    });
 
     window._authAction = function() {
         if (currentUser) {
@@ -3819,6 +5190,8 @@ reviews.forEach(r => {
             window._closeDrawer();
             updateAuthPill();
             toast('Viewing as read-only', 'info');
+            if (document.getElementById('section-following')?.classList.contains('active')) loadFollowingScores();
+            if (document.getElementById('section-history')?.classList.contains('active')) loadHistory();
         } catch (e) {
             toast(e.message, 'error');
         }
@@ -3831,7 +5204,10 @@ reviews.forEach(r => {
             window._closeDrawer();
             updateAuthPill();
             toast('Signed in with extension', 'success');
+            startNotifPolling();
             if (currentLookupPubkey) await renderReviewForm();
+            if (document.getElementById('section-following')?.classList.contains('active')) loadFollowingScores();
+            if (document.getElementById('section-history')?.classList.contains('active')) loadHistory();
         } catch (e) {
             toast(e.message, 'error');
         }
@@ -3846,7 +5222,10 @@ reviews.forEach(r => {
             window._closeDrawer();
             updateAuthPill();
             toast('Signed in (auto-logout in 15 min idle)', 'success');
+            startNotifPolling();
             if (currentLookupPubkey) await renderReviewForm();
+            if (document.getElementById('section-following')?.classList.contains('active')) loadFollowingScores();
+            if (document.getElementById('section-history')?.classList.contains('active')) loadHistory();
         } catch (e) {
             input.value = '';
             toast(e.message, 'error');
@@ -4299,6 +5678,35 @@ reviews.forEach(r => {
             avgRating = (sum / totalReviews).toFixed(1);
         }
 
+        // Build rating distribution
+        const dist = [0, 0, 0, 0, 0]; // index 0 = 1★, index 4 = 5★
+        for (const r of reviews) {
+            const tag = r.tags.find(t => t[0] === 'rating');
+            const rating = tag ? parseInt(tag[1]) || 0 : 0;
+            if (rating >= 1 && rating <= 5) dist[rating - 1]++;
+        }
+        const maxCount = Math.max(...dist, 1);
+        const distHtml = totalReviews > 0 ? `
+            <div class="rating-dist" id="ratingDist">
+                <div class="rating-dist-toggle" onclick="document.getElementById('ratingDist').classList.toggle('open')">
+                    <div class="rating-dist-title">Rating breakdown</div>
+                    <svg class="rating-dist-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="rating-dist-body">
+                    ${[5,4,3,2,1].map(star => {
+                        const count = dist[star - 1];
+                        const pct = (count / maxCount * 100).toFixed(0);
+                        return `<div class="rating-dist-row">
+                            <div class="rating-dist-label">${star}</div>
+                            <div class="rating-dist-bar-bg"><div class="rating-dist-bar" style="width:${pct}%"></div></div>
+                            <div class="rating-dist-count">${count}</div>
+                        </div>`;
+                    }).join('')}
+                    ${categoryBreakdownHtml(reviews)}
+                </div>
+            </div>
+        ` : '';
+
         document.getElementById('profileArea').innerHTML = `
             <div class="profile-card anim">
                 <div class="pc-top">
@@ -4323,6 +5731,8 @@ reviews.forEach(r => {
                         </div>
                     </div>
                 </div>
+                ${distHtml}
+                ${shareRowHtml(npub, avgRating, totalReviews)}
             </div>
         `;
 
@@ -4539,12 +5949,28 @@ reviews.forEach(r => {
                 const nameEl = card.querySelector('.rc-name');
                 const imgEl = card.querySelector('.rc-avi');
                 if (profile.name || profile.display_name) {
+                    const badge = nameEl.querySelector('.reviewer-score-badge');
                     nameEl.textContent = capLength(profile.display_name || profile.name, 40);
+                    if (badge) nameEl.appendChild(badge);
                 }
                 if (profile.picture) {
                     imgEl.src = sanitizeUrl(profile.picture);
                 }
             }
+
+            // Fetch reviewer reputation score
+            getReviewerScore(review.pubkey).then(score => {
+                const badge = document.querySelector(`[data-rsb="${review.pubkey}"]`);
+                if (!badge) return;
+                if (score.count > 0) {
+                    badge.textContent = `${score.avg}★`;
+                    badge.classList.remove('no-score');
+                    badge.title = `Reviewer's PubScore: ${score.avg}/5 (${score.count} review${score.count !== 1 ? 's' : ''})`;
+                } else {
+                    badge.textContent = 'new';
+                    badge.title = 'This reviewer has no reviews yet';
+                }
+            }).catch(() => {});
         });
     }
 
@@ -4570,7 +5996,7 @@ reviews.forEach(r => {
                     <div class="rc-reviewer-link" onclick="window._lbLookup('${review.pubkey}')" role="button" tabindex="0" aria-label="View profile">
                         <img class="rc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
                         <div class="rc-who">
-                            <div class="rc-name">${shortNpub(npub)}</div>
+                            <div class="rc-name">${shortNpub(npub)}<span class="reviewer-score-badge no-score" data-rsb="${review.pubkey}">…</span></div>
                             <div class="rc-npub">${shortNpub(npub)}</div>
                         </div>
                     </div>
@@ -4641,7 +6067,7 @@ reviews.forEach(r => {
         const area = document.getElementById('historyArea');
 
         if (!currentUser) {
-            area.innerHTML = '<div class="empty">Sign in to see your profile</div>';
+            area.innerHTML = '<div class="empty">Sign in to see your profile<div style="margin-top:16px;font-size:0.75rem;color:var(--accent);opacity:0.35;font-style:italic;letter-spacing:0.5px;" title="Reputation flies — Virgil">fama volat</div></div>';
             return;
         }
 
@@ -4670,6 +6096,33 @@ reviews.forEach(r => {
                 ? (parsed.reduce((s, r) => s + r.rating, 0) / parsed.length).toFixed(1)
                 : 0;
 
+            // Rating distribution for history card
+            const histDist = [0, 0, 0, 0, 0];
+            for (const r of parsed) {
+                if (r.rating >= 1 && r.rating <= 5) histDist[r.rating - 1]++;
+            }
+            const histMaxCount = Math.max(...histDist, 1);
+            const histDistHtml = parsed.length > 0 ? `
+                <div class="rating-dist" id="histRatingDist">
+                    <div class="rating-dist-toggle" onclick="document.getElementById('histRatingDist').classList.toggle('open')">
+                        <div class="rating-dist-title">Rating breakdown</div>
+                        <svg class="rating-dist-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="rating-dist-body">
+                        ${[5,4,3,2,1].map(star => {
+                            const count = histDist[star - 1];
+                            const pct = (count / histMaxCount * 100).toFixed(0);
+                            return `<div class="rating-dist-row">
+                                <div class="rating-dist-label">${star}</div>
+                                <div class="rating-dist-bar-bg"><div class="rating-dist-bar" style="width:${pct}%"></div></div>
+                                <div class="rating-dist-count">${count}</div>
+                            </div>`;
+                        }).join('')}
+                        ${categoryBreakdownHtml(receivedReviews)}
+                    </div>
+                </div>
+            ` : '';
+
             area.innerHTML = `
                 <div class="profile-card anim">
                     <div class="pc-top">
@@ -4678,7 +6131,7 @@ reviews.forEach(r => {
                             <div class="pc-name">${escapeHtml(name)}</div>
                             ${nip05 ? `<div class="pc-nip05">${escapeHtml(nip05)}</div>` : ''}
                             <div class="pc-npub">${escapeHtml(npub)}</div>
-                            ${clientMenuHtml(npub, true)}
+                            ${clientMenuHtml(npub, true, { avg: avgRating, count: receivedReviews.length })}
                         </div>
                     </div>
                     ${bio ? `<div class="pc-bio">${bio}</div>` : ''}
@@ -4692,6 +6145,7 @@ reviews.forEach(r => {
                             </div>
                         </div>
                     </div>
+                    ${histDistHtml}
                     ${shareRowHtml(npub, avgRating, receivedReviews.length)}
                 </div>
 
@@ -4754,7 +6208,7 @@ reviews.forEach(r => {
                             <div class="rc-reviewer-link" onclick="window._lbLookup('${review.pubkey}')" role="button" tabindex="0" aria-label="View profile">
                                 <img class="rc-avi hr-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0">
                                 <div class="rc-who">
-                                    <div class="rc-name hr-name">${shortNpub(reviewerNpub)}</div>
+                                    <div class="rc-name hr-name">${shortNpub(reviewerNpub)}<span class="reviewer-score-badge no-score" data-hrsb="${review.pubkey}">…</span></div>
                                     <div class="rc-npub">${shortNpub(reviewerNpub)}</div>
                                 </div>
                             </div>
@@ -4779,7 +6233,7 @@ reviews.forEach(r => {
                             <div class="rc-reviewer-link" onclick="window._lbLookup('${subjectPubkey}')" role="button" tabindex="0" aria-label="View profile">
                                 <img class="rc-avi hs-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'">
                                 <div class="rc-who">
-                                    <div class="rc-name hs-name" style="color:var(--text-3);font-style:italic;font-weight:400">Loading...</div>
+                                    <div class="rc-name hs-name" style="color:var(--text-3);font-style:italic;font-weight:400">Loading...<span class="reviewer-score-badge no-score" data-hssb="${subjectPubkey}">…</span></div>
                                     <div class="rc-npub hs-npub">${shortNpub(subjectNpub)}</div>
                                 </div>
                             </div>
@@ -4808,11 +6262,29 @@ reviews.forEach(r => {
                     if (!card) return;
                     if (profile.display_name || profile.name) {
                         const el = card.querySelector('.hr-name');
-                        if (el) el.textContent = capLength(profile.display_name || profile.name, 30);
+                        const badge = el ? el.querySelector('.reviewer-score-badge') : null;
+                        if (el) {
+                            el.textContent = capLength(profile.display_name || profile.name, 30);
+                            if (badge) el.appendChild(badge);
+                        }
                     }
                     if (profile.picture) {
                         const img = card.querySelector('.hr-avi');
                         if (img) img.src = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
+                    }
+                }).catch(() => {});
+
+                // Fetch reviewer reputation score
+                getReviewerScore(review.pubkey).then(score => {
+                    const badge = area.querySelector(`[data-hrsb="${review.pubkey}"]`);
+                    if (!badge) return;
+                    if (score.count > 0) {
+                        badge.textContent = `${score.avg}★`;
+                        badge.classList.remove('no-score');
+                        badge.title = `Reviewer's PubScore: ${score.avg}/5 (${score.count} review${score.count !== 1 ? 's' : ''})`;
+                    } else {
+                        badge.textContent = 'new';
+                        badge.title = 'This reviewer has no reviews yet';
                     }
                 }).catch(() => {});
             }
@@ -4826,20 +6298,205 @@ reviews.forEach(r => {
                     if (!card) return;
                     const displayName = profile.display_name || profile.name;
                     const nameEl = card.querySelector('.hs-name');
+                    const badge = nameEl ? nameEl.querySelector('.reviewer-score-badge') : null;
                     if (nameEl) {
                         nameEl.textContent = displayName ? capLength(displayName, 30) : shortNpub(subjectNpub);
                         nameEl.style.color = '';
                         nameEl.style.fontStyle = '';
                         nameEl.style.fontWeight = '';
+                        if (badge) nameEl.appendChild(badge);
                     }
                     if (profile.picture) {
                         const img = card.querySelector('.hs-avi');
                         if (img) img.src = sanitizeUrl(profile.picture) || DEFAULT_AVATAR;
                     }
                 }).catch(() => {});
+
+                // Fetch subject's reputation score
+                getReviewerScore(subjectPubkey).then(score => {
+                    const badge = area.querySelector(`[data-hssb="${subjectPubkey}"]`);
+                    if (!badge) return;
+                    if (score.count > 0) {
+                        badge.textContent = `${score.avg}★`;
+                        badge.classList.remove('no-score');
+                        badge.title = `PubScore: ${score.avg}/5 (${score.count} review${score.count !== 1 ? 's' : ''})`;
+                    } else {
+                        badge.textContent = 'new';
+                        badge.title = 'No reviews yet';
+                    }
+                }).catch(() => {});
             }
         }
     }
+
+    // =====================================================================
+    // FOLLOWING TAB — scores for people you follow
+    // =====================================================================
+
+    let followingCache = null;
+
+    let _followingData = null;
+    let _followingPage = 0;
+    const FOLLOWING_PER_PAGE = 24;
+
+    async function loadFollowingScores() {
+        const area = document.getElementById('followingArea');
+
+        if (!currentUser) {
+            area.innerHTML = '<div class="empty">Sign in to see people you follow</div>';
+            return;
+        }
+
+        area.innerHTML = '<div class="loader anim"><div class="spin"></div>Loading people you follow...</div>';
+
+        try {
+            const follows = await fetchFollows(currentUser.pubkey);
+
+            if (!follows.length) {
+                area.innerHTML = '<div class="following-empty">You\'re not following anyone yet.<br>Follow some people on Nostr and come back!</div>';
+                return;
+            }
+
+            // Batch fetch scores from API (up to 200 at a time)
+            const batchSize = 200;
+            const scoreMap = new Map(); // pubkey → { avg, count }
+
+            for (let i = 0; i < follows.length; i += batchSize) {
+                const batch = follows.slice(i, i + batchSize);
+                const npubs = batch.map(pk => NostrTools.nip19.npubEncode(pk));
+                try {
+                    const resp = await fetch(`https://api.pubscore.space/scores?npubs=${npubs.join(',')}`);
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const scores = data.scores || {};
+                        for (const [npubKey, scoreData] of Object.entries(scores)) {
+                            if (scoreData && scoreData.count > 0) {
+                                const idx = npubs.indexOf(npubKey);
+                                const pk = idx >= 0 ? batch[idx] : null;
+                                if (pk) {
+                                    scoreMap.set(pk, {
+                                        avgRating: parseFloat(scoreData.avgRating || 0).toFixed(1),
+                                        reviewCount: scoreData.count || 0
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Batch score fetch error:', e);
+                }
+            }
+
+            // Build combined list: scored first (sorted by rating), then unscored
+            const scored = [];
+            const unscored = [];
+            for (const pk of follows) {
+                const s = scoreMap.get(pk);
+                if (s) {
+                    scored.push({ pubkey: pk, avgRating: s.avgRating, reviewCount: s.reviewCount });
+                } else {
+                    unscored.push({ pubkey: pk, avgRating: null, reviewCount: 0 });
+                }
+            }
+
+            scored.sort((a, b) => {
+                const diff = parseFloat(b.avgRating) - parseFloat(a.avgRating);
+                return diff !== 0 ? diff : b.reviewCount - a.reviewCount;
+            });
+
+            _followingData = [...scored, ...unscored];
+            _followingPage = 0;
+
+            renderFollowingPage(area, follows.length, scored.length);
+
+        } catch (e) {
+            area.innerHTML = '<div class="empty">Error loading following</div>';
+            console.error(e);
+        }
+    }
+
+    function renderFollowingPage(area, totalFollows, scoredCount) {
+        if (!_followingData) return;
+
+        const showCount = Math.min((_followingPage + 1) * FOLLOWING_PER_PAGE, _followingData.length);
+        const visible = _followingData.slice(0, showCount);
+        const hasMore = showCount < _followingData.length;
+
+        area.innerHTML = `
+            <div class="featured-section anim">
+                <div class="lb-header">
+                    <div class="lb-title">People you follow</div>
+                    <div style="font-size:0.82rem;color:var(--text-3)">${scoredCount} of ${totalFollows} have scores</div>
+                </div>
+                <div class="lb-grid" id="followingGrid"></div>
+                ${hasMore ? `
+                    <div class="pagination anim" style="margin-top:16px">
+                        <button onclick="window._followingShowMore()">Show more</button>
+                        <div class="pagination-info">Showing ${showCount} of ${_followingData.length}</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        const grid = document.getElementById('followingGrid');
+        grid.innerHTML = visible.map((entry, i) => {
+            const npub = NostrTools.nip19.npubEncode(entry.pubkey);
+            const hasScore = entry.avgRating !== null;
+            return `
+                <div class="featured-card anim" style="animation-delay:${Math.min(i, 12) * 0.03}s"
+                    onclick="document.getElementById('npubInput').value='${escapeHtml(npub)}'; window._lbLookup('${entry.pubkey}'); switchTab('lookup');">
+                    <div class="fc-top">
+                        <img class="fc-avi" src="${DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'" data-ffc-pk="${entry.pubkey}">
+                        <div style="min-width:0;flex:1">
+                            <div class="fc-name" data-ffc-name="${entry.pubkey}" style="color:var(--text-3);font-weight:400;font-style:italic">Loading...</div>
+                            <div class="fc-npub">${shortNpub(npub)}</div>
+                        </div>
+                    </div>
+                    <div class="fc-bottom">
+                        ${hasScore ? `
+                            <div class="fc-score">${entry.avgRating}</div>
+                            <div class="fc-meta">
+                                ${starsHtml(Math.round(parseFloat(entry.avgRating)), '0.9rem')}<br>
+                                ${entry.reviewCount} review${entry.reviewCount !== 1 ? 's' : ''}
+                            </div>
+                        ` : `
+                            <div class="fc-meta" style="font-size:0.82rem;color:var(--text-3);font-style:italic">No reviews yet</div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Lazy-load profile info for visible cards
+        for (const entry of visible) {
+            getProfile(entry.pubkey).then(profile => {
+                if (!profile) return;
+                const nameEl = grid.querySelector(`[data-ffc-name="${entry.pubkey}"]`);
+                const imgEl = grid.querySelector(`[data-ffc-pk="${entry.pubkey}"]`);
+                if (nameEl && (profile.display_name || profile.name)) {
+                    nameEl.textContent = capLength(profile.display_name || profile.name, 20);
+                    nameEl.style.color = '';
+                    nameEl.style.fontWeight = '';
+                    nameEl.style.fontStyle = '';
+                }
+                if (imgEl && profile.picture) imgEl.src = sanitizeUrl(profile.picture);
+            }).catch(() => {});
+        }
+    }
+
+    window._followingShowMore = function() {
+        _followingPage++;
+        const area = document.getElementById('followingArea');
+        const scoredCount = _followingData ? _followingData.filter(e => e.avgRating !== null).length : 0;
+        const totalFollows = _followingData ? _followingData.length : 0;
+        renderFollowingPage(area, totalFollows, scoredCount);
+        // Scroll to the new cards
+        const cards = document.querySelectorAll('#followingGrid .featured-card');
+        if (cards.length > FOLLOWING_PER_PAGE) {
+            const target = cards[cards.length - Math.min(FOLLOWING_PER_PAGE, cards.length)];
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     // =====================================================================
     // LEADERBOARDS
@@ -5290,11 +6947,74 @@ reviews.forEach(r => {
     };
 
     // =====================================================================
+    // KEYBOARD SHORTCUTS
+    // =====================================================================
+
+    document.addEventListener('keydown', (e) => {
+        // Don't fire shortcuts when typing in an input/textarea
+        const tag = document.activeElement?.tagName;
+        const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+
+        // Escape — close any open overlay (most specific first)
+        if (e.key === 'Escape') {
+            if (document.getElementById('badgeModalBg')?.classList.contains('open')) {
+                window._closeBadgeModal(); return;
+            }
+            if (document.getElementById('shareModalBg')?.classList.contains('open')) {
+                window._closeShareModal(); return;
+            }
+            if (document.getElementById('confirmModalBg')?.classList.contains('open')) {
+                closeConfirmModal(); return;
+            }
+            if (document.getElementById('notifDropdown')?.classList.contains('open')) {
+                document.getElementById('notifDropdown').classList.remove('open'); return;
+            }
+            if (document.getElementById('drawer')?.classList.contains('open')) {
+                window._closeDrawer(); return;
+            }
+            if (document.getElementById('apiDrawerBg')?.classList.contains('open')) {
+                window._closeApiDocs(); return;
+            }
+            // If viewing a profile, go home
+            if (currentLookupPubkey) {
+                goHome(); return;
+            }
+            return;
+        }
+
+        // Skip all other shortcuts if typing
+        if (isTyping) return;
+
+        // / or Cmd+K — focus search
+        if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) {
+            e.preventDefault();
+            document.getElementById('npubInput')?.focus();
+            switchTab('lookup');
+            return;
+        }
+
+        // 1, 2, 3 — switch tabs
+        if (e.key === '1') { switchTab('lookup'); return; }
+        if (e.key === '2') { switchTab('following'); return; }
+        if (e.key === '3') { switchTab('history'); return; }
+
+        // t — toggle theme
+        if (e.key === 't') { window._toggleTheme(); return; }
+
+        // n — toggle notifications
+        if (e.key === 'n') { window._toggleNotifs(); return; }
+
+        // h — go home (back to featured/leaderboard)
+        if (e.key === 'h') { goHome(); return; }
+    });
+
+    // =====================================================================
     // INIT
     // =====================================================================
 
     await initPool();
     console.log('PubScore initialized');
+    console.log('%c« Fama volat »', 'color:#e8c46c;font-style:italic;font-size:10px');
 
     const urlParams = new URLSearchParams(window.location.search);
     const deepNpub = urlParams.get('npub');
