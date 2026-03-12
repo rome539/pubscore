@@ -53,15 +53,15 @@ On load, PubScore fetches leaderboard data from the API and displays top-rated p
 
 ## Event Protocol
 
-### Review Events — Kind 38383
+### Review Events — Kind 38100
 
-PubScore uses kind 38383, a parameterized replaceable event in the app-specific range (30000–39999). Being replaceable means each user can only have one active review per subject — publishing a new one overwrites the old one automatically.
+PubScore uses kind 38100, a parameterized replaceable event in the app-specific range (30000–39999). Being replaceable means each user can only have one active review per subject — publishing a new one overwrites the old one automatically.
 
 #### Event Structure
 
 ```json
 {
-  "kind": 38383,
+  "kind": 38100,
   "pubkey": "<reviewer's hex pubkey>",
   "created_at": 1709312400,
   "tags": [
@@ -97,7 +97,7 @@ Deleting a review publishes a standard NIP-09 deletion event:
   "kind": 5,
   "tags": [
     ["e", "<event id of the review to delete>"],
-    ["k", "38383"]
+    ["k", "38100"]
   ],
   "content": ""
 }
@@ -109,7 +109,7 @@ Deleting a review publishes a standard NIP-09 deletion event:
 
 Scoring is simple and transparent — no weighted algorithms or hidden factors:
 
-1. Fetch all kind 38383 events where the `p` tag matches the subject's pubkey
+1. Fetch all kind 38100 events where the `p` tag matches the subject's pubkey
 2. Deduplicate — keep only the newest by `created_at` per author
 3. Extract the `rating` tag value (clamped to 1–5)
 4. Average — sum all ratings, divide by count
@@ -209,7 +209,7 @@ og-preview.png         — 1200x630 Open Graph preview image
 README.md              — This file
 ```
 
-## Why Kind 38383?
+## Why Kind 38100?
 
 Nostr reserves kind ranges for different purposes:
 
@@ -218,10 +218,10 @@ Nostr reserves kind ranges for different purposes:
 - 20000–29999 — Ephemeral events
 - 30000–39999 — Parameterized replaceable events (addressable)
 
-Kind 38383 falls in the parameterized replaceable range, which gives us:
+Kind 38100 falls in the parameterized replaceable range, which gives us:
 
 - **One review per person per subject** — enforced at the protocol level by the `d` tag
 - **Updatable** — publish a new event with the same `d` value and it replaces the old one
 - **App-specific** — avoids collision with well-known kinds like 30023 (long-form posts)
 
-The `d` tag is set to the subject's pubkey, so the "address" of a review is effectively `38383:<reviewer pubkey>:<subject pubkey>` — globally unique per reviewer-subject pair.
+The `d` tag is set to the subject's pubkey, so the "address" of a review is effectively `38100:<reviewer pubkey>:<subject pubkey>` — globally unique per reviewer-subject pair.
