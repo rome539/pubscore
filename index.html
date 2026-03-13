@@ -32,9 +32,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="apple-mobile-web-app-title" content="PubScore">
-    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Security: Content Security Policy -->
@@ -420,7 +418,6 @@
         html {
             scroll-behavior: smooth;
             overflow-x: hidden;
-            overscroll-behavior-y: none;
         }
 
         body {
@@ -431,7 +428,6 @@
             min-height: 100dvh;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
         /* ================================================================
@@ -634,7 +630,7 @@
            ================================================================ */
         .toast {
             position: fixed;
-            bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
+            bottom: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(80px);
             padding: 14px 28px;
@@ -816,7 +812,6 @@
             min-width: 170px;
             max-height: 260px;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             background: var(--bg-raised);
             border: 1px solid var(--border-strong);
             border-radius: var(--r);
@@ -1270,7 +1265,6 @@
             width: 320px;
             max-height: 400px;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             background: var(--bg-raised);
             border: 1px solid var(--border-strong);
             border-radius: var(--r);
@@ -1559,7 +1553,7 @@
                 -webkit-overflow-scrolling: touch;
                 flex: 1;
                 min-height: 0;
-                padding: 16px 18px max(24px, calc(24px + env(safe-area-inset-bottom)));
+                padding: 16px 18px 24px;
             }
         }
 
@@ -2656,7 +2650,6 @@
             padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
             flex: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .drawer-body p {
@@ -2809,7 +2802,6 @@
             border-radius: var(--r);
             overflow: hidden;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             max-height: 320px;
             z-index: 30;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -3197,15 +3189,6 @@
            RESPONSIVE — Mobile
            ================================================================ */
         @media (max-width: 540px) {
-            /* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
-            .search-wrap input,
-            .rf-textarea,
-            .share-composer-textarea,
-            .nsec-panel input[type="password"],
-            .nsec-panel input[type="text"] {
-                font-size: 16px;
-            }
-
             .topbar-inner {
                 padding: 0 14px;
                 padding-top: 8px;
@@ -3335,13 +3318,13 @@
 
             /* Login drawer — full width */
             .drawer { width: 100%; max-width: 100vw; }
-            .drawer-body { padding: 20px; padding-bottom: max(20px, calc(20px + env(safe-area-inset-bottom))); }
+            .drawer-body { padding: 20px; }
             .login-opt { padding: 14px; font-size: 0.85rem; }
             .login-opt-icon { width: 36px; height: 36px; }
 
             /* API drawer — full width on mobile */
             .api-drawer { width: 100%; max-width: 100vw; }
-            .api-drawer-body { padding: 16px; padding-bottom: max(16px, calc(16px + env(safe-area-inset-bottom))); }
+            .api-drawer-body { padding: 16px; }
 
             /* API base URL — wrap on small screens */
             .api-base-url {
@@ -3458,7 +3441,7 @@
             .notif-dot { width: 6px; height: 6px; top: 2px; right: 2px; }
 
             .main { padding: 16px 10px 72px; }
-            .search-wrap input { padding: 14px 12px; }
+            .search-wrap input { padding: 14px 12px; font-size: 0.85rem; }
             .lb-tab { font-size: 0.75rem; padding: 6px 10px; }
             .featured-card { padding: 14px; }
             .fc-avi { width: 40px; height: 40px; }
@@ -3737,7 +3720,7 @@ reviews.forEach(r => {
                     <input type="checkbox" id="nsecRiskCheck" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('nsecSignInBtn').disabled=!this.checked;document.getElementById('nsecSignInBtn').style.opacity=this.checked?'1':'0.5';document.getElementById('nsecSignInBtn').style.cursor=this.checked?'pointer':'not-allowed';">
                     I understand the risks of using my private key in a web app and prefer this over a browser extension.
                 </label>
-                <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+                <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
                 <button id="nsecSignInBtn" class="btn btn-accent" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled onclick="loginNsec()">Sign in with nsec</button>
             </div>
 
@@ -3757,7 +3740,7 @@ reviews.forEach(r => {
 
             <!-- npub input (toggles open) -->
             <div class="nsec-panel" id="npubLoginPanel">
-                <input type="text" id="npubLoginInput" placeholder="npub1..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" style="font-family:monospace;">
+                <input type="text" id="npubLoginInput" placeholder="npub1..." autocomplete="off" style="font-family:monospace;font-size:0.88rem;">
                 <button class="btn" style="width:100%;background:var(--blue);border-color:var(--blue);color:#fff;" onclick="window._loginNpub()">View profile</button>
             </div>
         </div>
@@ -4798,7 +4781,6 @@ reviews.forEach(r => {
 
         // Open modal
         document.getElementById('shareModalBg').classList.add('open');
-        document.body.style.overflow = 'hidden';
         textarea.focus();
         textarea.setSelectionRange(0, 0);
     };
@@ -4835,7 +4817,6 @@ reviews.forEach(r => {
 
     window._closeShareModal = function() {
         document.getElementById('shareModalBg').classList.remove('open');
-        document.body.style.overflow = '';
     };
 
     // Close share modal on backdrop click
@@ -4915,12 +4896,10 @@ reviews.forEach(r => {
         document.getElementById('badgeHtml').textContent = htmlCode;
 
         document.getElementById('badgeModalBg').classList.add('open');
-        document.body.style.overflow = 'hidden';
     };
 
     window._closeBadgeModal = function() {
         document.getElementById('badgeModalBg').classList.remove('open');
-        document.body.style.overflow = '';
     };
 
     // Close on backdrop click
@@ -5107,14 +5086,12 @@ reviews.forEach(r => {
         } else {
             bg.classList.add('open');
             drawer.classList.add('open');
-            document.body.style.overflow = 'hidden';
         }
     };
 
     window._closeApiDocs = function() {
         document.getElementById('apiDrawerBg').classList.remove('open');
         document.getElementById('apiDrawer').classList.remove('open');
-        document.body.style.overflow = '';
     };
 
     window._copyApi = function(path) {
@@ -5145,7 +5122,6 @@ reviews.forEach(r => {
             document.getElementById('drawerBg').classList.add('open');
             document.getElementById('drawer').classList.add('open');
             document.getElementById('nsecPanel').classList.remove('show');
-            document.body.style.overflow = 'hidden';
         }
     };
 
@@ -5160,13 +5136,11 @@ reviews.forEach(r => {
         confirmBtn.className = style === 'positive' ? 'modal-confirm positive' : 'modal-confirm';
         _modalOnConfirm = onConfirm;
         document.getElementById('confirmModalBg').classList.add('open');
-        document.body.style.overflow = 'hidden';
     }
 
     function closeConfirmModal() {
         document.getElementById('confirmModalBg').classList.remove('open');
         _modalOnConfirm = null;
-        document.body.style.overflow = '';
     }
 
     document.getElementById('modalCancel').addEventListener('click', closeConfirmModal);
@@ -5187,7 +5161,6 @@ reviews.forEach(r => {
         document.getElementById('npubLoginInput').value = '';
         document.getElementById('npubLoginPanel').classList.remove('show');
         document.getElementById('nsecPanel').classList.remove('show');
-        document.body.style.overflow = '';
     };
 
     // Close drawer on backdrop click
