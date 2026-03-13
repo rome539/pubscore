@@ -4546,6 +4546,7 @@ reviews.forEach(r => {
             const data = await resp.json();
             // Convert API response to match the event-like format the UI expects
             return (data.reviews || []).map(r => ({
+                id: r.id,
                 pubkey: r.reviewerHex,
                 created_at: r.created_at,
                 content: r.content || '',
@@ -4580,6 +4581,7 @@ reviews.forEach(r => {
             if (!resp.ok) throw new Error(`API ${resp.status}`);
             const data = await resp.json();
             return (data.reviews || []).map(r => ({
+                id: r.id,
                 pubkey: r.reviewerHex,
                 created_at: r.created_at,
                 content: r.content || '',
@@ -4607,15 +4609,32 @@ reviews.forEach(r => {
 
     /** Delete a review by publishing a kind 5 deletion event */
     async function deleteReview(eventId) {
-        const event = {
-            kind: 5,
-            pubkey: currentUser.pubkey,
-            created_at: Math.floor(Date.now() / 1000),
-            tags: [['e', eventId], ['k', String(REVIEW_KIND)]],
-            content: ''
-        };
-        const signed = await signEvent(event);
-        await publishToAllRelays(signed);
+        // Send deletion for both current and legacy kinds
+        // Relays accept the one that matches, ignore the other
+        const kinds = [String(REVIEW_KIND), '38383'];
+        for (const k of kinds) {
+            try {
+                const event = {
+                    kind: 5,
+                    pubkey: currentUser.pubkey,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: [['e', eventId], ['k', k]],
+                    content: ''
+                };
+                const signed = await signEvent(event);
+                await publishToAllRelays(signed);
+                break; // If one succeeds, we're done
+            } catch (e) {
+                console.warn(`Deletion with k=${k} failed, trying next...`);
+            }
+        }
+
+        // Also remove from API database
+        try {
+            await fetch(`https://api.pubscore.space/reviews/${eventId}?npub=${currentUser.npub}`, { method: 'DELETE' });
+        } catch (e) {
+            console.warn('API delete failed (relay deletion still sent):', e);
+        }
     }
 
     /** Publish (or update) a review for a subject pubkey */
@@ -5765,7 +5784,7 @@ reviews.forEach(r => {
                     </div>
                 </div>
                 ${distHtml}
-                ${shareRowHtml(npub, avgRating, totalReviews)}
+                ${currentUser && pubkey === currentUser.pubkey ? shareRowHtml(npub, avgRating, totalReviews) : ''}
             </div>
         `;
 
@@ -6081,7 +6100,22 @@ reviews.forEach(r => {
                         );
                         await renderReviewForm();
                     } else if (context === 'history') {
-                        loadHistory();
+                        // Remove from local data so UI updates immediately
+                        if (window._histData) {
+                            window._histData.writtenReviews = window._histData.writtenReviews.filter(r => r.id !== eventId);
+                            window._histData.receivedReviews = window._histData.receivedReviews.filter(r => r.id !== eventId);
+                            // Update tab counts
+                            document.querySelectorAll('.hist-tab').forEach(b => {
+                                if (b.textContent.includes('Reviews I wrote')) {
+                                    b.innerHTML = `Reviews I wrote <span class="hist-tab-count">${window._histData.writtenReviews.length}</span>`;
+                                } else if (b.textContent.includes('Reviews I received')) {
+                                    b.innerHTML = `Reviews I received <span class="hist-tab-count">${window._histData.receivedReviews.length}</span>`;
+                                }
+                            });
+                            renderHistoryReviews();
+                        } else {
+                            loadHistory();
+                        }
                     }
                 } catch (e) {
                     toast('Delete failed: ' + e.message, 'error');
