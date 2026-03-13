@@ -5528,6 +5528,7 @@ reviews.forEach(r => {
         const thisLookup = ++_lookupGeneration;
         currentLookupPubkey = pubkey;
         currentPage = 0;
+        updateSearchBtn();
 
         const isStale = () => _lookupGeneration !== thisLookup;
 
@@ -5700,11 +5701,13 @@ reviews.forEach(r => {
         } else if (val) {
             if (val.startsWith('npub1') || /^[0-9a-f]{64}$/i.test(val)) {
                 lookupProfile();
-                return;
+                return; // lookupProfile handles updateSearchBtn
             }
             if (currentLookupPubkey) currentLookupPubkey = null;
+            updateSearchBtn();
+        } else {
+            updateSearchBtn();
         }
-        updateSearchBtn();
         if (val) closeSearchResults();
     });
 
