@@ -1,5 +1,8 @@
 // sw.js — PubScore Service Worker
-const CACHE_NAME = 'pubscore-v2';
+
+// Auto-version: update BUILD_TS at deploy time, or manually bump to bust cache
+const BUILD_TS = '1741859679';
+const CACHE_NAME = 'pubscore-' + BUILD_TS;
 
 // App shell files to cache
 const SHELL_FILES = [
@@ -21,7 +24,7 @@ const FONT_ORIGINS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching app shell');
+      console.log('[SW] Caching app shell:', CACHE_NAME);
       return cache.addAll(SHELL_FILES);
     })
   );
@@ -30,14 +33,17 @@ self.addEventListener('install', (event) => {
 });
 
 // ---------------------------------------------------------------
-// Activate — clean up old caches
+// Activate — clean up ALL old caches
 // ---------------------------------------------------------------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) => {
       return Promise.all(
         names.filter((name) => name !== CACHE_NAME)
-             .map((name) => caches.delete(name))
+             .map((name) => {
+               console.log('[SW] Deleting old cache:', name);
+               return caches.delete(name);
+             })
       );
     })
   );
@@ -46,7 +52,7 @@ self.addEventListener('activate', (event) => {
 });
 
 // ---------------------------------------------------------------
-// Fetch — serve from cache when possible
+// Fetch — network first for app shell, cache first for fonts
 // ---------------------------------------------------------------
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
@@ -57,8 +63,7 @@ self.addEventListener('fetch', (event) => {
   // Skip WebSocket connections (relay traffic)
   if (url.protocol === 'wss:' || url.protocol === 'ws:') return;
 
-  // API calls — network first, no caching
-  // We want fresh data from the PubScore API and relays
+  // API calls & CDN scripts — always network, never cache
   if (url.hostname === 'api.pubscore.space' ||
       url.hostname === 'esm.sh' ||
       url.hostname === 'unpkg.com' ||
@@ -66,7 +71,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Google Fonts — cache first (they never change)
+  // Google Fonts — cache first (they're immutable)
   if (FONT_ORIGINS.some(origin => event.request.url.startsWith(origin))) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
@@ -83,19 +88,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell — cache first, fall back to network
+  // App shell — network first, fall back to cache
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) {
-        // Serve from cache, but update in background
-        fetch(event.request).then((response) => {
-          if (response.ok) {
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response));
-          }
-        }).catch(() => {});
-        return cached;
+    fetch(event.request).then((response) => {
+      if (response.ok) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
       }
-      return fetch(event.request);
+      return response;
+    }).catch(() => {
+      // Offline — serve from cache
+      return caches.match(event.request);
     })
   );
 });
