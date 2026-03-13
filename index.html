@@ -5427,8 +5427,9 @@ reviews.forEach(r => {
         // Render featured sections if they haven't been loaded yet (e.g. deep link entry)
         if (!document.getElementById('featuredArea').innerHTML.trim()) renderFeatured();
         if (!document.getElementById('tagLbArea').innerHTML.trim()) renderTagLeaderboard();
-        // Make sure we're on the lookup tab
-        switchTab('lookup');
+        // Return to the tab the user was on before viewing a profile
+        switchTab(previousTab || 'lookup');
+        previousTab = 'lookup';
     }
     window._goHome = goHome;
 
@@ -5696,13 +5697,12 @@ reviews.forEach(r => {
         const val = e.target.value.trim();
         if (!val && currentLookupPubkey) {
             goHome();
-        } else if (val && currentLookupPubkey) {
-            // User changed the npub — auto-lookup if it looks like a valid npub or hex
+        } else if (val) {
             if (val.startsWith('npub1') || /^[0-9a-f]{64}$/i.test(val)) {
                 lookupProfile();
                 return;
             }
-            currentLookupPubkey = null;
+            if (currentLookupPubkey) currentLookupPubkey = null;
         }
         updateSearchBtn();
         if (val) closeSearchResults();
@@ -7010,7 +7010,13 @@ reviews.forEach(r => {
         }
     };
 
+    let previousTab = 'lookup';
+
     window._lbLookup = async function(pubkey) {
+        // Remember which tab the user was on before navigating to a profile
+        const activeTab = document.querySelector('.topbar-nav button.active');
+        if (activeTab) previousTab = activeTab.dataset.tab || 'lookup';
+
         const npub = NostrTools.nip19.npubEncode(pubkey);
         document.getElementById('npubInput').value = npub;
         switchTab('lookup');
