@@ -3638,7 +3638,7 @@ reviews.forEach(r => {
                 <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ Rating between 1–5</p>
                 <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ No self-reviews</p>
                 <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:4px">✓ One review per reviewer per profile</p>
-                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:16px">✓ Max 20 reviews per reviewer per day</p>
+                <p style="color:var(--text); font-size:0.82rem; line-height:1.8; margin-bottom:16px">✓ Max 50 reviews per reviewer per day</p>
 
                 <h3>Rate Limits</h3>
                 <p>120 requests per minute per IP. No authentication needed.</p>
@@ -5911,6 +5911,25 @@ reviews.forEach(r => {
 
         const reviewerFollowers = await fetchFollowerCount(currentUser.pubkey);
         if (reviewerFollowers < 20) return toast('You need at least 20 followers to review', 'error');
+
+        // Check daily review limit
+        try {
+            const npub = NostrTools.nip19.npubEncode(currentUser.pubkey);
+            const resp = await fetch(`https://api.pubscore.space/reviews/by?npub=${npub}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                const oneDayAgo = Math.floor(Date.now() / 1000) - 86400;
+                const todayCount = (data.reviews || []).filter(r => r.created_at > oneDayAgo).length;
+                if (todayCount >= 50) {
+                    return toast('You\'ve hit the daily limit of 50 reviews. Try again tomorrow.', 'error');
+                }
+                if (todayCount >= 40) {
+                    toast(`${50 - todayCount} reviews remaining today`, 'info');
+                }
+            }
+        } catch (e) {
+            console.warn('Daily limit check failed, proceeding:', e);
+        }
 
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
