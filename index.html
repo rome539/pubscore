@@ -3571,6 +3571,12 @@
                     <div class="api-endpoint-desc">All reviews written by a given npub — subjects, ratings, text, categories.</div>
                 </div>
 
+                <div class="api-endpoint" onclick="window._copyApi('/reviews/{id}?npub={npub}')">
+                    <div class="api-endpoint-method">DELETE</div>
+                    <div class="api-endpoint-path">/reviews/{id}?npub={npub}</div>
+                    <div class="api-endpoint-desc">Delete a review from the API database. Only the original reviewer can delete their own.</div>
+                </div>
+
                 <h3>Example: Get a score</h3>
                 <div class="api-example">
                     <code>fetch('https://api.pubscore.space/score?npub=npub1...')
