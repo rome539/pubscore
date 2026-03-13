@@ -84,7 +84,7 @@ PubScore uses kind 38100, a parameterized replaceable event in the app-specific 
 | `p` | References the subject being reviewed. Standard Nostr profile tag — relays can index on this for efficient querying. |
 | `d` | Set to the subject's pubkey. Makes the event parameterized replaceable — one review per reviewer per subject. |
 | `rating` | Integer from 1 to 5. Stored as a string per Nostr tag convention. |
-| `t` | Optional category tags. Zero or more of: `trade`, `knowledge`, `helpful`, `funny`, `creative`, `warning`. |
+| `t` | Optional category tags. Zero or more of: `TRUSTWORTHY`, `KNOWLEDGEABLE`, `HELPFUL`, `FUNNY`, `CREATIVE`, `WARNING`.|
 
 The `content` field holds the free-text review body (max 2000 characters, enforced client-side).
 
