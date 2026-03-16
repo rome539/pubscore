@@ -1155,7 +1155,7 @@
         /* Category bar colors */
         .cat-bar-trade { background: var(--accent); }
         .cat-bar-knowledge { background: var(--blue); }
-        .cat-bar-helpful { background: var(--green); }
+        .cat-bar-helpful { background: #2db5a0; }
         .cat-bar-funny { background: #f59e0b; }
         .cat-bar-creative { background: #a855f7; }
         .cat-bar-warning { background: var(--red); }
@@ -1269,7 +1269,7 @@
         /* Category label colors */
         .cat-label-trade { color: var(--accent); }
         .cat-label-knowledge { color: var(--blue); }
-        .cat-label-helpful { color: var(--green); }
+        .cat-label-helpful { color: #2db5a0; }
         .cat-label-funny { color: #f59e0b; }
         .cat-label-creative { color: #a855f7; }
         .cat-label-warning { color: var(--red); }
@@ -1278,6 +1278,52 @@
         [data-theme="light"] .cat-bar-funny { background: #c88008; }
         [data-theme="light"] .cat-label-creative { color: #7038b0; }
         [data-theme="light"] .cat-bar-creative { background: #8040c8; }
+
+        /* Light theme — vote bars */
+        [data-theme="light"] .vote-bar-trusted { background: #1e8a4e; }
+        [data-theme="light"] .vote-bar-neutral { background: #70707a; }
+        [data-theme="light"] .vote-bar-avoid { background: #b83232; }
+
+        /* Light theme — vote buttons */
+        [data-theme="light"] .vote-btn.vote-trusted.sel {
+            background: rgba(30, 138, 78, 0.12);
+            border-color: #1e8a4e;
+            color: #1e8a4e;
+        }
+        [data-theme="light"] .vote-btn.vote-neutral.sel {
+            background: rgba(112, 112, 122, 0.12);
+            border-color: #70707a;
+            color: #70707a;
+        }
+        [data-theme="light"] .vote-btn.vote-avoid.sel {
+            background: rgba(184, 50, 50, 0.12);
+            border-color: #b83232;
+            color: #b83232;
+        }
+
+        /* Light theme — vote badges */
+        [data-theme="light"] .vote-badge-trusted {
+            background: rgba(30, 138, 78, 0.12);
+            color: #1e8a4e;
+        }
+        [data-theme="light"] .vote-badge-neutral {
+            background: rgba(112, 112, 122, 0.12);
+            color: #70707a;
+        }
+        [data-theme="light"] .vote-badge-avoid {
+            background: rgba(184, 50, 50, 0.12);
+            color: #b83232;
+        }
+
+        /* Light theme — trust percentage colors */
+        [data-theme="light"] .vote-summary-trust.trust-high { color: #1e8a4e; }
+        [data-theme="light"] .vote-summary-trust.trust-mid { color: #9a7b14; }
+        [data-theme="light"] .vote-summary-trust.trust-low { color: #b83232; }
+
+        /* Light theme — helpful teal */
+        [data-theme="light"] .cat-bar-helpful { background: #18806e; }
+        [data-theme="light"] .cat-label-helpful { color: #18806e; }
+        [data-theme="light"] .rtag-helpful { background: rgba(24, 128, 110, 0.12); color: #18806e; }
 
         @media (max-width: 540px) {
             .cat-breakdown-label { width: 75px; font-size: 0.68rem; }
@@ -2050,7 +2096,7 @@
 
         .rtag-trade { background: var(--accent-bg); color: var(--accent); }
         .rtag-knowledge { background: var(--blue-bg); color: var(--blue); }
-        .rtag-helpful { background: var(--green-bg); color: var(--green); }
+        .rtag-helpful { background: rgba(45, 181, 160, 0.1); color: #2db5a0; }
         .rtag-funny { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
         .rtag-creative { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
         .rtag-warning { background: var(--red-bg); color: var(--red); }
@@ -3017,7 +3063,7 @@
 
         .tag-lb-pill.active-trade  { background: var(--accent-bg);              border-color: var(--accent-border);          color: var(--accent); }
         .tag-lb-pill.active-knowledge { background: var(--blue-bg);             border-color: rgba(91,156,245,0.25);         color: var(--blue); }
-        .tag-lb-pill.active-helpful   { background: var(--green-bg);            border-color: rgba(78,202,130,0.25);         color: var(--green); }
+        .tag-lb-pill.active-helpful   { background: rgba(45,181,160,0.1);       border-color: rgba(45,181,160,0.25);         color: #2db5a0; }
         .tag-lb-pill.active-funny     { background: rgba(245,158,11,0.1);       border-color: rgba(245,158,11,0.25);         color: #f59e0b; }
         .tag-lb-pill.active-creative   { background: rgba(168,85,247,0.1);       border-color: rgba(168,85,247,0.25);         color: #a855f7; }
         .tag-lb-pill.active-warning   { background: var(--red-bg);              border-color: var(--red-border);             color: var(--red); }
@@ -6163,7 +6209,7 @@ reviews.forEach(r => {
             <div class="reviews-header anim">
                 <h3>${reviews.length} review${reviews.length !== 1 ? 's' : ''}</h3>
                 <div class="sort-pills">
-                    ${['newest', 'oldest', 'trusted', 'avoid'].map(s =>
+                    ${['newest', 'oldest'].map(s =>
                         `<button class="sort-pill ${currentSort === s ? 'on' : ''}" onclick="window._sort('${s}')">${s[0].toUpperCase() + s.slice(1)}</button>`
                     ).join('')}
                 </div>
@@ -6236,7 +6282,6 @@ reviews.forEach(r => {
                         </div>
                     </div>
                     <div class="rc-right">
-                        <span class="vote-badge vote-badge-${review.rating}">${voteLabel(review.rating)}</span>
                         <div class="rc-date">${fmtDate(review.created_at)}</div>
                     </div>
                 </div>
@@ -6469,7 +6514,6 @@ reviews.forEach(r => {
                                 </div>
                             </div>
                             <div class="rc-right">
-                                <span class="vote-badge vote-badge-${review.rating}">${voteLabel(review.rating)}</span>
                                 <div class="rc-date">${fmtDate(review.created_at)}</div>
                             </div>
                         </div>
@@ -6494,7 +6538,6 @@ reviews.forEach(r => {
                                 </div>
                             </div>
                             <div class="rc-right">
-                                <span class="vote-badge vote-badge-${review.rating}">${voteLabel(review.rating)}</span>
                                 <div class="rc-date">${fmtDate(review.created_at)}</div>
                             </div>
                         </div>
