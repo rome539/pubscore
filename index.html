@@ -5961,7 +5961,6 @@ reviews.forEach(r => {
                         return `<div class="rating-dist-row">
                             <div class="rating-dist-label">${vote[0].toUpperCase() + vote.slice(1)}</div>
                             <div class="rating-dist-bar-bg"><div class="rating-dist-bar vote-bar-${vote}" style="width:${pct}%"></div></div>
-                            <div class="rating-dist-count">${count}</div>
                         </div>`;
                     }).join('')}
                     ${categoryBreakdownHtml(reviews)}
@@ -6416,7 +6415,6 @@ reviews.forEach(r => {
                             return `<div class="rating-dist-row">
                                 <div class="rating-dist-label">${vote[0].toUpperCase() + vote.slice(1)}</div>
                                 <div class="rating-dist-bar-bg"><div class="rating-dist-bar vote-bar-${vote}" style="width:${pct}%"></div></div>
-                                <div class="rating-dist-count">${count}</div>
                             </div>`;
                         }).join('')}
                         ${categoryBreakdownHtml(receivedReviews)}
