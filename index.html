@@ -1142,9 +1142,14 @@
         .cat-breakdown-pct {
             font-size: 0.72rem;
             color: var(--text-3);
-            width: 32px;
+            width: 58px;
             text-align: left;
             flex-shrink: 0;
+        }
+
+        .cat-breakdown-count {
+            color: var(--text-2);
+            font-size: 0.68rem;
         }
 
         /* Category bar colors */
@@ -1157,8 +1162,32 @@
 
         /* Vote distribution bars */
         .vote-bar-trusted { background: var(--green); }
-        .vote-bar-neutral { background: var(--accent); }
+        .vote-bar-neutral { background: #8a8a96; }
         .vote-bar-avoid { background: var(--red); }
+
+        /* Vote summary line */
+        .vote-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vote-summary-trust {
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .vote-summary-trust.trust-high { color: var(--green); }
+        .vote-summary-trust.trust-mid { color: var(--accent); }
+        .vote-summary-trust.trust-low { color: var(--red); }
+
+        .vote-summary-count {
+            font-size: 0.78rem;
+            color: var(--text-3);
+        }
 
         /* Vote input buttons */
         .vote-input {
@@ -1191,9 +1220,9 @@
         }
 
         .vote-btn.vote-neutral.sel {
-            background: var(--accent-bg);
-            border-color: var(--accent);
-            color: var(--accent);
+            background: rgba(138, 138, 150, 0.1);
+            border-color: #8a8a96;
+            color: #8a8a96;
         }
 
         .vote-btn.vote-avoid.sel {
@@ -1219,8 +1248,8 @@
         }
 
         .vote-badge-neutral {
-            background: var(--accent-bg);
-            color: var(--accent-dim);
+            background: rgba(138, 138, 150, 0.1);
+            color: #8a8a96;
         }
 
         .vote-badge-avoid {
@@ -1253,7 +1282,7 @@
         @media (max-width: 540px) {
             .cat-breakdown-label { width: 75px; font-size: 0.68rem; }
             .cat-breakdown-bar-bg { height: 7px; }
-            .cat-breakdown-pct { font-size: 0.68rem; width: 28px; }
+            .cat-breakdown-pct { font-size: 0.68rem; width: 50px; }
             .cat-breakdown-title { font-size: 0.72rem; }
         }
 
@@ -5057,7 +5086,7 @@ reviews.forEach(r => {
     /** Generate a category tag badge */
     function catTag(category) {
         const labels = {
-            trade: 'Trustworthy',
+            trade: 'Honest',
             knowledge: 'Knowledgeable',
             helpful: 'Helpful',
             funny: 'Funny',
@@ -5078,7 +5107,7 @@ reviews.forEach(r => {
     /** Build category breakdown HTML from reviews */
     function categoryBreakdownHtml(reviews) {
         const catLabels = {
-            trade: 'Trustworthy',
+            trade: 'Honest',
             knowledge: 'Knowledgeable',
             helpful: 'Helpful',
             funny: 'Funny',
@@ -5116,7 +5145,7 @@ reviews.forEach(r => {
                     return `<div class="cat-breakdown-row">
                         <div class="cat-breakdown-label cat-label-${key}">${catLabels[key]}</div>
                         <div class="cat-breakdown-bar-bg"><div class="cat-breakdown-bar cat-bar-${key}" style="width:${barPct}%"></div></div>
-                        <div class="cat-breakdown-pct">${pct}%</div>
+                        <div class="cat-breakdown-pct">${pct}% <span class="cat-breakdown-count">(${count})</span></div>
                     </div>`;
                 }).join('')}
             </div>
@@ -5867,6 +5896,8 @@ reviews.forEach(r => {
             if (voteDist.hasOwnProperty(vote)) voteDist[vote]++;
         }
         const maxVoteCount = Math.max(voteDist.trusted, voteDist.neutral, voteDist.avoid, 1);
+        const trustPct = totalReviews > 0 ? Math.round((voteDist.trusted / totalReviews) * 100) : 0;
+        const trustClass = trustPct >= 70 ? 'trust-high' : trustPct >= 40 ? 'trust-mid' : 'trust-low';
         const distHtml = totalReviews > 0 ? `
             <div class="rating-dist" id="ratingDist">
                 <div class="rating-dist-toggle" onclick="document.getElementById('ratingDist').classList.toggle('open')">
@@ -5874,6 +5905,10 @@ reviews.forEach(r => {
                     <svg class="rating-dist-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
                 <div class="rating-dist-body">
+                    <div class="vote-summary">
+                        <span class="vote-summary-trust ${trustClass}">${trustPct}% trusted</span>
+                        <span class="vote-summary-count">${totalReviews} voter${totalReviews !== 1 ? 's' : ''}</span>
+                    </div>
                     ${['trusted','neutral','avoid'].map(vote => {
                         const count = voteDist[vote];
                         const pct = (count / maxVoteCount * 100).toFixed(0);
@@ -5982,7 +6017,7 @@ reviews.forEach(r => {
                 <div class="rf-row">
                     <div class="rf-label">Category (optional)</div>
                     <div class="cat-tags">
-                        <button class="cat-tag ${selectedCategories.has('trade') ? 'sel' : ''}" data-cat="trade" onclick="window._toggleCat('trade',this)">Trustworthy</button>
+                        <button class="cat-tag ${selectedCategories.has('trade') ? 'sel' : ''}" data-cat="trade" onclick="window._toggleCat('trade',this)">Honest</button>
                         <button class="cat-tag ${selectedCategories.has('knowledge') ? 'sel' : ''}" data-cat="knowledge" onclick="window._toggleCat('knowledge',this)">Knowledgeable</button>
                         <button class="cat-tag ${selectedCategories.has('helpful') ? 'sel' : ''}" data-cat="helpful" onclick="window._toggleCat('helpful',this)">Helpful</button>
                         <button class="cat-tag ${selectedCategories.has('funny') ? 'sel' : ''}" data-cat="funny" onclick="window._toggleCat('funny',this)">Funny</button>
@@ -6317,6 +6352,8 @@ reviews.forEach(r => {
                 if (histDist.hasOwnProperty(r.rating)) histDist[r.rating]++;
             }
             const histMaxCount = Math.max(histDist.trusted, histDist.neutral, histDist.avoid, 1);
+            const histTrustPct = parsed.length > 0 ? Math.round((histDist.trusted / parsed.length) * 100) : 0;
+            const histTrustClass = histTrustPct >= 70 ? 'trust-high' : histTrustPct >= 40 ? 'trust-mid' : 'trust-low';
             const histDistHtml = parsed.length > 0 ? `
                 <div class="rating-dist" id="histRatingDist">
                     <div class="rating-dist-toggle" onclick="document.getElementById('histRatingDist').classList.toggle('open')">
@@ -6324,6 +6361,10 @@ reviews.forEach(r => {
                         <svg class="rating-dist-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="rating-dist-body">
+                        <div class="vote-summary">
+                            <span class="vote-summary-trust ${histTrustClass}">${histTrustPct}% trusted</span>
+                            <span class="vote-summary-count">${parsed.length} voter${parsed.length !== 1 ? 's' : ''}</span>
+                        </div>
                         ${['trusted','neutral','avoid'].map(vote => {
                             const count = histDist[vote];
                             const pct = (count / histMaxCount * 100).toFixed(0);
@@ -6873,7 +6914,7 @@ reviews.forEach(r => {
     // =====================================================================
 
     const TAG_CATEGORIES = [
-        { key: 'trade',     label: 'Trustworthy',    pillClass: 'active-trade'     },
+        { key: 'trade',     label: 'Honest',         pillClass: 'active-trade'     },
         { key: 'knowledge', label: 'Knowledgeable',  pillClass: 'active-knowledge' },
         { key: 'helpful',   label: 'Helpful',        pillClass: 'active-helpful'   },
         { key: 'funny',     label: 'Funny',          pillClass: 'active-funny'     },
