@@ -20,7 +20,7 @@ Search any Nostr profile by npub, hex pubkey, or username. See their score, revi
 
 ### Vote Breakdown
 
-Expand "Vote Breakdown" on any profile card to see how many Trusted, Neutral, and Avoid votes a profile has received, plus a "Tagged as" section showing what percentage of reviewers tagged them as Trustworthy, Knowledgeable, Helpful, Funny, Creative, or Warning.
+Expand "Vote Breakdown" on any profile card to see the trust percentage, total voter count, and Trusted/Neutral/Avoid distribution, plus a "Tagged as" section showing what percentage of reviewers tagged them as Honest, Knowledgeable, Helpful, Funny, Creative, or Warning.
 
 ### Following Tab
 
@@ -32,7 +32,7 @@ Every review card shows a small badge next to the reviewer's name with their own
 
 ### Notifications
 
-Bell icon in the top bar. When someone reviews you, a red dot appears. Tap to see who voted on you, their vote, and when. Powered by the PubScore API — only validated reviews trigger notifications.
+Bell icon in the top bar. When someone reviews you, a red dot appears. Tap to see who reviewed you and when. Powered by the PubScore API — only validated reviews trigger notifications.
 
 ### Dark / Light Mode
 
@@ -61,7 +61,7 @@ Shortcuts are disabled while typing in inputs.
 
 ### Front Page
 
-On load, PubScore fetches leaderboard data from the API and displays top-rated profiles. The top 3 highest-rated are pinned, and 13 more are randomly selected. Hit **Shuffle** to re-randomize without re-fetching. A tag leaderboard section shows profiles grouped by category (Trustworthy, Knowledgeable, etc.).
+On load, PubScore fetches leaderboard data from the API and displays top-rated profiles. The top 3 highest-rated are pinned, and 13 more are randomly selected. Hit **Shuffle** to re-randomize without re-fetching. A tag leaderboard section shows profiles grouped by category (Honest, Knowledgeable, etc.).
 
 ---
 
