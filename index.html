@@ -5020,6 +5020,75 @@ reviews.forEach(r => {
         // Store sub reference so we can cancel
         _bunkerSession = { clientSk, clientPk, signerPk: null, userPk: null, relays, sub };
 
+        // PWA recovery: when the app comes back to foreground (after switching to Primal
+        // to paste the string), the relay WebSockets may be dead. Reconnect and re-subscribe.
+        function onResume() {
+            if (settled || !_bunkerConnecting) {
+                document.removeEventListener('visibilitychange', onResume);
+                return;
+            }
+            if (document.hidden) return;
+
+            console.log('[NIP-46] App resumed — reconnecting relays and re-subscribing');
+            // Close old sub (likely dead)
+            try { sub.close(); } catch(e) {}
+
+            // Reconnect relays and create a fresh subscription
+            const freshSince = Math.floor(Date.now() / 1000) - 120; // look back 2 min to catch what we missed
+            p.subscribeMany(relays, [{
+                kinds: [24133],
+                '#p': [clientPk],
+                since: freshSince,
+            }], {
+                async onevent(ev) {
+                    if (settled) return;
+                    console.log('[NIP-46] (resumed) Received event from:', ev.pubkey.substring(0, 12) + '…');
+                    try {
+                        const decrypted = await nip44Decrypt(clientSk, ev.pubkey, ev.content);
+                        const resp = JSON.parse(decrypted);
+                        console.log('[NIP-46] (resumed) Decrypted:', JSON.stringify(resp));
+
+                        if (resp.error && resp.result !== 'auth_url') {
+                            updateBunkerUI('error', 'Connection rejected: ' + resp.error);
+                            _bunkerConnecting = false;
+                            settled = true;
+                            return;
+                        }
+                        if (resp.result === 'auth_url' && resp.error) {
+                            window.open(resp.error, '_blank', 'width=600,height=700');
+                            toast('Please confirm in the popup', 'info');
+                            return;
+                        }
+                        if (resp.result !== secret && resp.result !== 'ack') return;
+
+                        settled = true;
+                        document.removeEventListener('visibilitychange', onResume);
+                        const signerPk = ev.pubkey;
+                        console.log('[NIP-46] (resumed) Connect accepted! Signer:', signerPk.substring(0, 12) + '…');
+
+                        _bunkerSession = { clientSk, clientPk, signerPk, userPk: null, relays, sub: null };
+                        updateBunkerUI('waiting', 'Connected! Fetching your identity…');
+                        try {
+                            const userPk = await bunkerRequest('get_public_key');
+                            _bunkerSession.userPk = userPk;
+                            await completeBunkerLogin(userPk);
+                        } catch(e) {
+                            _bunkerSession.userPk = signerPk;
+                            await completeBunkerLogin(signerPk);
+                        }
+                    } catch(e) {}
+                },
+                oneose() {
+                    console.log('[NIP-46] (resumed) EOSE — re-subscription live');
+                }
+            });
+
+            // Also re-ensure relay connections (they may have dropped)
+            Promise.allSettled(relays.map(url => p.ensureRelay(url)));
+        }
+
+        document.addEventListener('visibilitychange', onResume);
+
         // After 90s, show a subtle refresh option in case the sub went stale
         clearTimeout(_bunkerRefreshTimer);
         document.getElementById('bunkerRefreshBtn').style.display = 'none';
