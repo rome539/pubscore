@@ -2912,6 +2912,211 @@
             border-color: var(--accent-border);
         }
 
+        /* Bunker (NIP-46) panel */
+        .bunker-panel {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .bunker-panel.show {
+            display: block;
+        }
+
+        .bunker-status {
+            text-align: center;
+            padding: 8px 0 4px;
+        }
+
+        .bunker-status-text {
+            font-size: 0.82rem;
+            color: var(--text-3);
+            margin-bottom: 12px;
+        }
+
+        .bunker-status-text.waiting {
+            color: var(--accent);
+        }
+
+        .bunker-status-text.error {
+            color: var(--red);
+        }
+
+        .bunker-qr-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .bunker-qr-wrap canvas {
+            border-radius: 10px;
+        }
+
+        .bunker-string-box {
+            position: relative;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 42px 12px 14px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: var(--text-3);
+            line-height: 1.5;
+            max-height: 72px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.15s;
+            margin-bottom: 12px;
+        }
+
+        .bunker-string-box:hover {
+            border-color: var(--accent-border);
+        }
+
+        .bunker-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-3);
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .bunker-copy-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent-border);
+        }
+
+        .bunker-copy-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .bunker-or {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-3);
+            margin: 14px 0 10px;
+            position: relative;
+        }
+
+        .bunker-or::before,
+        .bunker-or::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: calc(50% - 24px);
+            height: 1px;
+            background: var(--border);
+        }
+
+        .bunker-or::before { left: 0; }
+        .bunker-or::after { right: 0; }
+
+        .bunker-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .bunker-input-row input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .bunker-input-row input:focus {
+            border-color: var(--accent-border);
+        }
+
+        .bunker-input-row button {
+            padding: 0 18px;
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--bg);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .bunker-input-row button:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+        }
+
+        .bunker-input-row button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @keyframes bunker-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .bunker-waiting {
+            animation: bunker-pulse 2s ease-in-out infinite;
+        }
+
+        .bunker-cancel-btn {
+            display: inline-block;
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: var(--text-3);
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .bunker-cancel-btn:hover {
+            color: var(--red);
+        }
+
+        .bunker-refresh-btn {
+            display: inline-block;
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .bunker-refresh-btn:hover {
+            color: var(--accent-dim);
+        }
+
         /* ================================================================
            PAGINATION — "Show more" button
            ================================================================ */
@@ -3382,6 +3587,9 @@
             .notif-item-avi { width: 30px; height: 30px; }
             .notif-item-text { font-size: 0.78rem; }
 
+            .bunker-qr-wrap canvas { max-width: 200px; max-height: 200px; }
+            .bunker-or { margin: 10px 0 8px; }
+
             .main { padding: 20px 14px 80px; }
 
             /* Search — stack button below on very small screens */
@@ -3478,6 +3686,10 @@
             .drawer-body { padding: 20px; }
             .login-opt { padding: 14px; font-size: 0.85rem; }
             .login-opt-icon { width: 36px; height: 36px; }
+
+            .bunker-input-row { flex-direction: column; }
+            .bunker-input-row button { padding: 12px; }
+            .bunker-string-box { font-size: 0.65rem; }
 
             /* API drawer — full width on mobile */
             .api-drawer { width: 100%; max-width: 100vw; }
@@ -3615,6 +3827,10 @@
 
             /* Notification dropdown */
             .notif-dropdown { left: 4px; right: 4px; }
+
+            .bunker-qr-wrap canvas { max-width: 180px; max-height: 180px; }
+            .bunker-string-box { font-size: 0.6rem; max-height: 56px; padding: 10px 36px 10px 10px; }
+            .bunker-copy-btn { width: 24px; height: 24px; top: 6px; right: 6px; }
         }
     </style>
 </head>
@@ -3892,6 +4108,45 @@ reviews.forEach(r => {
                 </label>
                 <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
                 <button id="nsecSignInBtn" class="btn btn-accent" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled onclick="loginNsec()">Sign in with nsec</button>
+            </div>
+
+            <!-- Bunker / NIP-46 remote signer -->
+            <button class="login-opt" onclick="window._toggleBunker()">
+                <div class="login-opt-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="login-opt-text">
+                    Remote Signer (NIP-46)
+                    <small>nsec.app, Amber, or any bunker</small>
+                </div>
+            </button>
+
+            <!-- Bunker panel (toggles open) -->
+            <div class="bunker-panel" id="bunkerPanel">
+                <div id="bunkerContent">
+                    <!-- Mode 1: Generate nostrconnect:// for remote signer to scan -->
+                    <div class="bunker-status">
+                        <div class="bunker-status-text" id="bunkerStatusText">Scan or paste in your remote signer</div>
+                    </div>
+                    <div class="bunker-qr-wrap" id="bunkerQrWrap"></div>
+                    <div class="bunker-string-box" id="bunkerStringBox" onclick="window._copyBunkerString()" title="Click to copy"></div>
+                    <button class="bunker-copy-btn" id="bunkerCopyFloatBtn" onclick="window._copyBunkerString()" style="display:none;">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+
+                    <div class="bunker-or">or</div>
+
+                    <!-- Mode 2: Paste a bunker:// URL from the remote signer -->
+                    <div class="bunker-input-row">
+                        <input type="text" id="bunkerUrlInput" placeholder="bunker://..." autocomplete="off">
+                        <button id="bunkerConnectBtn" onclick="window._connectBunkerUrl()">Connect</button>
+                    </div>
+
+                    <div style="text-align:center;" id="bunkerActionRow">
+                        <button class="bunker-refresh-btn" id="bunkerRefreshBtn" onclick="window._refreshBunker()" style="display:none;">↻ Refresh connection</button>
+                        <button class="bunker-cancel-btn" id="bunkerCancelBtn" onclick="window._cancelBunker()" style="display:none;">Cancel connection</button>
+                    </div>
+                </div>
             </div>
 
             <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
@@ -4525,9 +4780,583 @@ reviews.forEach(r => {
         return currentUser;
     }
 
+    // =====================================================================
+    // NIP-46 BUNKER / REMOTE SIGNER
+    // =====================================================================
+
+    let _bunkerSession = null;   // { clientSk, clientPk, signerPk, userPk, relays, sub }
+    let _bunkerConnecting = false;
+    let _bunkerRefreshTimer = null;
+
+    const BUNKER_RELAYS = ['wss://relay.nsec.app', 'wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.primal.net'];
+
+    /** Generate a random hex string for request IDs / secrets */
+    function randomHex(bytes = 16) {
+        const arr = new Uint8Array(bytes);
+        crypto.getRandomValues(arr);
+        return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /** NIP-44 encrypt wrapper using nostr-tools */
+    let _nip44mod = null;
+    async function _loadNip44() {
+        if (_nip44mod) return _nip44mod;
+        _nip44mod = await import("https://esm.sh/nostr-tools@2.7.2/nip44");
+        console.log('[NIP-46] nip44 module keys:', Object.keys(_nip44mod));
+        if (_nip44mod.v2) console.log('[NIP-46] nip44.v2 keys:', Object.keys(_nip44mod.v2));
+        return _nip44mod;
+    }
+
+    async function nip44Encrypt(privkey, pubkey, text) {
+        const mod = await _loadNip44();
+        // nostr-tools exports: top-level getConversationKey/encrypt OR v2.utils.getConversationKey / v2.encrypt
+        if (mod.getConversationKey) {
+            const ck = mod.getConversationKey(privkey, pubkey);
+            return mod.encrypt(text, ck);
+        }
+        const ck = mod.v2.utils.getConversationKey(privkey, pubkey);
+        return mod.v2.encrypt(text, ck);
+    }
+
+    /** NIP-44 decrypt wrapper using nostr-tools */
+    async function nip44Decrypt(privkey, pubkey, ciphertext) {
+        const mod = await _loadNip44();
+        if (mod.getConversationKey) {
+            const ck = mod.getConversationKey(privkey, pubkey);
+            return mod.decrypt(ciphertext, ck);
+        }
+        const ck = mod.v2.utils.getConversationKey(privkey, pubkey);
+        return mod.v2.decrypt(ciphertext, ck);
+    }
+
+    /** Send a NIP-46 request and wait for a response */
+    async function bunkerRequest(method, params = []) {
+        if (!_bunkerSession) throw new Error('No bunker session');
+        const { clientSk, clientPk, signerPk, relays } = _bunkerSession;
+        const reqId = randomHex(8);
+
+        const payload = JSON.stringify({ id: reqId, method, params });
+        const encrypted = await nip44Encrypt(clientSk, signerPk, payload);
+
+        const event = {
+            kind: 24133,
+            created_at: Math.floor(Date.now() / 1000),
+            tags: [['p', signerPk]],
+            content: encrypted,
+        };
+        const signed = NostrTools.finalizeEvent(event, clientSk);
+
+        const p = await initPool();
+
+        // Subscribe BEFORE publishing so we don't miss the response
+        const sinceTs = Math.floor(Date.now() / 1000) - 60;
+
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            const timeout = setTimeout(() => {
+                if (!settled) {
+                    settled = true;
+                    sub.close();
+                    reject(new Error('Bunker request timed out (45s)'));
+                }
+            }, 45000);
+
+            const sub = p.subscribeMany(relays, [{
+                kinds: [24133],
+                '#p': [clientPk],
+                since: sinceTs,
+            }], {
+                async onevent(ev) {
+                    try {
+                        const decrypted = await nip44Decrypt(clientSk, ev.pubkey, ev.content);
+                        const resp = JSON.parse(decrypted);
+                        if (resp.id !== reqId) return;
+
+                        // Handle auth_url challenge — keep sub open, wait for real response
+                        if (resp.result === 'auth_url' && resp.error) {
+                            window.open(resp.error, '_blank', 'width=600,height=700');
+                            toast('Please confirm in the popup', 'info');
+                            return;
+                        }
+
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(timeout);
+                        sub.close();
+
+                        if (resp.error) {
+                            reject(new Error(resp.error));
+                        } else {
+                            resolve(resp.result);
+                        }
+                    } catch(e) { /* ignore events we can't decrypt */ }
+                },
+                oneose() {}
+            });
+
+            // Publish AFTER subscribing
+            Promise.allSettled(relays.map(async url => {
+                try {
+                    const relay = await p.ensureRelay(url);
+                    await relay.publish(signed);
+                } catch(e) { console.warn('bunker publish fail', url, e); }
+            }));
+        });
+    }
+
+    /** Sign an event via NIP-46 bunker */
+    async function bunkerSignEvent(eventTemplate) {
+        const unsigned = {
+            kind: eventTemplate.kind,
+            content: eventTemplate.content || '',
+            tags: eventTemplate.tags || [],
+            created_at: eventTemplate.created_at || Math.floor(Date.now() / 1000),
+        };
+        const resultStr = await bunkerRequest('sign_event', [JSON.stringify(unsigned)]);
+        const signedEvent = JSON.parse(resultStr);
+        return signedEvent;
+    }
+
+    /**
+     * Client-initiated NIP-46 flow:
+     * Generates nostrconnect:// URI, shows QR, waits for signer to connect.
+     */
+    async function startBunkerClientFlow() {
+        if (_bunkerConnecting) return;
+        _bunkerConnecting = true;
+
+        const clientSk = NostrTools.generateSecretKey();
+        const clientPk = NostrTools.getPublicKey(clientSk);
+        const secret = randomHex(8);
+        const relays = BUNKER_RELAYS;
+
+        // Build nostrconnect:// URI
+        const relayParams = relays.map(r => `relay=${encodeURIComponent(r)}`).join('&');
+        const connectUri = `nostrconnect://${clientPk}?${relayParams}&secret=${secret}&name=${encodeURIComponent('PubScore')}&url=${encodeURIComponent('https://pubscore.space')}&perms=${encodeURIComponent('sign_event:' + REVIEW_KIND + ',sign_event:5')}`;
+
+        // Connect to relays and subscribe BEFORE showing the QR code
+        const p = await initPool();
+        const sinceTs = Math.floor(Date.now() / 1000) - 60;
+
+        // Ensure relay connections are live
+        await Promise.allSettled(relays.map(url => p.ensureRelay(url)));
+
+        console.log('[NIP-46] Client pubkey:', clientPk);
+        console.log('[NIP-46] Subscribing on relays:', relays);
+        console.log('[NIP-46] Secret:', secret);
+
+        let settled = false;
+
+        const sub = p.subscribeMany(relays, [{
+            kinds: [24133],
+            '#p': [clientPk],
+            since: sinceTs,
+        }], {
+            async onevent(ev) {
+                if (settled) return;
+                console.log('[NIP-46] Received event from:', ev.pubkey.substring(0, 12) + '…');
+                try {
+                    const decrypted = await nip44Decrypt(clientSk, ev.pubkey, ev.content);
+                    const resp = JSON.parse(decrypted);
+                    console.log('[NIP-46] Decrypted response:', JSON.stringify(resp));
+
+                    // Validate the connect response
+                    if (resp.error && resp.result !== 'auth_url') {
+                        updateBunkerUI('error', 'Connection rejected: ' + resp.error);
+                        _bunkerConnecting = false;
+                        settled = true;
+                        sub.close();
+                        return;
+                    }
+
+                    // Handle auth_url — keep listening
+                    if (resp.result === 'auth_url' && resp.error) {
+                        window.open(resp.error, '_blank', 'width=600,height=700');
+                        toast('Please confirm in the popup', 'info');
+                        return;
+                    }
+
+                    // Accept: secret match, "ack", or any non-error response to our connect
+                    if (resp.result !== secret && resp.result !== 'ack') {
+                        console.log('[NIP-46] Ignoring response — secret mismatch. Got:', resp.result, 'Expected:', secret);
+                        return;
+                    }
+
+                    settled = true;
+                    const signerPk = ev.pubkey;
+                    sub.close();
+                    console.log('[NIP-46] Connect accepted! Signer pubkey:', signerPk.substring(0, 12) + '…');
+
+                    // Session established
+                    _bunkerSession = { clientSk, clientPk, signerPk, userPk: null, relays, sub: null };
+
+                    // Get the actual user pubkey
+                    updateBunkerUI('waiting', 'Connected! Fetching your identity…');
+                    try {
+                        const userPk = await bunkerRequest('get_public_key');
+                        _bunkerSession.userPk = userPk;
+                        console.log('[NIP-46] User pubkey:', userPk.substring(0, 12) + '…');
+                        await completeBunkerLogin(userPk);
+                    } catch(e) {
+                        console.warn('[NIP-46] get_public_key failed, using signer pubkey:', e);
+                        _bunkerSession.userPk = signerPk;
+                        await completeBunkerLogin(signerPk);
+                    }
+                } catch(e) {
+                    console.log('[NIP-46] Could not decrypt event (not for us):', e.message);
+                }
+            },
+            oneose() {
+                console.log('[NIP-46] EOSE received — subscription is live');
+            }
+        });
+
+        // NOW show the QR and string — subscription is already active
+        updateBunkerUI('waiting', 'Waiting for remote signer…', connectUri);
+
+        // Store sub reference so we can cancel
+        _bunkerSession = { clientSk, clientPk, signerPk: null, userPk: null, relays, sub };
+
+        // After 90s, show a subtle refresh option in case the sub went stale
+        clearTimeout(_bunkerRefreshTimer);
+        document.getElementById('bunkerRefreshBtn').style.display = 'none';
+        _bunkerRefreshTimer = setTimeout(() => {
+            if (_bunkerConnecting && !_bunkerSession?.signerPk) {
+                document.getElementById('bunkerRefreshBtn').style.display = '';
+                const statusText = document.getElementById('bunkerStatusText');
+                statusText.textContent = 'Still waiting — refresh if your signer didn\u2019t connect';
+                statusText.classList.remove('bunker-waiting');
+            }
+        }, 90000);
+    }
+
+    /**
+     * Signer-initiated NIP-46 flow:
+     * User pastes a bunker:// URL from their remote signer.
+     */
+    async function connectBunkerUrl(bunkerUrl) {
+        if (_bunkerConnecting) return;
+        _bunkerConnecting = true;
+
+        try {
+            const url = new URL(bunkerUrl);
+            if (url.protocol !== 'bunker:') throw new Error('Invalid bunker URL');
+
+            const signerPk = url.hostname || url.pathname.replace(/^\/\//, '');
+            if (!signerPk || signerPk.length !== 64) throw new Error('Invalid signer pubkey in bunker URL');
+
+            const relays = url.searchParams.getAll('relay');
+            if (relays.length === 0) throw new Error('No relays specified in bunker URL');
+
+            const secret = url.searchParams.get('secret') || '';
+
+            const clientSk = NostrTools.generateSecretKey();
+            const clientPk = NostrTools.getPublicKey(clientSk);
+
+            _bunkerSession = { clientSk, clientPk, signerPk, userPk: null, relays, sub: null };
+
+            updateBunkerUI('waiting', 'Connecting to remote signer…');
+
+            const p = await initPool();
+            const sinceTs = Math.floor(Date.now() / 1000) - 60;
+
+            // Ensure relay connections are live
+            await Promise.allSettled(relays.map(u => p.ensureRelay(u)));
+
+            console.log('[NIP-46] Bunker URL flow — signer:', signerPk.substring(0, 12) + '…');
+            console.log('[NIP-46] Relays from URL:', relays);
+
+            let settled = false;
+
+            // Subscribe for responses BEFORE sending connect
+            const responseSub = p.subscribeMany(relays, [{
+                kinds: [24133],
+                '#p': [clientPk],
+                since: sinceTs,
+            }], {
+                async onevent(ev) {
+                    if (settled) return;
+                    console.log('[NIP-46] Received event from:', ev.pubkey.substring(0, 12) + '…');
+                    try {
+                        const decrypted = await nip44Decrypt(clientSk, ev.pubkey, ev.content);
+                        const resp = JSON.parse(decrypted);
+                        console.log('[NIP-46] Decrypted response:', JSON.stringify(resp));
+
+                        // Handle auth_url — keep listening
+                        if (resp.result === 'auth_url' && resp.error) {
+                            window.open(resp.error, '_blank', 'width=600,height=700');
+                            toast('Please confirm in the popup', 'info');
+                            return;
+                        }
+
+                        if (resp.error && resp.result !== 'auth_url') {
+                            updateBunkerUI('error', 'Connection error: ' + resp.error);
+                            _bunkerConnecting = false;
+                            settled = true;
+                            responseSub.close();
+                            return;
+                        }
+
+                        // connect response received
+                        settled = true;
+                        responseSub.close();
+                        _bunkerSession.sub = null;
+                        console.log('[NIP-46] Bunker URL connect accepted');
+
+                        updateBunkerUI('waiting', 'Connected! Fetching your identity…');
+                        try {
+                            const userPk = await bunkerRequest('get_public_key');
+                            _bunkerSession.userPk = userPk;
+                            await completeBunkerLogin(userPk);
+                        } catch(e) {
+                            console.warn('[NIP-46] get_public_key failed, using signer pk:', e);
+                            _bunkerSession.userPk = signerPk;
+                            await completeBunkerLogin(signerPk);
+                        }
+                    } catch(e) {
+                        console.log('[NIP-46] Could not decrypt event:', e.message);
+                    }
+                },
+                oneose() {
+                    console.log('[NIP-46] EOSE — subscription live, sending connect request');
+                }
+            });
+
+            _bunkerSession.sub = responseSub;
+
+            // Send connect request AFTER subscription is active
+            const reqId = randomHex(8);
+            const connectPayload = JSON.stringify({
+                id: reqId,
+                method: 'connect',
+                params: [signerPk, secret, 'sign_event:' + REVIEW_KIND + ',sign_event:5']
+            });
+            const encrypted = await nip44Encrypt(clientSk, signerPk, connectPayload);
+
+            const connectEvent = {
+                kind: 24133,
+                created_at: Math.floor(Date.now() / 1000),
+                tags: [['p', signerPk]],
+                content: encrypted,
+            };
+            const signedEv = NostrTools.finalizeEvent(connectEvent, clientSk);
+
+            console.log('[NIP-46] Publishing connect request…');
+            const pubResults = await Promise.allSettled(relays.map(async u => {
+                try {
+                    const relay = await p.ensureRelay(u);
+                    await relay.publish(signedEv);
+                    console.log('[NIP-46] Published to', u);
+                } catch(e) { console.warn('[NIP-46] Publish fail', u, e); }
+            }));
+
+        } catch(e) {
+            updateBunkerUI('error', e.message);
+            _bunkerConnecting = false;
+            _bunkerSession = null;
+        }
+    }
+
+    /** Complete bunker login once we have the user pubkey */
+    async function completeBunkerLogin(userPk) {
+        clearTimeout(_bunkerRefreshTimer);
+        const npub = NostrTools.nip19.npubEncode(userPk);
+        currentUser = { pubkey: userPk, npub, profile: {}, loginMethod: 'bunker' };
+        _bunkerConnecting = false;
+
+        // Persist session so we reuse the same client keypair on reload
+        _saveBunkerSession();
+
+        fetchProfile(userPk).then(profile => {
+            if (currentUser && currentUser.pubkey === userPk) {
+                currentUser.profile = profile;
+                updateAuthPill();
+                const historyActive = document.getElementById('section-history')?.classList.contains('active');
+                if (historyActive) loadHistory();
+            }
+        });
+
+        window._closeDrawer();
+        updateAuthPill();
+        toast('Signed in via remote signer', 'success');
+        startNotifPolling();
+        startBunkerHeartbeat();
+        if (currentLookupPubkey) await renderReviewForm();
+        if (document.getElementById('section-following')?.classList.contains('active')) loadFollowingScores();
+        if (document.getElementById('section-history')?.classList.contains('active')) loadHistory();
+    }
+
+    // =====================================================================
+    // BUNKER SESSION PERSISTENCE — reuse client keypair across page loads
+    // =====================================================================
+
+    const _BUNKER_KEY = 'pubscore-bunker';
+
+    function _saveBunkerSession() {
+        if (!_bunkerSession?.clientSk || !_bunkerSession?.signerPk || !_bunkerSession?.userPk) return;
+        try {
+            localStorage.setItem(_BUNKER_KEY, JSON.stringify({
+                sk: Array.from(_bunkerSession.clientSk).map(b => b.toString(16).padStart(2, '0')).join(''),
+                pk: _bunkerSession.clientPk,
+                signer: _bunkerSession.signerPk,
+                user: _bunkerSession.userPk,
+                relays: _bunkerSession.relays,
+                t: Date.now(),
+            }));
+        } catch(e) {}
+    }
+
+    function _clearBunkerSession() {
+        try { localStorage.removeItem(_BUNKER_KEY); } catch(e) {}
+    }
+
+    /**
+     * On page load: restore saved bunker session.
+     * Does NOT re-handshake — the session is already established on the signer.
+     * Just rebuilds the local state and pings to verify.
+     */
+    async function _restoreBunkerSession() {
+        let d;
+        try {
+            const raw = localStorage.getItem(_BUNKER_KEY);
+            if (!raw) return false;
+            d = JSON.parse(raw);
+        } catch(e) { return false; }
+
+        if (!d.sk || !d.pk || !d.signer || !d.user || !d.relays?.length) {
+            _clearBunkerSession(); return false;
+        }
+        // Expire after 24h
+        if (d.t && Date.now() - d.t > 86400000) {
+            _clearBunkerSession(); return false;
+        }
+
+        // Rebuild session from saved data
+        _bunkerSession = {
+            clientSk: new Uint8Array(d.sk.match(/.{2}/g).map(h => parseInt(h, 16))),
+            clientPk: d.pk,
+            signerPk: d.signer,
+            userPk: d.user,
+            relays: d.relays,
+            sub: null,
+        };
+
+        // Connect to relays
+        const p = await initPool();
+        await Promise.allSettled(d.relays.map(u => p.ensureRelay(u)));
+
+        // Ping to verify session is alive
+        try {
+            const pong = await Promise.race([
+                bunkerRequest('ping'),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000)),
+            ]);
+            if (pong !== 'pong') throw new Error('bad pong');
+        } catch(e) {
+            console.log('[NIP-46] Saved session dead:', e.message);
+            _bunkerSession = null;
+            _clearBunkerSession();
+            return false;
+        }
+
+        // Session is alive — restore user
+        console.log('[NIP-46] Session restored from localStorage');
+        const npub = NostrTools.nip19.npubEncode(d.user);
+        currentUser = { pubkey: d.user, npub, profile: {}, loginMethod: 'bunker' };
+
+        fetchProfile(d.user).then(profile => {
+            if (currentUser && currentUser.pubkey === d.user) {
+                currentUser.profile = profile;
+                updateAuthPill();
+            }
+        });
+
+        updateAuthPill();
+        startNotifPolling();
+        startBunkerHeartbeat();
+        return true;
+    }
+
+    /** Update bunker panel UI */
+    function updateBunkerUI(state, text, connectUri) {
+        const statusText = document.getElementById('bunkerStatusText');
+        const qrWrap = document.getElementById('bunkerQrWrap');
+        const stringBox = document.getElementById('bunkerStringBox');
+        const cancelBtn = document.getElementById('bunkerCancelBtn');
+
+        statusText.textContent = text;
+        statusText.className = 'bunker-status-text' + (state === 'waiting' ? ' waiting bunker-waiting' : state === 'error' ? ' error' : '');
+
+        if (state === 'waiting' && connectUri) {
+            // Render QR code
+            renderBunkerQR(qrWrap, connectUri);
+            stringBox.textContent = connectUri;
+            stringBox.style.display = '';
+            stringBox.dataset.uri = connectUri;
+            cancelBtn.style.display = '';
+        } else if (state === 'waiting') {
+            qrWrap.innerHTML = '<div class="spin" style="width:24px;height:24px;margin:16px auto;"></div>';
+            stringBox.style.display = 'none';
+            cancelBtn.style.display = '';
+        } else if (state === 'error') {
+            qrWrap.innerHTML = '';
+            stringBox.style.display = 'none';
+            cancelBtn.style.display = '';
+        } else {
+            qrWrap.innerHTML = '';
+            stringBox.style.display = 'none';
+            cancelBtn.style.display = 'none';
+        }
+    }
+
+    /** Render a QR code into a container using a lightweight canvas approach */
+    async function renderBunkerQR(container, data) {
+        container.innerHTML = '';
+        try {
+            // Dynamically load qrcode-generator (tiny lib, ~4kb)
+            if (!window.qrcode) {
+                const mod = await import("https://esm.sh/qrcode-generator@1.4.4");
+                window.qrcode = mod.default || mod;
+            }
+            const qr = window.qrcode(0, 'L');
+            qr.addData(data);
+            qr.make();
+
+            const moduleCount = qr.getModuleCount();
+            const cellSize = Math.max(3, Math.min(5, Math.floor(240 / moduleCount)));
+            const margin = 12;
+            const size = moduleCount * cellSize + margin * 2;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            canvas.style.width = Math.min(240, size) + 'px';
+            canvas.style.height = Math.min(240, size) + 'px';
+            canvas.style.borderRadius = '10px';
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#000000';
+
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if (qr.isDark(row, col)) {
+                        ctx.fillRect(margin + col * cellSize, margin + row * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+
+            container.appendChild(canvas);
+        } catch(e) {
+            console.warn('QR render failed:', e);
+            container.innerHTML = '<div style="color:var(--text-3);font-size:0.8rem;">QR code unavailable — copy the string below</div>';
+        }
+    }
+
     /** Check if the current user can sign events (write reviews, delete, etc.) */
     function canSign() {
-        return currentUser && currentUser.loginMethod !== 'viewonly';
+        return currentUser && (currentUser.loginMethod === 'extension' || currentUser.loginMethod === 'nsec' || currentUser.loginMethod === 'bunker');
     }
 
     /** Sign a Nostr event using the current auth method */
@@ -4539,6 +5368,17 @@ reviews.forEach(r => {
         if (currentUser.loginMethod === 'nsec' && SecureKeyStore.has()) {
             return SecureKeyStore.signEvent(event);
         }
+        if (currentUser.loginMethod === 'bunker' && _bunkerSession) {
+            try {
+                return await bunkerSignEvent(event);
+            } catch(e) {
+                // Signer disconnected or timed out — clean up gracefully
+                console.warn('[NIP-46] Sign failed:', e.message);
+                doLogout();
+                toast('Remote signer disconnected — please sign in again', 'error');
+                throw new Error('Signer disconnected');
+            }
+        }
         throw new Error('No signing method available');
     }
 
@@ -4547,10 +5387,17 @@ reviews.forEach(r => {
         currentUser = null;
         SecureKeyStore.clear();
         stopNotifPolling();
+        stopBunkerHeartbeat();
         if (inactivityMonitor) {
             inactivityMonitor.destroy();
             inactivityMonitor = null;
         }
+        // Clean up bunker session
+        if (_bunkerSession) {
+            try { _bunkerSession.sub?.close(); } catch(e) {}
+            _bunkerSession = null;
+        }
+        _clearBunkerSession();
         updateAuthPill();
         toast('Signed out', 'info');
     }
@@ -5364,6 +6211,7 @@ reviews.forEach(r => {
             document.getElementById('drawerBg').classList.add('open');
             document.getElementById('drawer').classList.add('open');
             document.getElementById('nsecPanel').classList.remove('show');
+            document.getElementById('bunkerPanel').classList.remove('show');
         }
     };
 
@@ -5397,12 +6245,15 @@ reviews.forEach(r => {
 
     /** Close the login drawer */
     window._closeDrawer = function() {
+        clearTimeout(_bunkerRefreshTimer);
         document.getElementById('drawerBg').classList.remove('open');
         document.getElementById('drawer').classList.remove('open');
         document.getElementById('nsecInput').value = '';
         document.getElementById('npubLoginInput').value = '';
         document.getElementById('npubLoginPanel').classList.remove('show');
         document.getElementById('nsecPanel').classList.remove('show');
+        document.getElementById('bunkerPanel').classList.remove('show');
+        document.getElementById('bunkerUrlInput').value = '';
     };
 
     // Close drawer on backdrop click
@@ -5419,6 +6270,7 @@ reviews.forEach(r => {
     window._toggleNsec = function() {
         document.getElementById('nsecPanel').classList.toggle('show');
         document.getElementById('npubLoginPanel').classList.remove('show');
+        document.getElementById('bunkerPanel').classList.remove('show');
         // Reset checkbox when panel is toggled
         const cb = document.getElementById('nsecRiskCheck');
         const btn = document.getElementById('nsecSignInBtn');
@@ -5430,6 +6282,7 @@ reviews.forEach(r => {
     window._toggleNpubLogin = function() {
         document.getElementById('npubLoginPanel').classList.toggle('show');
         document.getElementById('nsecPanel').classList.remove('show');
+        document.getElementById('bunkerPanel').classList.remove('show');
     };
 
     /** Handle npub view-only login */
@@ -5497,6 +6350,92 @@ reviews.forEach(r => {
             window._loginNpub();
         }
     });
+
+    // Enter key support for bunker URL input
+    document.getElementById('bunkerUrlInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window._connectBunkerUrl();
+        }
+    });
+
+    /** Toggle the bunker panel — starts client-initiated flow automatically */
+    window._toggleBunker = function() {
+        const panel = document.getElementById('bunkerPanel');
+        const wasOpen = panel.classList.contains('show');
+        document.getElementById('nsecPanel').classList.remove('show');
+        document.getElementById('npubLoginPanel').classList.remove('show');
+        panel.classList.toggle('show');
+
+        if (!wasOpen && !_bunkerConnecting && !_bunkerSession?.signerPk) {
+            // No active session — start fresh
+            updateBunkerUI('idle', 'Scan or paste in your remote signer');
+            startBunkerClientFlow();
+        }
+    };
+
+    /** Copy the nostrconnect:// string */
+    window._copyBunkerString = function() {
+        const box = document.getElementById('bunkerStringBox');
+        const uri = box.dataset.uri || box.textContent;
+        navigator.clipboard.writeText(uri).then(() => {
+            toast('Connection string copied!', 'success');
+        }).catch(() => {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = uri;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            toast('Connection string copied!', 'success');
+        });
+    };
+
+    /** Connect via a pasted bunker:// URL */
+    window._connectBunkerUrl = async function() {
+        const input = document.getElementById('bunkerUrlInput');
+        const url = input.value.trim();
+        if (!url) return toast('Paste a bunker:// URL', 'error');
+        if (!url.startsWith('bunker://')) return toast('URL must start with bunker://', 'error');
+
+        // Cancel any existing client-initiated flow
+        if (_bunkerSession?.sub) {
+            try { _bunkerSession.sub.close(); } catch(e) {}
+        }
+        _bunkerSession = null;
+        _bunkerConnecting = false;
+
+        await connectBunkerUrl(url);
+    };
+
+    /** Cancel the current bunker connection attempt */
+    window._cancelBunker = function() {
+        clearTimeout(_bunkerRefreshTimer);
+        if (_bunkerSession?.sub) {
+            try { _bunkerSession.sub.close(); } catch(e) {}
+        }
+        _bunkerSession = null;
+        _bunkerConnecting = false;
+        updateBunkerUI('idle', 'Scan or paste in your remote signer');
+        document.getElementById('bunkerQrWrap').innerHTML = '';
+        document.getElementById('bunkerStringBox').style.display = 'none';
+        document.getElementById('bunkerCancelBtn').style.display = 'none';
+        document.getElementById('bunkerRefreshBtn').style.display = 'none';
+        document.getElementById('bunkerUrlInput').value = '';
+    };
+
+    /** Refresh — tear down stale connection, restart with fresh keypair + QR */
+    window._refreshBunker = function() {
+        clearTimeout(_bunkerRefreshTimer);
+        if (_bunkerSession?.sub) {
+            try { _bunkerSession.sub.close(); } catch(e) {}
+        }
+        _bunkerSession = null;
+        _bunkerConnecting = false;
+        document.getElementById('bunkerRefreshBtn').style.display = 'none';
+        startBunkerClientFlow();
+    };
 
     // =====================================================================
     // PROFILE LOOKUP — supports npub, hex, and username search
@@ -6116,7 +7055,7 @@ reviews.forEach(r => {
 
     window._submitReview = async function() {
         if (!currentUser) return toast('Sign in first', 'error');
-        if (!canSign()) return toast('View-only mode — sign in with extension or nsec to review', 'error');
+        if (!canSign()) return toast('View-only mode — sign in to review', 'error');
         if (!selectedRating) return toast('Select your vote', 'error');
 
         const content = document.getElementById('reviewContent').value.trim();
@@ -6315,7 +7254,7 @@ reviews.forEach(r => {
 
     window._del = async function(eventId, context) {
         if (!currentUser) return toast('Sign in first', 'error');
-        if (!canSign()) return toast('View-only mode — sign in with extension or nsec to delete', 'error');
+        if (!canSign()) return toast('View-only mode — sign in to delete', 'error');
 
         showConfirmModal({
             title: 'Delete review',
@@ -7311,11 +8250,6 @@ reviews.forEach(r => {
             return;
         }
 
-        // 1, 2, 3 — switch tabs
-        if (e.key === '1') { switchTab('lookup'); return; }
-        if (e.key === '2') { switchTab('following'); return; }
-        if (e.key === '3') { switchTab('history'); return; }
-
         // t — toggle theme
         if (e.key === 't') { window._toggleTheme(); return; }
 
@@ -7327,12 +8261,54 @@ reviews.forEach(r => {
     });
 
     // =====================================================================
+    // BUNKER HEARTBEAT — ping signer every 30s, logout if dead
+    // =====================================================================
+
+    let _bunkerHeartbeat = null;
+
+    function startBunkerHeartbeat() {
+        stopBunkerHeartbeat();
+        _bunkerHeartbeat = setInterval(async () => {
+            if (!currentUser || currentUser.loginMethod !== 'bunker' || !_bunkerSession?.signerPk) {
+                stopBunkerHeartbeat();
+                return;
+            }
+            try {
+                const pong = await Promise.race([
+                    bunkerRequest('ping'),
+                    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000)),
+                ]);
+                if (pong === 'pong') {
+                    console.log('[NIP-46] Heartbeat OK');
+                } else {
+                    throw new Error('bad response');
+                }
+            } catch(e) {
+                console.log('[NIP-46] Heartbeat failed:', e.message);
+                stopBunkerHeartbeat();
+                doLogout();
+                toast('Remote signer disconnected — please sign in again', 'error');
+            }
+        }, 30000);
+    }
+
+    function stopBunkerHeartbeat() {
+        if (_bunkerHeartbeat) {
+            clearInterval(_bunkerHeartbeat);
+            _bunkerHeartbeat = null;
+        }
+    }
+
+    // =====================================================================
     // INIT
     // =====================================================================
 
     await initPool();
     console.log('PubScore initialized');
     console.log('%c« Fama volat »', 'color:#e8c46c;font-style:italic;font-size:10px');
+
+    // Restore bunker session from previous page load (reuses same client keypair)
+    await _restoreBunkerSession();
 
     const urlParams = new URLSearchParams(window.location.search);
     const deepNpub = urlParams.get('npub');
