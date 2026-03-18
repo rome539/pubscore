@@ -5187,10 +5187,9 @@ reviews.forEach(r => {
                 ${sorted.map(key => {
                     const count = counts[key];
                     const pct = Math.round((count / reviews.length) * 100);
-                    const barPct = Math.round((count / maxCount) * 100);
                     return `<div class="cat-breakdown-row">
                         <div class="cat-breakdown-label cat-label-${key}">${catLabels[key]}</div>
-                        <div class="cat-breakdown-bar-bg"><div class="cat-breakdown-bar cat-bar-${key}" style="width:${barPct}%"></div></div>
+                        <div class="cat-breakdown-bar-bg"><div class="cat-breakdown-bar cat-bar-${key}" style="width:${pct}%"></div></div>
                         <div class="cat-breakdown-pct">${pct}% <span class="cat-breakdown-count">(${count})</span></div>
                     </div>`;
                 }).join('')}
@@ -5483,6 +5482,21 @@ reviews.forEach(r => {
             toast(e.message, 'error');
         }
     };
+
+    // Enter key support for login inputs
+    document.getElementById('nsecInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !document.getElementById('nsecSignInBtn').disabled) {
+            e.preventDefault();
+            window.loginNsec();
+        }
+    });
+
+    document.getElementById('npubLoginInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window._loginNpub();
+        }
+    });
 
     // =====================================================================
     // PROFILE LOOKUP — supports npub, hex, and username search
