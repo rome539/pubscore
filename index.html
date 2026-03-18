@@ -2807,6 +2807,9 @@
             padding-bottom: max(24px, calc(24px + env(safe-area-inset-bottom)));
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            min-height: 0;
         }
 
         .drawer-body p {
@@ -4086,30 +4089,6 @@ reviews.forEach(r => {
                 </div>
             </button>
 
-            <!-- nsec login -->
-            <button class="login-opt" onclick="window._toggleNsec()">
-                <div class="login-opt-icon">
-                    <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-                </div>
-                <div class="login-opt-text">
-                    Private Key (nsec)
-                    <small>Held in memory, never saved</small>
-                </div>
-            </button>
-
-            <!-- nsec input (toggles open) -->
-            <div class="nsec-panel" id="nsecPanel">
-                <div class="nsec-warn">
-                    ⚠️ Using your private key in a web app carries inherent risk. If this site were ever compromised, your key could be exposed. A browser extension like <strong>nos2x</strong> or <strong>Alby</strong> is always the safer option.
-                </div>
-                <label style="display:flex;align-items:flex-start;gap:10px;margin:12px 0;cursor:pointer;font-size:0.83rem;color:var(--text-2);line-height:1.5;">
-                    <input type="checkbox" id="nsecRiskCheck" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('nsecSignInBtn').disabled=!this.checked;document.getElementById('nsecSignInBtn').style.opacity=this.checked?'1':'0.5';document.getElementById('nsecSignInBtn').style.cursor=this.checked?'pointer':'not-allowed';">
-                    I understand the risks of using my private key in a web app and prefer this over a browser extension.
-                </label>
-                <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
-                <button id="nsecSignInBtn" class="btn btn-accent" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled onclick="loginNsec()">Sign in with nsec</button>
-            </div>
-
             <!-- Bunker / NIP-46 remote signer -->
             <button class="login-opt" onclick="window._toggleBunker()">
                 <div class="login-opt-icon">
@@ -4147,6 +4126,30 @@ reviews.forEach(r => {
                         <button class="bunker-cancel-btn" id="bunkerCancelBtn" onclick="window._cancelBunker()" style="display:none;">Cancel connection</button>
                     </div>
                 </div>
+            </div>
+
+            <!-- nsec login -->
+            <button class="login-opt" onclick="window._toggleNsec()">
+                <div class="login-opt-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                </div>
+                <div class="login-opt-text">
+                    Private Key (nsec)
+                    <small>Held in memory, never saved</small>
+                </div>
+            </button>
+
+            <!-- nsec input (toggles open) -->
+            <div class="nsec-panel" id="nsecPanel">
+                <div class="nsec-warn">
+                    ⚠️ Using your private key in a web app carries inherent risk. If this site were ever compromised, your key could be exposed. A browser extension like <strong>nos2x</strong> or <strong>Alby</strong> is always the safer option.
+                </div>
+                <label style="display:flex;align-items:flex-start;gap:10px;margin:12px 0;cursor:pointer;font-size:0.83rem;color:var(--text-2);line-height:1.5;">
+                    <input type="checkbox" id="nsecRiskCheck" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('nsecSignInBtn').disabled=!this.checked;document.getElementById('nsecSignInBtn').style.opacity=this.checked?'1':'0.5';document.getElementById('nsecSignInBtn').style.cursor=this.checked?'pointer':'not-allowed';">
+                    I understand the risks of using my private key in a web app and prefer this over a browser extension.
+                </label>
+                <input type="password" id="nsecInput" placeholder="nsec1..." autocomplete="off">
+                <button id="nsecSignInBtn" class="btn btn-accent" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled onclick="loginNsec()">Sign in with nsec</button>
             </div>
 
             <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
