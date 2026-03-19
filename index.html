@@ -8400,8 +8400,10 @@ reviews.forEach(r => {
     console.log('PubScore initialized');
     console.log('%c« Fama volat »', 'color:#e8c46c;font-style:italic;font-size:10px');
 
-    // Restore bunker session from previous page load (reuses same client keypair)
-    await _restoreBunkerSession();
+    // Restore bunker session in the background — never blocks app startup
+    _restoreBunkerSession().then(restored => {
+        if (restored) console.log('[NIP-46] Bunker session active from previous visit');
+    }).catch(() => {});
 
     const urlParams = new URLSearchParams(window.location.search);
     const deepNpub = urlParams.get('npub');
