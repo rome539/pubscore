@@ -8,6 +8,25 @@
 
     <!-- Primary SEO -->
     <meta name="description" content="PubScore is a Nostr-native rating and review page for npubs. Public, signed reviews stored on relays.">
+    <link rel="canonical" href="https://pubscore.space/">
+
+    <!-- JSON-LD structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PubScore",
+      "url": "https://pubscore.space/",
+      "description": "PubScore is a Nostr-native rating and review app for npubs. Look up any Nostr public key and see signed, public reviews stored on relays.",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
@@ -3692,6 +3711,7 @@
 
             .bunker-input-row { flex-direction: column; }
             .bunker-input-row button { padding: 12px; }
+            .bunker-input-row input { font-size: 16px; } /* prevent iOS zoom */
             .bunker-string-box { font-size: 0.65rem; }
 
             /* API drawer — full width on mobile */
